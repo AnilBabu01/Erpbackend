@@ -3,6 +3,8 @@ const { config } = require("dotenv");
 var bcrypt = require("bcrypt");
 const Student = require("../Models/student.model");
 const Parent = require("../Models/parent.model");
+const Coachingfeestatus = require("../Models/coachingfeestatus.model");
+const { Coachingfeemon } = require("../Helper/Constant");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -141,6 +143,12 @@ const Addstudent = async (req, res) => {
         };
 
         let createdUser = await Student.create(newUser);
+        let data = {
+          ClientCode: req.user?.ClientCode,
+          institutename: req.user?.institutename,
+          studentId: createdUser?.id,
+        };
+        let fee = await Coachingfeestatus.create(data);
         var token = jwt.sign(
           {
             id: createdUser.id,
@@ -148,10 +156,11 @@ const Addstudent = async (req, res) => {
           },
           SECRET
         );
+
         if (token) {
           return respHandler.success(res, {
             status: true,
-            data: [{ token: token, user: createdUser }],
+            data: [{ token: token, user: createdUser, fee: fee }],
             msg: "Student Added Successfully!!",
           });
         }
@@ -226,6 +235,12 @@ const Addstudent = async (req, res) => {
         };
 
         let createdUser = await Student.create(newUser);
+        let data = {
+          ClientCode: req.user?.ClientCode,
+          institutename: req.user?.institutename,
+          studentId: createdUser?.id,
+        };
+        let fee = await Coachingfeestatus.create(data);
         var token = jwt.sign(
           {
             id: createdUser.id,
@@ -236,7 +251,7 @@ const Addstudent = async (req, res) => {
         if (token) {
           return respHandler.success(res, {
             status: true,
-            data: [{ token: token, user: createdUser }],
+            data: [{ token: token, user: createdUser, fee: fee }],
             msg: "Student Added Created Successfully!!",
           });
         }
@@ -302,7 +317,7 @@ const Loging = async (req, res) => {
 const getAllStudent = async (req, res) => {
   try {
     const { name, batch, fromdate, todate, fathers, studentname } = req.query;
-    console.log("query data is ", req.query);
+
     let whereClause = {};
     let from = new Date(fromdate);
     let to = new Date(todate);
@@ -331,6 +346,11 @@ const getAllStudent = async (req, res) => {
 
     let students = await Student.findAll({
       where: whereClause,
+      include: [
+        {
+          model: Coachingfeestatus,
+        },
+      ],
       order: [["id", "DESC"]],
     });
     if (students) {
@@ -487,6 +507,75 @@ const deleteStudent = async (req, res) => {
     });
   }
 };
+
+const addfee = async (req, res) => {
+  try {
+    const { id, paymonths } = req.body;
+
+    const promises = paymonths?.map(async (item) => {
+      let = key = Coachingfeemon[Number(item)];
+      let result = await Coachingfeestatus.update(
+        {
+          [key]: "Paid",
+        },
+        {
+          where: {
+            studentId: id,
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+          },
+        }
+      );
+      return result;
+    });
+
+    let studentone = await Student.findOne({
+      where: {
+        id: id,
+      },
+    });
+    if (studentone) {
+      await Student.update(
+        {
+          paidfee:
+            studentone?.paidfee + studentone?.permonthfee * paymonths.length,
+        },
+        {
+          where: {
+            id: id,
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+          },
+        }
+      );
+    }
+    if (await Promise.all(promises)) {
+      let student = await Student.findOne({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+        include: [
+          {
+            model: Coachingfeestatus,
+          },
+        ],
+      });
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fee Pay Added successfully!!",
+        data: [{ student: student }],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   Addstudent,
   getAllStudent,
@@ -494,4 +583,5 @@ module.exports = {
   UpdateStudent,
   deleteStudent,
   Loging,
+  addfee,
 };

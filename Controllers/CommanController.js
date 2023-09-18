@@ -9,6 +9,7 @@ const Client = require("../Models/client.model");
 const Course = require("../Models/course.model");
 const Employeetype = require("../Models/employeetype.model");
 const Departments = require("../Models/depart.model");
+const Coursemonth = require("../Models/coursemonth.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -783,15 +784,20 @@ const DeleteStudentCategory = async (req, res) => {
 
 const CreateFee = async (req, res) => {
   try {
-    const { adminssionfee, Registractionfee, feepermonth, coursename,courseduration} =
-      req.body;
+    const {
+      adminssionfee,
+      Registractionfee,
+      feepermonth,
+      coursename,
+      courseduration,
+    } = req.body;
     let feev;
 
     if (adminssionfee) {
       feev = await Fee.findOne({
         where: {
           coursename: coursename,
-          courseduration:courseduration,
+          courseduration: courseduration,
           ClientCode: req.user?.ClientCode,
           institutename: req.user?.institutename,
         },
@@ -801,7 +807,7 @@ const CreateFee = async (req, res) => {
       feev = await Fee.findOne({
         where: {
           coursename: coursename,
-          courseduration:courseduration,
+          courseduration: courseduration,
           ClientCode: req.user?.ClientCode,
           institutename: req.user?.institutename,
         },
@@ -824,7 +830,7 @@ const CreateFee = async (req, res) => {
       adminssionfee: adminssionfee,
       feepermonth: feepermonth,
       coursename: coursename,
-      courseduration:courseduration
+      courseduration: courseduration,
     });
     if (fees) {
       return respHandler.success(res, {
@@ -849,8 +855,14 @@ const CreateFee = async (req, res) => {
 
 const UpdateFee = async (req, res) => {
   try {
-    const { adminssionfee, feepermonth, Registractionfee, coursename,courseduration, id } =
-      req.body;
+    const {
+      adminssionfee,
+      feepermonth,
+      Registractionfee,
+      coursename,
+      courseduration,
+      id,
+    } = req.body;
 
     let status = await Fee.update(
       {
@@ -858,7 +870,7 @@ const UpdateFee = async (req, res) => {
         feepermonth: feepermonth,
         coursename: coursename,
         Registractionfee: Registractionfee,
-        courseduration:courseduration
+        courseduration: courseduration,
       },
       {
         where: {
@@ -1629,6 +1641,154 @@ const DeleteDepartment = async (req, res) => {
     });
   }
 };
+
+const CreateCoursemonth = async (req, res) => {
+  try {
+    const { noOfMonth } = req.body;
+
+    let coursemonths = await Coursemonth.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+        institutename: req.user?.institutename,
+      },
+    });
+    if (coursemonths.length > 0) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "You Have Allready Added Course Duration !!",
+        error: [""],
+      });
+    }
+    let coursemonth = await Coursemonth.create({
+      ClientCode: req.user?.ClientCode,
+      institutename: req.user?.institutename,
+      noOfMonth: noOfMonth,
+    });
+    if (coursemonth) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Course Duration In Month Created successfully!!",
+        data: coursemonth,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateCoursemonth = async (req, res) => {
+  try {
+    const { noOfMonth, id } = req.body;
+
+    let status = await Coursemonth.update(
+      {
+        noOfMonth: noOfMonth,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+          institutename: req.user?.institutename,
+        },
+      }
+    );
+    let coursemonth = await Coursemonth.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (status) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Course Duration Updated successfully!!",
+        data: coursemonth,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const getCoursemonth = async (req, res) => {
+  try {
+    let coursemonth = await Coursemonth.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+        institutename: req.user?.institutename,
+      },
+    });
+    if (coursemonth) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Course Duration successfully!!",
+        data: coursemonth,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteCoursemonth = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let coursemonth = await Coursemonth.findOne({ where: { id: id } });
+    if (coursemonth) {
+      await Coursemonth.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+          institutename: req.user?.institutename,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Course Duration Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   Getprofile,
   updateprofile,
@@ -1665,4 +1825,8 @@ module.exports = {
   DeleteDepartment,
   DeleteEmployee,
   UpdateEmployee,
+  CreateCoursemonth,
+  UpdateCoursemonth,
+  getCoursemonth,
+  DeleteCoursemonth,
 };

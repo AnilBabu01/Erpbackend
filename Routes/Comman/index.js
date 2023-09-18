@@ -83,4 +83,11 @@ router
   .get(verifyToken, CommanController.getDepartment)
   .put(verifyToken, CommanController.UpdateDepartment)
   .delete(verifyToken, CommanController.DeleteDepartment);
+
+router
+  .route("/courseduration", verifyToken)
+  .post(verifyToken, CommanController.CreateCoursemonth)
+  .get(verifyToken, CommanController.getCoursemonth)
+  .put(verifyToken, CommanController.UpdateCoursemonth)
+  .delete(verifyToken, CommanController.DeleteCoursemonth);
 module.exports = router;

@@ -8,7 +8,7 @@ const { Validation } = require("../../Middleware/Validate");
 router
   .route("/addstudent", verifyToken)
   .post(
-    verifyToken,   
+    verifyToken,
     upload.fields([
       {
         name: "profileurl",
@@ -42,5 +42,5 @@ router
   )
   .delete(verifyToken, StudentController.deleteStudent);
 router.post("/login", StudentController.Loging);
-
+router.post("/pacoachingfee",verifyToken, StudentController.addfee);
 module.exports = router;

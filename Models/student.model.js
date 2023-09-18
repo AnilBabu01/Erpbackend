@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../Helper/Connect");
+const Coachingfeestatus  = require('../Models/coachingfeestatus.model');
 const Student = sequelize.define("student", {
   id: {
     type: DataTypes.INTEGER,
@@ -153,5 +154,6 @@ const Student = sequelize.define("student", {
     defaultValue: "IN Institute",
   },
 });
-
+Student.hasOne(Coachingfeestatus, { foreignKey: "studentId" });
+Coachingfeestatus.belongsTo(Student, { foreignKey: "studentId" });
 module.exports = Student;

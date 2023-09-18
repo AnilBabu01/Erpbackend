@@ -157,7 +157,7 @@ const AttendanceAnalasis = async (req, res) => {
     let result = [];
     const promises = Students?.map(async (item) => {
       let checkattendance = await sequelizes.query(
-        `Select * FROM studentattendances WHERE institutename = '${req.user.institutename}' AND ClientCode= '${req.user?.institutename}' AND MONTH(attendancedate) ='${month}' AND rollnumber = '${item?.rollnumber}';`,
+        `Select * FROM studentattendances WHERE institutename = '${req.user.institutename}' AND ClientCode= '${req.user?.ClientCode}' AND MONTH(attendancedate) ='${month}' AND rollnumber = '${item?.rollnumber}';`,
         {
           nest: true,
           type: QueryTypes.SELECT,

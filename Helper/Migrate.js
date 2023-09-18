@@ -15,8 +15,10 @@ const Employee = require("../Models/employee.model");
 const Guest = require("../Models/guest.model");
 const Enquiry = require("../Models/enquiry.model");
 const Batch = require("../Models/batch.model");
-const AttendanceStudent = require('../Models/attendance.model');
-const Department = require('../Models/depart.model');
+const AttendanceStudent = require("../Models/attendance.model");
+const Department = require("../Models/depart.model");
+const Coursemonth = require("../Models/coursemonth.model");
+const Coachingfeestatus = require("../Models/coachingfeestatus.model");
 sequelize
   .sync({ alter: true })
   .then(() => {
