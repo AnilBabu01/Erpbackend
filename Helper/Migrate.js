@@ -19,6 +19,10 @@ const AttendanceStudent = require("../Models/attendance.model");
 const Department = require("../Models/depart.model");
 const Coursemonth = require("../Models/coursemonth.model");
 const Coachingfeestatus = require("../Models/coachingfeestatus.model");
+const Test = require('../Models/test.model');
+const Question = require("../Models/question.model");
+const Result = require("../Models/result.model");
+const Ansquestion = require("../Models/ansquetion.model");
 sequelize
   .sync({ alter: true })
   .then(() => {

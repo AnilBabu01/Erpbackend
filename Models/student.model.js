@@ -148,12 +148,16 @@ const Student = sequelize.define("student", {
     allowNull: true,
     defaultValue: "registration",
   },
+  typeoforganization: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   Status: {
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: "IN Institute",
   },
 });
-Student.hasOne(Coachingfeestatus, { foreignKey: "studentId" });
+Student.hasOne(Coachingfeestatus, { primaryKey: "id" });
 Coachingfeestatus.belongsTo(Student, { foreignKey: "studentId" });
 module.exports = Student;
