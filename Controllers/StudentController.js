@@ -292,7 +292,7 @@ const Loging = async (req, res) => {
         return respHandler.success(res, {
           status: true,
           msg: "Login successfully!!",
-          data: [{ token: token, user: user }],
+          data: [{ token: token, User: user }],
         });
       } else {
         return respHandler.error(res, {

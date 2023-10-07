@@ -90,4 +90,24 @@ router
   .get(verifyToken, CommanController.getCoursemonth)
   .put(verifyToken, CommanController.UpdateCoursemonth)
   .delete(verifyToken, CommanController.DeleteCoursemonth);
+
+router
+  .route("/credentials", verifyToken)
+  .get(verifyToken, CommanController.GetCredentials)
+  .put(
+    verifyToken,
+    upload.fields([
+      {
+        name: "profileurl",
+        maxCount: 1,
+      },
+      {
+        name: "logourl",
+        maxCount: 1,
+      },
+      { name: "certificatelogo", maxCount: 1 },
+    ]),
+    CommanController.updateCredentials
+  );
+
 module.exports = router;

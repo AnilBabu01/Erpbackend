@@ -2,6 +2,7 @@ const { sequelize, QueryTypes, Op, where, literal } = require("sequelize");
 const { config } = require("dotenv");
 var bcrypt = require("bcrypt");
 const Client = require("../Models/client.model");
+const Credentials = require("../Models/Credentials.model");
 const Enquiry = require("../Models/enquiry.model");
 const Batch = require("../Models/batch.model");
 var jwt = require("jsonwebtoken");
@@ -95,6 +96,8 @@ const Register = async (req, res) => {
       };
 
       let createdUser = await Client.create(newUser);
+      let clientdata = await Credentials.create(newUser);
+
       var token = jwt.sign(
         {
           id: createdUser.id,
@@ -109,7 +112,8 @@ const Register = async (req, res) => {
             // handle success
             return respHandler.success(res, {
               status: true,
-              msg: "OTP send successfully!!",
+              msg: "College Created Successfully!!",
+              data: [{ User: createdUser, CollegeDetails: clientdata }],
             });
           })
           .catch(function (error) {
@@ -176,7 +180,7 @@ const Loging = async (req, res) => {
           return respHandler.success(res, {
             status: true,
             msg: "Login successfully!!",
-            data: [{ token: token, user: user }],
+            data: [{ token: token, User: user }],
           });
         } else {
           return respHandler.error(res, {

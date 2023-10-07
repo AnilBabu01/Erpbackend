@@ -23,6 +23,7 @@ const Test = require('../Models/test.model');
 const Question = require("../Models/question.model");
 const Result = require("../Models/result.model");
 const Ansquestion = require("../Models/ansquetion.model");
+const Credential = require('../Models/Credentials.model');
 sequelize
   .sync({ alter: true })
   .then(() => {

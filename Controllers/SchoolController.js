@@ -97,7 +97,7 @@ const Register = async (req, res) => {
       if (token) {
         return respHandler.success(res, {
           status: true,
-          data: [{ token: token, user: createdUser }],
+          data: [{ token: token, ser: createdUser }],
           msg: "Institute Account Created Successfully!!",
         });
       }
@@ -151,7 +151,7 @@ const Loging = async (req, res) => {
           return respHandler.success(res, {
             status: true,
             msg: "Login successfully!!",
-            data: [{ token: token, user: user }],
+            data: [{ token: token, User: user }],
           });
         } else {
           return respHandler.error(res, {

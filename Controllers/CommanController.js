@@ -10,6 +10,7 @@ const Course = require("../Models/course.model");
 const Employeetype = require("../Models/employeetype.model");
 const Departments = require("../Models/depart.model");
 const Coursemonth = require("../Models/coursemonth.model");
+const Credentials = require("../Models/Credentials.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -456,11 +457,18 @@ const Getallemployee = async (req, res) => {
 const Getprofile = async (req, res) => {
   try {
     if (req?.user) {
-      return respHandler.success(res, {
-        status: true,
-        msg: "Profile fetch successfully!!",
-        data: [req?.user],
+      let credentailsdata = await Credentials.findOne({
+        where: {
+          ClientCode: req?.user?.ClientCode,
+        },
       });
+      if (credentailsdata) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Credentials fetch successfully!!",
+          data: { User: req?.user, CredentailsData: credentailsdata },
+        });
+      }
     } else {
       return respHandler.error(res, {
         status: false,
@@ -1180,6 +1188,149 @@ const updateprofile = async (req, res) => {
     });
   }
 };
+const updateCredentials = async (req, res) => {
+  const {
+    name,
+    userType,
+    email,
+    Clientname,
+    phoneno1,
+    phoneno2,
+    institutename,
+    address,
+    city,
+    state,
+    pincode,
+    Sendemail,
+    SendemailPassword,
+    Studentpassword,
+    Employeepassword,
+    Parentpassword,
+  } = req.body;
+
+  if (
+    name != "" ||
+    email != "" ||
+    Clientname != "" ||
+    phoneno1 != "" ||
+    phoneno2 != "" ||
+    address != "" ||
+    city != "" ||
+    state != "" ||
+    pincode != "" ||
+    userType != "" ||
+    institutename != "" ||
+    SendemailPassword != "" ||
+    Sendemail != ""
+  ) {
+    try {
+      let user = await Credentials.findOne({
+        where: { ClientCode: req?.user?.ClientCode },
+      });
+
+      if (user != null) {
+        if (req?.files?.logourl) {
+          removefile(`public/upload/${req?.user?.logourl?.substring(7)}`);
+        }
+        if (req?.files?.profileurl) {
+          removefile(`public/upload/${req?.user?.profileurl?.substring(7)}`);
+        }
+        if (req?.files?.certificatelogo) {
+          removefile(
+            `public/upload/${req?.user?.certificatelogo?.substring(7)}`
+          );
+        }
+        let updateUser = {
+          name: name,
+          email: email,
+          Sendemail: Sendemail,
+          SendemailPassword: SendemailPassword,
+          Studentpassword: Studentpassword,
+          Parentpassword: Parentpassword,
+          Employeepassword: Employeepassword,
+          Clientname: Clientname,
+          phoneno1: phoneno1,
+          phoneno2: phoneno2,
+          institutename: institutename,
+          ClientCode: user?.ClientCode,
+          address: address,
+          city: city,
+          state: state,
+          pincode: pincode,
+          userType: userType ? userType : user?.userType,
+          logourl: req?.files?.logourl
+            ? `images/${req?.files?.logourl[0]?.filename}`
+            : req?.user?.logourl,
+          profileurl: req?.files?.profileurl
+            ? `images/${req?.files?.profileurl[0]?.filename}`
+            : req?.user?.profileurl,
+          certificatelogo: req?.files?.certificatelogo
+            ? `images/${req?.files?.certificatelogo[0]?.filename}`
+            : req?.user?.profileurl,
+        };
+        let updateduser = await Credentials.update(updateUser, {
+          where: {
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+        if (updateduser) {
+          let user = await Credentials.findOne({
+            where: {
+              ClientCode: req?.user?.ClientCode,
+            },
+          });
+          if (user) {
+            return respHandler.success(res, {
+              status: true,
+              data: [user],
+              msg: "Credentials Updated Successfully!!",
+            });
+          }
+        }
+      }
+    } catch (err) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [err.message],
+      });
+    }
+  } else {
+    return respHandler.error(res, {
+      status: false,
+      msg: "All fields are required!!",
+    });
+  }
+};
+
+const GetCredentials = async (req, res) => {
+  try {
+    let credentials = await Credentials.findOne({
+      where: {
+        ClientCode: req?.user?.ClientCode,
+      },
+    });
+    if (credentials) {
+      return respHandler.success(res, {
+        status: true,
+        data: credentials,
+        msg: "Fetch credentials Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 const CreateCourse = async (req, res) => {
   try {
     const { coursename, courseduration } = req.body;
@@ -1792,6 +1943,8 @@ const DeleteCoursemonth = async (req, res) => {
 module.exports = {
   Getprofile,
   updateprofile,
+  updateCredentials,
+  GetCredentials,
   RegisterEmployee,
   Logingemployee,
   CreateSection,
