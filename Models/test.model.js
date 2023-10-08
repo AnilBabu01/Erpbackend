@@ -24,11 +24,11 @@ const Test = sequelize.define("test", {
     allowNull: false,
   },
   teststarTime: {
-    type: DataTypes.TIME,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   testendTime: {
-    type: DataTypes.TIME,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   testname: {

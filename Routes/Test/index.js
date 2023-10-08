@@ -16,7 +16,18 @@ router.post(
   ]),
   TestController.AddTest
 );
-
 router.get("/getalltest", verifyToken, TestController.GetAllTest);
+router.put(
+  "/updatetest",
+  upload.fields([
+    {
+      name: "testfile",
+      maxCount: 1,
+    },
+  ]),
+  verifyToken,
+  TestController.UpdateTest
+);
+router.delete("/deletetest", verifyToken, TestController.DeleteTest);
 
 module.exports = router;

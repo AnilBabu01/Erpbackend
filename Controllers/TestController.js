@@ -24,8 +24,6 @@ const AddTest = async (req, res) => {
     } = req.body;
     let newdate = new Date(date);
 
-    console.log("body query data is ", JSON.parse(questions));
-
     let test = await Test.create({
       ClientCode: req.user?.ClientCode,
       institutename: req.user?.institutename,
@@ -125,13 +123,13 @@ const GetAllTest = async (req, res) => {
           },
         ],
       });
-        if (alltest) {
-      return respHandler.success(res, {
-        status: true,
-        msg: "Fetch All Test successfully!!",
-        data: alltest,
-      });
-    }
+      if (alltest) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch All Test successfully!!",
+          data: alltest,
+        });
+      }
     } else {
       alltest = await Test.findAll({
         where: whereClause,
@@ -159,7 +157,132 @@ const GetAllTest = async (req, res) => {
   }
 };
 
+const DeleteTest = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let test = await Test.findOne({ where: { id: id } });
+    if (test) {
+      await Test.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+          institutename: req.user?.institutename,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Test Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+const UpdateTest = async (req, res) => {
+  try {
+    const {
+      batch,
+      course,
+      date,
+      testtype,
+      starttime,
+      endtime,
+      testtitle,
+      questions,
+      id,
+    } = req.body;
+    let newdate = new Date(date);
+    let test = await Test.update(
+      {
+        ClientCode: req.user?.ClientCode,
+        institutename: req.user?.institutename,
+        testdate: newdate,
+        teststarTime: starttime,
+        testendTime: endtime,
+        testname: testtitle,
+        testTitle: testtitle,
+        batch: batch,
+        course: course,
+        testtype: testtype,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+          institutename: req.user?.institutename,
+        },
+      }
+    );
+
+    if (test) {
+      const promises = JSON.parse(questions)?.map(async (item) => {
+        let result = await Question.update(
+          {
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+            question: item?.question,
+            option1: item?.option1,
+            option2: item?.option2,
+            option3: item?.option3,
+            option4: item?.option4,
+            correctoption: item?.correctoption,
+          },
+          {
+            where: {
+              testId: item?.testId,
+              id: item?.id,
+              ClientCode: req?.user?.ClientCode,
+              institutename: req?.user?.institutename,
+            },
+          }
+        );
+
+        return result;
+      });
+
+      if (await Promise.all(promises)) {
+        let updatedtest = await Test.findOne({
+          where: {
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+            id: id,
+          },
+          include: [
+            {
+              model: Question,
+            },
+          ],
+        });
+
+        return respHandler.success(res, {
+          status: true,
+          msg: "Test Updated successfully!!",
+          data: [updatedtest],
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   AddTest,
   GetAllTest,
+  DeleteTest,
+  UpdateTest,
 };
