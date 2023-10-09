@@ -6,7 +6,7 @@ const Ansquestion = sequelize.define("answerquestion", {
     autoIncrement: true,
     primaryKey: true,
   },
-  testId: {
+  resultId: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },

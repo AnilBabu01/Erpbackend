@@ -376,7 +376,7 @@ const AddTestResult = async (req, res) => {
     if (test) {
       const promises = questions?.map(async (item) => {
         let result = await Ansquestion.create({
-          testId: test?.id,
+          resultId: test?.id,
           ClientCode: req.user?.ClientCode,
           institutename: req.user?.institutename,
           question: item?.question,
