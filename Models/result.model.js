@@ -24,11 +24,11 @@ const Result = sequelize.define("result", {
     allowNull: false,
   },
   teststarTime: {
-    type: DataTypes.DATE,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   testendTime: {
-    type: DataTypes.DATE,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   testname: {
@@ -48,6 +48,10 @@ const Result = sequelize.define("result", {
     allowNull: false,
   },
   Totalmarks: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  TotalWrongAnswer: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },

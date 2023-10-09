@@ -42,6 +42,16 @@ const Question = sequelize.define("question", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  answeroption: { 
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue:false
+  },
+  currectanswer: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue:''
+  },
 });
 
 module.exports = Question;

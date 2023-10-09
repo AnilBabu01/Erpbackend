@@ -46,8 +46,16 @@ const Ansquestion = sequelize.define("answerquestion", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  testfile: {
+  // testfile: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
+  answeroption: {
     type: DataTypes.STRING,
+    allowNull: false,
+  },
+  currectanswer: {
+    type: DataTypes.BOOLEAN,
     allowNull: false,
   },
 });

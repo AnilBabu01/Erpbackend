@@ -29,5 +29,6 @@ router.put(
   TestController.UpdateTest
 );
 router.delete("/deletetest", verifyToken, TestController.DeleteTest);
-
+router.get("/getstudentalltest", verifyToken, TestController.GetStudentTest);
+router.post("/addtestretult", verifyToken, TestController.AddTestResult);
 module.exports = router;
