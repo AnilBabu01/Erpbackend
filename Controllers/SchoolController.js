@@ -2,6 +2,7 @@ const { config } = require("dotenv");
 var bcrypt = require("bcrypt");
 const Client = require("../Models/client.model");
 const Studentclass = require("../Models/studentclass.model");
+const Credentials = require("../Models/Credentials.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -87,6 +88,7 @@ const Register = async (req, res) => {
       };
 
       let createdUser = await Client.create(newUser);
+      let clientdata = await Credentials.create(newUser);
       var token = jwt.sign(
         {
           id: createdUser.id,
@@ -97,7 +99,7 @@ const Register = async (req, res) => {
       if (token) {
         return respHandler.success(res, {
           status: true,
-          data: [{ token: token, ser: createdUser }],
+          data: [{ User: createdUser, CollegeDetails: clientdata }],
           msg: "Institute Account Created Successfully!!",
         });
       }

@@ -112,7 +112,7 @@ const Register = async (req, res) => {
             // handle success
             return respHandler.success(res, {
               status: true,
-              msg: "College Created Successfully!!",
+              msg: "Coaching Account Created Successfully!!",
               data: [{ User: createdUser, CollegeDetails: clientdata }],
             });
           })
@@ -148,6 +148,7 @@ const Register = async (req, res) => {
 
 const Loging = async (req, res) => {
   const { email, password, institutename } = req.body;
+  console.log('from coaching login ',email,password,institutename);
   if (email || password != "") {
     let last = institutename.split(" ").pop();
     var lastIndex = institutename?.lastIndexOf(" ");
