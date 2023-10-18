@@ -653,7 +653,7 @@ const CreateStudentCategory = async (req, res) => {
       if (categoryv?.category?.toLowerCase() === category.toLowerCase()) {
         return respHandler.error(res, {
           status: false,
-          msg: "Something Went Wrong!!",
+          msg: "AllReady Exsist !!",
           error: ["AllReady Exsist !!"],
         });
       }
@@ -1347,7 +1347,7 @@ const CreateCourse = async (req, res) => {
       if (coursenamev?.coursename?.toLowerCase() === coursename.toLowerCase()) {
         return respHandler.error(res, {
           status: false,
-          msg: "Something Went Wrong!!",
+          msg: "AllReady Exsist!!",
           error: ["AllReady Exsist !!"],
         });
       }

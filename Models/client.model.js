@@ -88,6 +88,14 @@ const College = sequelize.define("client", {
     type: DataTypes.TEXT,
     defaultValue: "Parent",
   },
+  emailOtp: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  phoneOtp: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   Employeepassword: {
     type: DataTypes.TEXT,
     defaultValue: "Employee",
