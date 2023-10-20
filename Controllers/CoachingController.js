@@ -37,17 +37,8 @@ const Register = async (req, res) => {
     password,
   } = req.body;
 
-  // if (!req.files.profileurl || !req.files.logourl) {
-  //   return respHandler.error(res, {
-  //     status: false,
-  //     msg: "Error in file uploading",
-  //   });
-  // }
   const genSalt = 10;
   const hash = await bcrypt.hash(password, genSalt);
-  var val = Math.floor(1000 + Math.random() * 9000);
-  let mess = `Hello ${name} \n Thankyou for registering in instaphantom \n Your OTP is: ${val}`;
-  const MsgUrl = `https://www.fast2sms.com/dev/bulkV2?authorization=CgS6KLa6FZIWC4rGhHqjXUuBqaxaPbHxxgM8NItmRKFtJx1ncwGkmM1NqPEV&route=v3&sender_id=Cghpet&message=${mess}&language=english&flash=0&numbers=${phoneno1}`;
 
   let clients = await getClientCount();
   let clientID = `CNO-${clients + 900}`;
@@ -57,7 +48,6 @@ const Register = async (req, res) => {
     password != "" ||
     Clientname != "" ||
     phoneno1 != "" ||
-    phoneno2 != "" ||
     institutename != "" ||
     typeoforganization != "" ||
     address != "" ||
@@ -67,69 +57,66 @@ const Register = async (req, res) => {
     userType != ""
   ) {
     try {
-      let user = await Client.findOne({ where: { email: email } });
+      let user = await Client.findOne({
+        where: { phoneno1: phoneno1, email: email },
+      });
       if (user != null) {
-        // removefile(`public/upload/${req.files.logourl[0].filename}`);
-        // removefile(`public/upload/${req.files.profileurl[0].filename}`);
-        return respHandler.error(res, {
-          status: false,
-          msg: "Email or Mobile Number already exist",
-        });
-      }
-      let newUser = {
-        name: name,
-        email: email,
-        Clientname: Clientname,
-        phoneno1: phoneno1,
-        phoneno2: phoneno2,
-        institutename: institutename,
-        ClientCode: clientID,
-        typeoforganization: typeoforganization,
-        address: address,
-        city: city,
-        state: state,
-        pincode: pincode,
-        password: hash,
-        userType: userType,
-        // logourl: `images/${req.files.logourl[0].filename}`,
-        // profileurl: `images/${req.files.profileurl[0].filename}`,
-      };
-
-      let createdUser = await Client.create(newUser);
-      let clientdata = await Credentials.create(newUser);
-
-      var token = jwt.sign(
-        {
-          id: createdUser.id,
-          userType: createdUser.userType,
-        },
-        SECRET
-      );
-      if (token) {
-        axios
-          .get(MsgUrl)
-          .then(function (response) {
-            // handle success
+        let status = await Client.update(
+          {
+            name: name,
+            email: email,
+            Clientname: Clientname,
+            phoneno1: phoneno1,
+            institutename: institutename,
+            ClientCode: clientID,
+            typeoforganization: typeoforganization,
+            address: address,
+            city: city,
+            state: state,
+            pincode: pincode,
+            password: hash,
+            userType: userType,
+            emailOtpStatus: true,
+            phoneOtpStatus: true,
+          },
+          {
+            where: {
+              phoneno1: phoneno1,
+              email: email,
+            },
+          }
+        );
+        if (status) {
+          let clientdata = await Credentials.create({
+            name: name,
+            email: email,
+            Clientname: Clientname,
+            phoneno1: phoneno1,
+            institutename: institutename,
+            ClientCode: clientID,
+            typeoforganization: typeoforganization,
+            address: address,
+            city: city,
+            state: state,
+            pincode: pincode,
+            password: hash,
+            userType: userType,
+          });
+          var token = jwt.sign(
+            {
+              id: user?.id,
+              userType: user?.userType,
+            },
+            SECRET
+          );
+          if (token) {
             return respHandler.success(res, {
               status: true,
               msg: "Coaching Account Created Successfully!!",
-              data: [{ User: createdUser, CollegeDetails: clientdata }],
+              data: [{ User: user, CollegeDetails: clientdata }],
             });
-          })
-          .catch(function (error) {
-            // handle error
-            console.log(error);
-            return respHandler.error(res, {
-              status: false,
-              msg: error.message,
-              error: [error.message],
-            });
-          });
-        // return respHandler.success(res, {
-        //   status: true,
-        //   data: [{ token: token, user: createdUser }],
-        //   msg: "Client Account Created Successfully!!",
-        // });
+          }
+        }
       }
     } catch (err) {
       return respHandler.error(res, {
@@ -148,7 +135,7 @@ const Register = async (req, res) => {
 
 const Loging = async (req, res) => {
   const { email, password, institutename } = req.body;
-  console.log('from coaching login ',email,password,institutename);
+  console.log("from coaching login ", email, password, institutename);
   if (email || password != "") {
     let last = institutename.split(" ").pop();
     var lastIndex = institutename?.lastIndexOf(" ");

@@ -14,6 +14,7 @@ const Parent = require("./Routes/Parent");
 const Guest = require("./Routes/Guest");
 const AttendanceStudent = require("./Routes/Attendance");
 const Test = require("./Routes/Test");
+const clientVerify = require("./Routes/ClientVerify")
 // to run migrations run command - --------  npm run migrate ---------------------
 
 app.use(cors());
@@ -38,6 +39,7 @@ app.use("/api/parent", Parent);
 app.use("/api/guest", Guest);
 app.use("/api/attendanceatudent", AttendanceStudent);
 app.use("/api/test", Test);
+app.use("/api/clientVerify", clientVerify);
 app.use("*", (req, res) => {
   return res.status(404).json({
     status: false,
