@@ -124,7 +124,7 @@ const Student = sequelize.define("student", {
   },
   courseduration: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull:true,
   },
   adharno: {
     type: DataTypes.INTEGER,

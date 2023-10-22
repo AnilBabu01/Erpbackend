@@ -110,4 +110,10 @@ router
     CommanController.updateCredentials
   );
 
+router
+  .route("/receiptprefix", verifyToken)
+  .post(verifyToken, CommanController.CreateReceiptPrefix)
+  .get(verifyToken, CommanController.getReceiptPrefix)
+  .put(verifyToken, CommanController.UpdateReceiprefix);
+
 module.exports = router;

@@ -11,6 +11,7 @@ const Employeetype = require("../Models/employeetype.model");
 const Departments = require("../Models/depart.model");
 const Coursemonth = require("../Models/coursemonth.model");
 const Credentials = require("../Models/Credentials.model");
+const ReceiptPrefix = require("../Models/receiptprefix.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -1940,6 +1941,123 @@ const DeleteCoursemonth = async (req, res) => {
     });
   }
 };
+
+const CreateReceiptPrefix = async (req, res) => {
+  try {
+    const { receiptPrefix } = req.body;
+
+    let coursemonths = await ReceiptPrefix.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+        institutename: req.user?.institutename,
+      },
+    });
+    if (coursemonths.length > 0) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "You Have Allready Added Receipt Prefix !!",
+        error: [""],
+      });
+    }
+    let coursemonth = await ReceiptPrefix.create({
+      ClientCode: req.user?.ClientCode,
+      institutename: req.user?.institutename,
+      receiptPrefix: receiptPrefix,
+    });
+    if (coursemonth) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Receipt Prefix Created successfully!!",
+        data: coursemonth,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateReceiprefix = async (req, res) => {
+  try {
+    const { receiptPrefix, id } = req.body;
+
+    let status = await ReceiptPrefix.update(
+      {
+        receiptPrefix: receiptPrefix,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+          institutename: req.user?.institutename,
+        },
+      }
+    );
+    let coursemonth = await ReceiptPrefix.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (status) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Receipt Prefix Updated successfully!!",
+        data: coursemonth,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const getReceiptPrefix = async (req, res) => {
+  try {
+    let coursemonth = await ReceiptPrefix.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+        institutename: req.user?.institutename,
+      },
+    });
+    if (coursemonth) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Receipt Prefix successfully!!",
+        data: coursemonth,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found !!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   Getprofile,
   updateprofile,
@@ -1982,4 +2100,7 @@ module.exports = {
   UpdateCoursemonth,
   getCoursemonth,
   DeleteCoursemonth,
+  CreateReceiptPrefix,
+  UpdateReceiprefix,
+  getReceiptPrefix
 };
