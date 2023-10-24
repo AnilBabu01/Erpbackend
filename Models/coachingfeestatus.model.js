@@ -21,182 +21,182 @@ const Coachingfeestatus = sequelize.define("coachingfeestatus", {
   Jan: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Feb: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Mar: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   April: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   May: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   June: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   July: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Aug: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Sep: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Oct: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Nov: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Dec: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Jan2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Feb2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Mar2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   April2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   May2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   June2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   July2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Aug2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Sep2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Oct2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Nov2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Dec2: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Jan3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Feb3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Mar3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   April3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   May3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   June3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   July3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Aug3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Sep3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Oct3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Nov3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
   Dec3: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:"Does"
+    defaultValue:"Dues"
   },
 });
 

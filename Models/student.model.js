@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../Helper/Connect");
-const Coachingfeestatus  = require('../Models/coachingfeestatus.model');
+const Coachingfeestatus = require("../Models/coachingfeestatus.model");
 const Student = sequelize.define("student", {
   id: {
     type: DataTypes.INTEGER,
@@ -124,7 +124,7 @@ const Student = sequelize.define("student", {
   },
   courseduration: {
     type: DataTypes.INTEGER,
-    allowNull:true,
+    allowNull: true,
   },
   adharno: {
     type: DataTypes.INTEGER,
@@ -141,12 +141,17 @@ const Student = sequelize.define("student", {
   paidfee: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue:0
+    defaultValue: 0,
   },
   StudentStatus: {
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: "registration",
+  },
+  Registrationfeestatus: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
   },
   typeoforganization: {
     type: DataTypes.STRING,

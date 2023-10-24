@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../Helper/Connect");
-const Receiptdata = sequelize.define("receiptdata", {
+const ReceiptData = sequelize.define("receiptdata", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -22,10 +22,51 @@ const Receiptdata = sequelize.define("receiptdata", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  receiptPrefix: {
+  studentName: {
     type: DataTypes.STRING,
+    allowNull: true,
+  },
+  fathername:{
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  ReceiptNo: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  Feetype: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue:'Registration'
+  },
+  // PayForMonth: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
+  PaidDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  RollNo: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  PaidAmount: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  Course: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  fathersid: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  studentid: {
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
 });
 
-module.exports = Receiptdata;
+module.exports = ReceiptData;

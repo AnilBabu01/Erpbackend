@@ -4,6 +4,8 @@ var bcrypt = require("bcrypt");
 const Student = require("../Models/student.model");
 const Parent = require("../Models/parent.model");
 const Coachingfeestatus = require("../Models/coachingfeestatus.model");
+const ReceiptData = require("../Models/receiptdata.model");
+const ReceiptPrefix = require("../Models/receiptprefix.model");
 const { Coachingfeemon } = require("../Helper/Constant");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
@@ -108,7 +110,10 @@ const Addstudent = async (req, res) => {
           email: email,
           ClientCode: req.user?.ClientCode,
           institutename: req.user?.institutename,
-          typeoforganization: req.user?.userType==='employee'?req.user?.institutename:req.user?.userType,
+          typeoforganization:
+            req.user?.userType === "employee"
+              ? req.user?.institutename
+              : req.user?.userType,
           logourl: req?.user?.logourl,
           phoneno1: phoneno1,
           phoneno2: phoneno2,
@@ -201,7 +206,10 @@ const Addstudent = async (req, res) => {
           email: email,
           ClientCode: req.user?.ClientCode,
           institutename: req.user?.institutename,
-          typeoforganization: req.user?.userType==='employee'?req.user?.institutename:req.user?.userType,
+          typeoforganization:
+            req.user?.userType === "employee"
+              ? req.user?.institutename
+              : req.user?.userType,
           logourl: req.user.logourl,
           phoneno1: phoneno1,
           phoneno2: phoneno2,
@@ -218,7 +226,7 @@ const Addstudent = async (req, res) => {
           regisgrationfee: regisgrationfee,
           StudentStatus: StudentStatus,
           courseorclass: courseorclass,
-          courseorclass: courseorclass,
+          courseduration: courseduration,
           studentTotalFee: studentTotalFee,
           permonthfee: permonthfee,
           adharno: adharno,
@@ -509,65 +517,155 @@ const deleteStudent = async (req, res) => {
     });
   }
 };
+getClientCount = async (req) => {
+  let count = await ReceiptData.findAll({
+    where: {
+      ClientCode: req?.user?.ClientCode,
+      institutename: req?.user?.institutename,
+    },
+  });
+
+  return count?.length + 1;
+};
 
 const addfee = async (req, res) => {
   try {
-    const { id, paymonths } = req.body;
-
-    const promises = paymonths?.map(async (item) => {
-      let = key = Coachingfeemon[Number(item)];
-      let result = await Coachingfeestatus.update(
+    const { id, paymonths, studentData, feetype, discount } = req.body;
+    if (discount === true) {
+      let status = await Student.update(
         {
-          [key]: "Paid",
-        },
-        {
-          where: {
-            studentId: id,
-            ClientCode: req.user?.ClientCode,
-            institutename: req.user?.institutename,
-          },
-        }
-      );
-      return result;
-    });
-
-    let studentone = await Student.findOne({
-      where: {
-        id: id,
-      },
-    });
-    if (studentone) {
-      await Student.update(
-        {
-          paidfee:
-            studentone?.paidfee + studentone?.permonthfee * paymonths.length,
+          Registrationfeestatus: true,
         },
         {
           where: {
             id: id,
-            ClientCode: req.user?.ClientCode,
-            institutename: req.user?.institutename,
+            ClientCode: req?.user?.ClientCode,
+            institutename: req?.user?.institutename,
           },
         }
       );
-    }
-    if (await Promise.all(promises)) {
-      let student = await Student.findOne({
-        where: {
-          id: id,
-          ClientCode: req.user?.ClientCode,
-        },
-        include: [
-          {
-            model: Coachingfeestatus,
+      if (status) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Discount Added successfully!!",
+          data: [],
+        });
+      }
+    } else {
+      let prefix;
+      if (req?.user?.institutename) {
+        prefix = await ReceiptPrefix.findOne({
+          where: {
+            ClientCode: req?.user?.ClientCode,
+            institutename: req?.user?.institutename,
           },
-        ],
-      });
-      return respHandler.success(res, {
-        status: true,
-        msg: "Fee Pay Added successfully!!",
-        data: [{ student: student }],
-      });
+        });
+        if (prefix) {
+          const promises = paymonths?.map(async (item) => {
+            let = key = Coachingfeemon[Number(item)];
+
+            let result = await Coachingfeestatus.update(
+              {
+                [key]: "Paid",
+              },
+              {
+                where: {
+                  studentId: id,
+                  ClientCode: req?.user?.ClientCode,
+                  institutename: req?.user?.institutename,
+                },
+              }
+            );
+            return result;
+          });
+
+          let studentone = await Student.findOne({
+            where: {
+              id: id,
+            },
+          });
+          if (studentone) {
+            await Student.update(
+              {
+                paidfee:
+                  studentone?.paidfee +
+                  studentone?.permonthfee * paymonths.length,
+              },
+              {
+                where: {
+                  id: id,
+                  ClientCode: req?.user?.ClientCode,
+                  institutename: req?.user?.institutename,
+                },
+              }
+            );
+          }
+          if (await Promise.all(promises)) {
+            if (feetype === "Registration") {
+              await Student.update(
+                {
+                  Registrationfeestatus: true,
+                },
+                {
+                  where: {
+                    id: id,
+                    ClientCode: req?.user?.ClientCode,
+                    institutename: req?.user?.institutename,
+                  },
+                }
+              );
+            }
+
+            let count = await getClientCount(req);
+            let receipno = `${prefix?.receiptPrefix}${count}`;
+
+            let result = await ReceiptData.create({
+              ClientCode: req?.user?.ClientCode,
+              institutename: req?.user?.institutename,
+              typeoforganization: req?.user?.institutename,
+              ReceiptNo: receipno,
+              Feetype: feetype,
+              PaidDate: new Date(),
+              PaidAmount:
+                feetype === "Registration"
+                  ? studentData?.regisgrationfee
+                  : studentData?.permonthfee * paymonths.length,
+              RollNo: studentData?.rollnumber,
+              studentName: studentData?.name,
+              fathername: studentData?.fathersName,
+              Course: studentData?.courseorclass,
+              fathersid: studentData?.parentId,
+              studentid: studentData?.id,
+            });
+            if (result) {
+              let student = await Student.findOne({
+                where: {
+                  id: id,
+                  ClientCode: req?.user?.ClientCode,
+                },
+                include: [
+                  {
+                    model: Coachingfeestatus,
+                  },
+                ],
+              });
+              return respHandler.success(res, {
+                status: true,
+                msg: "Fee Pay Added successfully!!",
+                data: [{ student: student, sss: studentData }],
+              });
+            }
+          }
+        } else {
+          return respHandler.error(res, {
+            status: false,
+            msg: "Please Add Receipt Prefix !!",
+            error: [""],
+          });
+        }
+
+        console.log("dd", prefix?.receiptPrefix);
+      }
     }
   } catch (err) {
     return respHandler.error(res, {
