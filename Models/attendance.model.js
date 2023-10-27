@@ -63,6 +63,15 @@ const AttendanceStudent = sequelize.define("studentattendance", {
     allowNull: false,
     defaultValue: false,
   },
+  attendaceStatusIntext: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: "NONE",
+  },
+  Comment: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   attendancedate: {
     type: DataTypes.DATE,
     allowNull: true,

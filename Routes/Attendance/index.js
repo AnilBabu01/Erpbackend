@@ -15,4 +15,9 @@ router
   .route("/analysisattendance", verifyToken)
   .post(verifyToken, AttendanceController.AttendanceAnalasis);
 
+router
+  .route("/holidy", verifyToken)
+  .post(verifyToken, AttendanceController.AddHoliday)
+  .get(verifyToken, AttendanceController.GetHolidays);
+
 module.exports = router;
