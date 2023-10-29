@@ -1,7 +1,6 @@
 const { config } = require("dotenv");
 var bcrypt = require("bcrypt");
 const Client = require("../Models/client.model");
-const Studentclass = require("../Models/studentclass.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -18,11 +17,7 @@ const getotponPhone = async (req, res) => {
         where: { phoneno1: phone },
       });
       if (client) {
-        if (
-          // client?.phoneOtpStatus === true &&
-          // client?.emailOtpStatus === true &&
-          client?.ClientCode === ""
-        ) {
+        if (client?.address !== "") {
           return respHandler.error(res, {
             status: false,
             msg: "You have allready with this phone number !!",
@@ -111,7 +106,7 @@ const getotponEmail = async (req, res) => {
         where: { phoneno1: phone, email: email },
       });
       if (client) {
-        if (client?.ClientCode === "") {
+        if (client?.address !== "") {
           return respHandler.error(res, {
             status: false,
             msg: "You have allready with this Email !!",
@@ -122,7 +117,6 @@ const getotponEmail = async (req, res) => {
           let status = await Client.update(
             {
               emailOtp: val,
-              emailOtpStatus: false,
             },
             {
               where: {
@@ -216,7 +210,6 @@ const getotponEmail = async (req, res) => {
           {
             emailOtp: val,
             email: email,
-            emailOtpStatus: false,
           },
           {
             where: {

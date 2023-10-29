@@ -9,17 +9,9 @@ var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
 const axios = require("axios");
+const SECRET = process.env.SECRET;
 config();
 
-const SECRET = process.env.SECRET;
-getClientCount = async () => {
-  let count = await Client.count({
-    distinct: true,
-    col: "userType",
-  });
-
-  return count;
-};
 const Register = async (req, res) => {
   const {
     name,
@@ -27,6 +19,7 @@ const Register = async (req, res) => {
     email,
     Clientname,
     phoneno1,
+    phoneno2,
     typeoforganization,
     institutename,
     address,
@@ -38,11 +31,9 @@ const Register = async (req, res) => {
 
   const genSalt = 10;
   const hash = await bcrypt.hash(password, genSalt);
-
-  let clients = await getClientCount();
+  let clients = await Client.findAll();
 
   if (clients) {
-    let clientID = `CNO-${clients + 900}`;
     if (
       name != "" ||
       email != "" ||
@@ -62,6 +53,7 @@ const Register = async (req, res) => {
           where: { phoneno1: phoneno1, email: email },
         });
         if (user != null) {
+          let clientID = `CNO-${clients?.length - 1 + 900}`;
           let status = await Client.update(
             {
               name: name,
@@ -69,7 +61,7 @@ const Register = async (req, res) => {
               Clientname: Clientname,
               phoneno1: phoneno1,
               institutename: institutename,
-              ClientCode:  clientID,
+              ClientCode: clientID,
               typeoforganization: typeoforganization,
               address: address,
               city: city,
@@ -88,13 +80,14 @@ const Register = async (req, res) => {
             }
           );
           if (status) {
+            let clientID = `CNO-${clients?.length - 1 + 900}`;
             let clientdata = await Credentials.create({
               name: name,
               email: email,
               Clientname: Clientname,
               phoneno1: phoneno1,
               institutename: institutename,
-              ClientCode:  clientID,
+              ClientCode: clientID,
               typeoforganization: typeoforganization,
               address: address,
               city: city,
