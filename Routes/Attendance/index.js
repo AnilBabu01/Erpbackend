@@ -18,6 +18,11 @@ router
 router
   .route("/holidy", verifyToken)
   .post(verifyToken, AttendanceController.AddHoliday)
-  .get(verifyToken, AttendanceController.GetHolidays);
+  .put(verifyToken, AttendanceController.Updateholiday)
+  .delete(verifyToken, AttendanceController.Deleteholiday);
+
+router
+  .route("/getholidy", verifyToken)
+  .post(verifyToken, AttendanceController.GetHolidays);
 
 module.exports = router;

@@ -15,7 +15,7 @@ const SECRET = process.env.SECRET;
 getClientCount = async () => {
   let count = await Client.count({
     distinct: true,
-    col: "institutename",
+    col: "userType",
   });
 
   return count;
@@ -27,7 +27,6 @@ const Register = async (req, res) => {
     email,
     Clientname,
     phoneno1,
-    phoneno2,
     typeoforganization,
     institutename,
     address,
@@ -41,95 +40,98 @@ const Register = async (req, res) => {
   const hash = await bcrypt.hash(password, genSalt);
 
   let clients = await getClientCount();
-  let clientID = `CNO-${clients + 900}`;
-  if (
-    name != "" ||
-    email != "" ||
-    password != "" ||
-    Clientname != "" ||
-    phoneno1 != "" ||
-    institutename != "" ||
-    typeoforganization != "" ||
-    address != "" ||
-    city != "" ||
-    state != "" ||
-    pincode != "" ||
-    userType != ""
-  ) {
-    try {
-      let user = await Client.findOne({
-        where: { phoneno1: phoneno1, email: email },
-      });
-      if (user != null) {
-        let status = await Client.update(
-          {
-            name: name,
-            email: email,
-            Clientname: Clientname,
-            phoneno1: phoneno1,
-            institutename: institutename,
-            ClientCode: clientID,
-            typeoforganization: typeoforganization,
-            address: address,
-            city: city,
-            state: state,
-            pincode: pincode,
-            password: hash,
-            userType: userType,
-            emailOtpStatus: true,
-            phoneOtpStatus: true,
-          },
-          {
-            where: {
-              phoneno1: phoneno1,
-              email: email,
-            },
-          }
-        );
-        if (status) {
-          let clientdata = await Credentials.create({
-            name: name,
-            email: email,
-            Clientname: Clientname,
-            phoneno1: phoneno1,
-            institutename: institutename,
-            ClientCode: clientID,
-            typeoforganization: typeoforganization,
-            address: address,
-            city: city,
-            state: state,
-            pincode: pincode,
-            password: hash,
-            userType: userType,
-          });
-          var token = jwt.sign(
+
+  if (clients) {
+    let clientID = `CNO-${clients + 900}`;
+    if (
+      name != "" ||
+      email != "" ||
+      password != "" ||
+      Clientname != "" ||
+      phoneno1 != "" ||
+      institutename != "" ||
+      typeoforganization != "" ||
+      address != "" ||
+      city != "" ||
+      state != "" ||
+      pincode != "" ||
+      userType != ""
+    ) {
+      try {
+        let user = await Client.findOne({
+          where: { phoneno1: phoneno1, email: email },
+        });
+        if (user != null) {
+          let status = await Client.update(
             {
-              id: user?.id,
-              userType: user?.userType,
+              name: name,
+              email: email,
+              Clientname: Clientname,
+              phoneno1: phoneno1,
+              institutename: institutename,
+              ClientCode:  clientID,
+              typeoforganization: typeoforganization,
+              address: address,
+              city: city,
+              state: state,
+              pincode: pincode,
+              password: hash,
+              userType: userType,
+              emailOtpStatus: true,
+              phoneOtpStatus: true,
             },
-            SECRET
+            {
+              where: {
+                phoneno1: phoneno1,
+                email: email,
+              },
+            }
           );
-          if (token) {
-            return respHandler.success(res, {
-              status: true,
-              msg: "Coaching Account Created Successfully!!",
-              data: [{ User: user, CollegeDetails: clientdata }],
+          if (status) {
+            let clientdata = await Credentials.create({
+              name: name,
+              email: email,
+              Clientname: Clientname,
+              phoneno1: phoneno1,
+              institutename: institutename,
+              ClientCode:  clientID,
+              typeoforganization: typeoforganization,
+              address: address,
+              city: city,
+              state: state,
+              pincode: pincode,
+              password: hash,
+              userType: userType,
             });
+            var token = jwt.sign(
+              {
+                id: user?.id,
+                userType: user?.userType,
+              },
+              SECRET
+            );
+            if (token) {
+              return respHandler.success(res, {
+                status: true,
+                msg: "Coaching Account Created Successfully!!",
+                data: [{ User: user, CollegeDetails: clientdata }],
+              });
+            }
           }
         }
+      } catch (err) {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: [err.message],
+        });
       }
-    } catch (err) {
+    } else {
       return respHandler.error(res, {
         status: false,
-        msg: "Something Went Wrong!!",
-        error: [err.message],
+        msg: "All fields are required!!",
       });
     }
-  } else {
-    return respHandler.error(res, {
-      status: false,
-      msg: "All fields are required!!",
-    });
   }
 };
 

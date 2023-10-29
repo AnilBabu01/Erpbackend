@@ -19,9 +19,9 @@ const getotponPhone = async (req, res) => {
       });
       if (client) {
         if (
-          client?.phoneOtpStatus === true &&
-          client?.emailOtpStatus === true &&
-          client?.ClientCode != ""
+          // client?.phoneOtpStatus === true &&
+          // client?.emailOtpStatus === true &&
+          client?.ClientCode === ""
         ) {
           return respHandler.error(res, {
             status: false,
@@ -111,7 +111,7 @@ const getotponEmail = async (req, res) => {
         where: { phoneno1: phone, email: email },
       });
       if (client) {
-        if (client?.emailOtpStatus === true) {
+        if (client?.ClientCode === "") {
           return respHandler.error(res, {
             status: false,
             msg: "You have allready with this Email !!",
@@ -122,6 +122,7 @@ const getotponEmail = async (req, res) => {
           let status = await Client.update(
             {
               emailOtp: val,
+              emailOtpStatus: false,
             },
             {
               where: {
@@ -215,6 +216,7 @@ const getotponEmail = async (req, res) => {
           {
             emailOtp: val,
             email: email,
+            emailOtpStatus: false,
           },
           {
             where: {

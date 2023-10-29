@@ -54,6 +54,10 @@ const AttendanceStudent = sequelize.define("studentattendance", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  monthNumber: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   institutename: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -67,6 +71,11 @@ const AttendanceStudent = sequelize.define("studentattendance", {
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: "NONE",
+  },
+  holidaytype: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: "default",
   },
   Comment: {
     type: DataTypes.STRING,

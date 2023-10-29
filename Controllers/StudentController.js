@@ -326,7 +326,8 @@ const Loging = async (req, res) => {
 ///amdin or employee can get all studbnt list
 const getAllStudent = async (req, res) => {
   try {
-    const { name, batch, fromdate, todate, fathers, studentname } = req.query;
+    const { name, batch, fromdate, todate, fathers, studentname, rollnumber } =
+      req.query;
 
     let whereClause = {};
     let from = new Date(fromdate);
@@ -349,6 +350,9 @@ const getAllStudent = async (req, res) => {
     }
     if (fathers) {
       whereClause.fathersName = { [Op.regexp]: `^${fathers}.*` };
+    }
+    if (rollnumber) {
+      whereClause.rollnumber = { [Op.regexp]: `^${rollnumber}.*` };
     }
     if (studentname) {
       whereClause.name = { [Op.regexp]: `^${studentname}.*` };
@@ -652,7 +656,7 @@ const addfee = async (req, res) => {
               return respHandler.success(res, {
                 status: true,
                 msg: "Fee Pay Added successfully!!",
-                data: [{ student: student, sss: studentData }],
+                data: [{ receiptdata: result }],
               });
             }
           }
@@ -676,6 +680,58 @@ const addfee = async (req, res) => {
   }
 };
 
+///amdin or employee can get all studbnt list
+const getReceipt = async (req, res) => {
+  try {
+    const { fromdate, name, studentname, rollnumber } = req.query;
+    let Dates = new Date(fromdate);
+    let whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req.user?.ClientCode;
+      whereClause.institutename = req.user.institutename;
+    }
+    if (fromdate) {
+      whereClause.PaidDate = { [Op.regexp]: `^${Dates}.*` };
+    }
+
+    if (name) {
+      whereClause.Course = { [Op.regexp]: `^${name}.*` };
+    }
+
+    if (rollnumber) {
+      whereClause.RollNo = { [Op.regexp]: `^${rollnumber}.*` };
+    }
+    if (studentname) {
+      whereClause.studentName = { [Op.regexp]: `^${studentname}.*` };
+    }
+
+    let receipts = await ReceiptData.findAll({
+      where: whereClause,
+      // order: [["id", "DESC"]],
+    });
+    if (receipts) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Receipt successfully!!",
+        data: receipts,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   Addstudent,
   getAllStudent,
@@ -684,4 +740,5 @@ module.exports = {
   deleteStudent,
   Loging,
   addfee,
+  getReceipt,
 };

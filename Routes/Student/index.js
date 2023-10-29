@@ -43,4 +43,5 @@ router
   .delete(verifyToken, StudentController.deleteStudent);
 router.post("/login", StudentController.Loging);
 router.post("/pacoachingfee",verifyToken, StudentController.addfee);
+router.get("/getreceiptdata",verifyToken, StudentController.getReceipt);
 module.exports = router;

@@ -12,7 +12,7 @@ const SECRET = process.env.SECRET;
 getClientCount = async () => {
   let count = await Client.count({
     distinct: true,
-    col: "institutename",
+    col: "userType",
   });
 
   return count;

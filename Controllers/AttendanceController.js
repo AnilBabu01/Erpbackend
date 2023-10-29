@@ -150,6 +150,7 @@ const MarkStudentAttendance = async (req, res) => {
           rollnumber: item?.rollnumber,
           attendancedate: newdate,
           attendaceStatusIntext: "Absent",
+          monthNumber: newdate?.getMonth() + 1,
         });
 
         return result;
@@ -360,6 +361,8 @@ const AddHoliday = async (req, res) => {
             attendancedate: newdate,
             attendaceStatusIntext: "Holiday",
             Comment: comment,
+            monthNumber: newdate?.getMonth() + 1,
+            holidaytype: "manual",
           });
 
           return result;
@@ -437,6 +440,8 @@ const AddHoliday = async (req, res) => {
                 attendancedate: newdate,
                 attendaceStatusIntext: "Holiday",
                 Comment: comment,
+                monthNumber: newdate?.getMonth() + 1,
+                holidaytype: "default",
               });
             });
           }
@@ -460,44 +465,135 @@ const AddHoliday = async (req, res) => {
 
 const GetHolidays = async (req, res) => {
   try {
-    const { Attendancedate, batch } = req.body;
-    let newdate = new Date(Attendancedate);
-    if (batch) {
-      let checkattendance = await AttendanceStudent.findAll({
+    const { month } = req.body;
+
+    console.log("month no is ", month);
+
+    let checkattendance = await AttendanceStudent.findAll({
+      where: {
+        monthNumber: month,
+        ClientCode: req.user?.ClientCode,
+        institutename: req.user?.institutename,
+        attendaceStatusIntext: "Holiday",
+      },
+      group: ["attendancedate"],
+    });
+
+    if (checkattendance?.length != 0) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Holidays successfully!!",
+        data: checkattendance,
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const Updateholiday = async (req, res) => {
+  try {
+    const { holidaydate, batchname, comment, data, forbatch } = req.body;
+    let newdate = new Date(holidaydate);
+    let byupdatedate = new Date(data?.attendancedate);
+    if (forbatch === "manual") {
+      let allstudent = await Student.findAll({
         where: {
-          // batch: batch,
-          // attendancedate: newdate,
           ClientCode: req.user?.ClientCode,
           institutename: req.user?.institutename,
-          attendaceStatusIntext: "Holiday",
+          batch: { [Op.regexp]: `^${data?.batch}.*` },
         },
       });
+      if (allstudent) {
+        const promises = allstudent?.map(async (item) => {
+          let result = await AttendanceStudent.update(
+            {
+              name: item?.name,
+              email: item?.email,
+              ClientCode: req.user?.ClientCode,
+              institutename: req.user?.institutename,
+              userId: req?.user?.id,
+              address: item?.address,
+              parentId: item?.parentId,
+              studentid: item?.id,
+              courseorclass: item?.courseorclass,
+              batch: batchname,
+              rollnumber: item?.rollnumber,
+              fathersPhoneNo: item?.fathersPhoneNo,
+              fathersName: item?.fathersName,
+              MathersName: item?.MathersName,
+              rollnumber: item?.rollnumber,
+              attendancedate: newdate,
+              attendaceStatusIntext: "Holiday",
+              Comment: comment,
+              monthNumber: newdate?.getMonth() + 1,
+              holidaytype: "manual",
+            },
+            {
+              attendancedate: byupdatedate,
+              ClientCode: req.user?.ClientCode,
+              institutename: req.user?.institutename,
+              attendaceStatusIntext: "Holiday",
+              batch: { [Op.regexp]: `^${data?.batch}.*` },
+            }
+          );
 
-      if (checkattendance?.length != 0) {
-        return respHandler.success(res, {
-          status: true,
-          msg: "Fetch Holidays successfully!!",
-          data: checkattendance,
+          return result;
         });
+
+        if (await Promise.all(promises)) {
+          let checkattendance = await AttendanceStudent.findAll({
+            where: {
+              batch: batchname,
+              attendancedate: newdate,
+              ClientCode: req.user?.ClientCode,
+              institutename: req.user?.institutename,
+            },
+          });
+
+          return respHandler.success(res, {
+            status: true,
+            msg: "Holiday Updated successfully!!",
+            data: checkattendance,
+          });
+        }
       }
-    } else {
-      let checkattendance = await AttendanceStudent.findAll({
-        where: {
-          // attendancedate: newdate,
-          ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-          attendaceStatusIntext: "Holiday",
-        },
-        group: ["attendancedate"],
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const Deleteholiday = async (req, res) => {
+  try {
+    const { month } = req.body;
+
+    console.log("month no is ", month);
+
+    let checkattendance = await AttendanceStudent.findAll({
+      where: {
+        monthNumber: month,
+        ClientCode: req.user?.ClientCode,
+        institutename: req.user?.institutename,
+        attendaceStatusIntext: "Holiday",
+      },
+      group: ["attendancedate"],
+    });
+
+    if (checkattendance?.length != 0) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Holidays successfully!!",
+        data: checkattendance,
       });
-
-      if (checkattendance?.length != 0) {
-        return respHandler.success(res, {
-          status: true,
-          msg: "Fetch Holidays successfully!!",
-          data: checkattendance,
-        });
-      }
     }
   } catch (err) {
     return respHandler.error(res, {
@@ -514,4 +610,6 @@ module.exports = {
   AttendanceAnalasis,
   AddHoliday,
   GetHolidays,
+  Updateholiday,
+  Deleteholiday,
 };
