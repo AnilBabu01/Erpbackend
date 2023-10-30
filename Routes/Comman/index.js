@@ -8,9 +8,27 @@ const { Validation } = require("../../Middleware/Validate");
 router.post(
   "/createemployee",
   verifyToken,
-  upload.single("profileurl"),
+  upload.fields([
+    {
+      name: "profileurl",
+      maxCount: 1,
+    },
+    {
+      name: "ResumeFile",
+      maxCount: 1,
+    },
+    {
+      name: "OfferLater",
+      maxCount: 1,
+    },
+    {
+      name: "JoningLater",
+      maxCount: 1,
+    },
+  ]),
   CommanController.RegisterEmployee
 );
+
 router.post("/employeelogin", CommanController.Logingemployee);
 router.put("/updateemployee", verifyToken, CommanController.UpdateEmployee);
 router.delete("/deleteemployee", verifyToken, CommanController.DeleteEmployee);

@@ -26,11 +26,11 @@ const Employee = sequelize.define("employee", {
   },
   employeetype: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull:true,
   },
   organizationtype: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull:true,
   },
   name: {
     type: DataTypes.STRING,
@@ -99,11 +99,7 @@ const Employee = sequelize.define("employee", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  BasicSalary: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  TotalSalary: {
+  basicsalary: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
@@ -112,6 +108,10 @@ const Employee = sequelize.define("employee", {
     allowNull: true,
   },
   Deduction: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  TotalSalary: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
@@ -135,15 +135,15 @@ const Employee = sequelize.define("employee", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-   OfferLater: {
+  ResumeFile: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  OfferLater: {
     type: DataTypes.STRING,
     allowNull: true,
   },
   JoningLater: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  Offerlater: {
     type: DataTypes.STRING,
     allowNull: true,
   },

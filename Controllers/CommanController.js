@@ -42,6 +42,15 @@ const RegisterEmployee = async (req, res) => {
     employeeof,
     master,
     report,
+    basicsalary,
+    Allowance,
+    Deduction,
+    TotalSalary,
+    AccountHolder,
+    AccountNumber,
+    BankName,
+    Branch,
+    IfscCode,
     fronroficeRead,
     fronroficeWrite,
     fronroficeEdit,
@@ -118,6 +127,15 @@ const RegisterEmployee = async (req, res) => {
         state: state,
         pincode: pincode,
         password: hash,
+        basicsalary: Number(basicsalary),
+        Allowance: Number(Allowance),
+        Deduction:Number(Deduction),
+        TotalSalary:Number(TotalSalary),
+        AccountHolder: AccountHolder,
+        AccountNumber: AccountNumber,
+        BankName: BankName,
+        Branch: Branch,
+        IfscCode: IfscCode,
         joiningdate: joiningdate,
         resigndate: resigndate,
         empsubject: empsubject,
@@ -154,7 +172,18 @@ const RegisterEmployee = async (req, res) => {
         masterWrite: masterWrite,
         masterEdit: masterEdit,
         masterDelete: masterDelete,
-        profileurl: req?.file ? `images/${req?.file?.filename}` : "",
+        profileurl: req?.files?.profileurl
+          ? `images/${req?.files?.profileurl[0]?.filename}`
+          : "",
+        ResumeFile: req?.files?.ResumeFile
+          ? `images/${req?.files?.ResumeFile[0]?.filename}`
+          : req?.user?.profileurl,
+        OfferLater: req?.files?.OfferLater
+          ? `images/${req?.files?.OfferLater[0]?.filename}`
+          : "",
+        JoningLater: req?.files?.JoningLater
+          ? `images/${req?.files?.JoningLater[0]?.filename}`
+          : "",
       };
 
       let createdUser = await Employee.create(newUser);
@@ -239,6 +268,14 @@ const DeleteEmployee = async (req, res) => {
     const { id } = req.body;
     let organization = await Employee.findOne({ where: { id: id } });
     if (organization) {
+      removefile(`public/upload/${req?.user?.ResumeFile?.substring(7)}`);
+
+      removefile(`public/upload/${req?.user?.profileurl?.substring(7)}`);
+
+      removefile(`public/upload/${req?.user?.OfferLater?.substring(7)}`);
+
+      removefile(`public/upload/${req?.user?.JoningLater?.substring(7)}`);
+
       await Employee.destroy({
         where: {
           id: id,
@@ -271,7 +308,6 @@ const UpdateEmployee = async (req, res) => {
   try {
     const {
       name,
-      userType,
       email,
       phoneno1,
       phoneno2,
@@ -291,6 +327,15 @@ const UpdateEmployee = async (req, res) => {
       employeeof,
       master,
       report,
+      basicsalary,
+      Allowance,
+      Deduction,
+      TotalSalary,
+      AccountHolder,
+      AccountNumber,
+      BankName,
+      Branch,
+      IfscCode,
       fronroficeRead,
       fronroficeWrite,
       fronroficeEdit,
@@ -319,87 +364,127 @@ const UpdateEmployee = async (req, res) => {
       id,
     } = req.body;
 
-    let status = await Employee.update(
-      {
-        name: name,
-        email: email,
-        ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
-        organizationtype: req.user.userType,
-        userId: req.user.id,
-        logourl: req.user.logourl,
-        employeeof: employeeof,
-        phoneno1: phoneno1,
-        phoneno2: phoneno2,
-        address: address,
-        city: city,
-        state: state,
-        pincode: pincode,
-        // password: hash,
-        joiningdate: joiningdate,
-        resigndate: resigndate,
-        empsubject: empsubject,
-        employeetype: employeetype,
-        department: department,
-        fronrofice: fronrofice,
-        student: student,
-        accounts: accounts,
-        HumanResource: HumanResource,
-        master: master,
-        report: report,
-        fronroficeRead: fronroficeRead,
-        fronroficeWrite: fronroficeWrite,
-        fronroficeEdit: fronroficeEdit,
-        fronroficeDelete: fronroficeDelete,
-        studentRead: studentRead,
-        studentWrite: studentWrite,
-        studentEdit: studentEdit,
-        studentDelete: studentDelete,
-        attendance: attendance,
-        attendanceRead: attendanceRead,
-        attendanceWrite: attendanceWrite,
-        attendanceEdit: attendanceEdit,
-        attendanceDelete: attendanceDelete,
-        accountsRead: accountsRead,
-        accountsWrite: accountsWrite,
-        accountsEdit: accountsEdit,
-        accountsDelete: accountsDelete,
-        HumanResourceRead: HumanResourceRead,
-        HumanResourceWrite: HumanResourceWrite,
-        HumanResourceEdit: HumanResourceEdit,
-        HumanResourceDelete: HumanResourceDelete,
-        masterRead: masterRead,
-        masterWrite: masterWrite,
-        masterEdit: masterEdit,
-        masterDelete: masterDelete,
-        profileurl: req?.file ? `images/${req?.file?.filename}` : "",
-      },
-      {
-        where: {
-          id: id,
-          ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-        },
-      }
-    );
-    let studentclass = await Employee.findOne({
+    let employees = await Employee.findOne({
       where: {
         id: id,
       },
     });
+    if (employees != null) {
+      if (req?.files?.ResumeFile) {
+        removefile(`public/upload/${req?.user?.ResumeFile?.substring(7)}`);
+      }
+      if (req?.files?.profileurl) {
+        removefile(`public/upload/${req?.user?.profileurl?.substring(7)}`);
+      }
+      if (req?.files?.OfferLater) {
+        removefile(`public/upload/${req?.user?.OfferLater?.substring(7)}`);
+      }
+      if (req?.files?.JoningLater) {
+        removefile(`public/upload/${req?.user?.JoningLater?.substring(7)}`);
+      }
 
-    if (status) {
-      return respHandler.success(res, {
-        status: true,
-        msg: "Employee Updated successfully!!",
-        data: [studentclass],
+      let status = await Employee.update(
+        {
+          name: name,
+          email: email,
+          ClientCode: req.user?.ClientCode,
+          institutename: req.user?.institutename,
+          organizationtype: req.user.userType,
+          userId: req.user.id,
+          logourl: req.user.logourl,
+          employeeof: employeeof,
+          phoneno1: phoneno1,
+          phoneno2: phoneno2,
+          address: address,
+          city: city,
+          state: state,
+          pincode: pincode,
+          // password: hash,
+          basicsalary: Number(basicsalary),
+          Allowance: Number(Allowance),
+          Deduction:Number(Deduction),
+          TotalSalary:Number(TotalSalary),
+          AccountHolder: AccountHolder,
+          AccountNumber: AccountNumber,
+          BankName: BankName,
+          Branch: Branch,
+          IfscCode: IfscCode,
+          joiningdate: joiningdate,
+          resigndate: resigndate,
+          empsubject: empsubject,
+          employeetype: employeetype,
+          department: department,
+          fronrofice: fronrofice,
+          student: student,
+          accounts: accounts,
+          HumanResource: HumanResource,
+          master: master,
+          report: report,
+          fronroficeRead: fronroficeRead,
+          fronroficeWrite: fronroficeWrite,
+          fronroficeEdit: fronroficeEdit,
+          fronroficeDelete: fronroficeDelete,
+          studentRead: studentRead,
+          studentWrite: studentWrite,
+          studentEdit: studentEdit,
+          studentDelete: studentDelete,
+          attendance: attendance,
+          attendanceRead: attendanceRead,
+          attendanceWrite: attendanceWrite,
+          attendanceEdit: attendanceEdit,
+          attendanceDelete: attendanceDelete,
+          accountsRead: accountsRead,
+          accountsWrite: accountsWrite,
+          accountsEdit: accountsEdit,
+          accountsDelete: accountsDelete,
+          HumanResourceRead: HumanResourceRead,
+          HumanResourceWrite: HumanResourceWrite,
+          HumanResourceEdit: HumanResourceEdit,
+          HumanResourceDelete: HumanResourceDelete,
+          masterRead: masterRead,
+          masterWrite: masterWrite,
+          masterEdit: masterEdit,
+          masterDelete: masterDelete,
+          profileurl: req?.files?.profileurl
+            ? `images/${req?.files?.profileurl[0]?.filename}`
+            : req?.user?.profileurl,
+          ResumeFile: req?.files?.ResumeFile
+            ? `images/${req?.files?.ResumeFile[0]?.filename}`
+            : req?.user?.ResumeFile,
+          OfferLater: req?.files?.OfferLater
+            ? `images/${req?.files?.OfferLater[0]?.filename}`
+            : req?.user?.OfferLater,
+          JoningLater: req?.files?.JoningLater
+            ? `images/${req?.files?.JoningLater[0]?.filename}`
+            : req?.user?.JoningLater,
+        },
+        {
+          where: {
+            id: id,
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+          },
+        }
+      );
+      let studentclass = await Employee.findOne({
+        where: {
+          id: id,
+        },
+      });
+
+      if (status) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Employee Updated successfully!!",
+          data: [studentclass],
+        });
+      }
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [err.message],
       });
     }
-    return respHandler.error(res, {
-      status: false,
-      msg: "Something Went Wrong!!",
-      error: [err.message],
-    });
   } catch (err) {
     return respHandler.error(res, {
       status: false,
@@ -1116,6 +1201,7 @@ const updateprofile = async (req, res) => {
       let user = await Client.findOne({ where: { id: req.user.id } });
 
       if (user != null) {
+        ``;
         if (req?.files?.logourl) {
           removefile(`public/upload/${req?.user?.logourl?.substring(7)}`);
         }
@@ -2102,5 +2188,5 @@ module.exports = {
   DeleteCoursemonth,
   CreateReceiptPrefix,
   UpdateReceiprefix,
-  getReceiptPrefix
+  getReceiptPrefix,
 };
