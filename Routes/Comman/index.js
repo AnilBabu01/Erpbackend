@@ -30,7 +30,29 @@ router.post(
 );
 
 router.post("/employeelogin", CommanController.Logingemployee);
-router.put("/updateemployee", verifyToken, CommanController.UpdateEmployee);
+router.put(
+  "/updateemployee",
+  verifyToken,
+  upload.fields([
+    {
+      name: "profileurl",
+      maxCount: 1,
+    },
+    {
+      name: "ResumeFile",
+      maxCount: 1,
+    },
+    {
+      name: "OfferLater",
+      maxCount: 1,
+    },
+    {
+      name: "JoningLater",
+      maxCount: 1,
+    },
+  ]),
+  CommanController.UpdateEmployee
+);
 router.delete("/deleteemployee", verifyToken, CommanController.DeleteEmployee);
 router.get("/allemployee", verifyToken, CommanController.Getallemployee);
 
