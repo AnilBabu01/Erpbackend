@@ -14,10 +14,12 @@ const Parent = require("./Routes/Parent");
 const Guest = require("./Routes/Guest");
 const AttendanceStudent = require("./Routes/Attendance");
 const Test = require("./Routes/Test");
-const clientVerify = require("./Routes/ClientVerify")
+const clientVerify = require("./Routes/ClientVerify");
+const Reports = require("./Routes/report");
 // to run migrations run command - --------  npm run migrate ---------------------
 
 app.use(cors());
+app.options("*", cors());
 app.use(express.static(__dirname + "/Documentation"));
 app.use(express.json({ limit: "50mb" }));
 
@@ -40,6 +42,7 @@ app.use("/api/guest", Guest);
 app.use("/api/attendanceatudent", AttendanceStudent);
 app.use("/api/test", Test);
 app.use("/api/clientVerify", clientVerify);
+app.use("/api/report", Reports);
 app.use("*", (req, res) => {
   return res.status(404).json({
     status: false,

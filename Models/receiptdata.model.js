@@ -30,6 +30,10 @@ const ReceiptData = sequelize.define("receiptdata", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  batchname:{
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   ReceiptNo: {
     type: DataTypes.STRING,
     allowNull: false,

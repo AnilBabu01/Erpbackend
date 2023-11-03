@@ -143,6 +143,11 @@ const Student = sequelize.define("student", {
     allowNull: false,
     defaultValue: 0,
   },
+  pendingfee: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
   StudentStatus: {
     type: DataTypes.STRING,
     allowNull: true,

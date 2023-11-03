@@ -105,7 +105,6 @@ const RegisterEmployee = async (req, res) => {
         },
       });
       if (user != null) {
-        removefile(`public/upload/${req.file.filename}`);
         return respHandler.error(res, {
           status: false,
           msg: "Email or Mobile Number already exist",
@@ -129,8 +128,8 @@ const RegisterEmployee = async (req, res) => {
         password: hash,
         basicsalary: Number(basicsalary),
         Allowance: Number(Allowance),
-        Deduction:Number(Deduction),
-        TotalSalary:Number(TotalSalary),
+        Deduction: Number(Deduction),
+        TotalSalary: Number(TotalSalary),
         AccountHolder: AccountHolder,
         AccountNumber: AccountNumber,
         BankName: BankName,
@@ -402,8 +401,8 @@ const UpdateEmployee = async (req, res) => {
           // password: hash,
           basicsalary: Number(basicsalary),
           Allowance: Number(Allowance),
-          Deduction:Number(Deduction),
-          TotalSalary:Number(TotalSalary),
+          Deduction: Number(Deduction),
+          TotalSalary: Number(TotalSalary),
           AccountHolder: AccountHolder,
           AccountNumber: AccountNumber,
           BankName: BankName,
@@ -1275,6 +1274,7 @@ const updateprofile = async (req, res) => {
     });
   }
 };
+
 const updateCredentials = async (req, res) => {
   const {
     name,
@@ -1315,17 +1315,17 @@ const updateCredentials = async (req, res) => {
         where: { ClientCode: req?.user?.ClientCode },
       });
 
+      console.log("geting error", user?.logourl);
+
       if (user != null) {
         if (req?.files?.logourl) {
-          removefile(`public/upload/${req?.user?.logourl?.substring(7)}`);
+          removefile(`public/upload/${user?.logourl?.substring(7)}`);
         }
         if (req?.files?.profileurl) {
-          removefile(`public/upload/${req?.user?.profileurl?.substring(7)}`);
+          removefile(`public/upload/${user?.profileurl?.substring(7)}`);
         }
         if (req?.files?.certificatelogo) {
-          removefile(
-            `public/upload/${req?.user?.certificatelogo?.substring(7)}`
-          );
+          removefile(`public/upload/${user?.certificatelogo?.substring(7)}`);
         }
         let updateUser = {
           name: name,
@@ -1347,20 +1347,25 @@ const updateCredentials = async (req, res) => {
           userType: userType ? userType : user?.userType,
           logourl: req?.files?.logourl
             ? `images/${req?.files?.logourl[0]?.filename}`
-            : req?.user?.logourl,
+            : req?.body?.logourl,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
-            : req?.user?.profileurl,
+            : req?.body?.profileurl,
           certificatelogo: req?.files?.certificatelogo
             ? `images/${req?.files?.certificatelogo[0]?.filename}`
-            : req?.user?.profileurl,
+            : req?.body?.certificatelogo,
         };
         let updateduser = await Credentials.update(updateUser, {
           where: {
             ClientCode: req?.user?.ClientCode,
           },
         });
-        if (updateduser) {
+        let updatednormaluser = await Client.update(updateUser, {
+          where: {
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+        if ((updateduser, updatednormaluser)) {
           let user = await Credentials.findOne({
             where: {
               ClientCode: req?.user?.ClientCode,

@@ -42,6 +42,8 @@ const Addstudent = async (req, res) => {
       regisgrationfee,
     } = req.body;
 
+    console.log("from form", req.body, req?.files);
+
     const genSalt = 10;
     const hash = await bcrypt.hash(req?.user?.Studentpassword, genSalt);
 
@@ -125,6 +127,7 @@ const Addstudent = async (req, res) => {
           password: hash,
           courseorclass: courseorclass,
           studentTotalFee: studentTotalFee,
+          pendingfee: studentTotalFee,
           courseduration: courseduration,
           adharno: adharno,
           pancardnno: pancardnno,
@@ -224,6 +227,7 @@ const Addstudent = async (req, res) => {
           MathersName: MathersName,
           rollnumber: rollnumber,
           regisgrationfee: regisgrationfee,
+          pendingfee: studentTotalFee,
           StudentStatus: StudentStatus,
           courseorclass: courseorclass,
           courseduration: courseduration,
@@ -594,6 +598,9 @@ const addfee = async (req, res) => {
                 paidfee:
                   studentone?.paidfee +
                   studentone?.permonthfee * paymonths.length,
+                pendingfee:
+                  Number(studentone?.pendingfee) -
+                  studentone?.permonthfee * paymonths.length,
               },
               {
                 where: {
@@ -640,6 +647,7 @@ const addfee = async (req, res) => {
               Course: studentData?.courseorclass,
               fathersid: studentData?.parentId,
               studentid: studentData?.id,
+              batchname: studentData?.batch,
             });
             if (result) {
               let student = await Student.findOne({
