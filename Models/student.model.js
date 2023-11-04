@@ -104,6 +104,30 @@ const Student = sequelize.define("student", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  markSheetname: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  othersdoc: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  othersdocName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  BirthDocument: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  StudentStatus: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  whatsappNo: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   password: {
     type: DataTypes.TEXT,
   },
@@ -143,6 +167,7 @@ const Student = sequelize.define("student", {
     allowNull: false,
     defaultValue: 0,
   },
+
   pendingfee: {
     type: DataTypes.INTEGER,
     allowNull: false,

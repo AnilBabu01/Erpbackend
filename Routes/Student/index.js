@@ -15,16 +15,25 @@ router
         maxCount: 1,
       },
       {
-        name: "adharcard",
+        name: "adharcard",  
         maxCount: 1,
       },
       {
         name: "markSheet",
         maxCount: 1,
       },
+      {
+        name: "othersdoc",
+        maxCount: 1,
+      },
+      {
+        name: "BirthDocument",
+        maxCount: 1,
+      },
     ]),
     StudentController.Addstudent
   )
+  
   .get(verifyToken, StudentController.getAllStudent)
   .put(
     verifyToken,
@@ -34,7 +43,19 @@ router
         maxCount: 1,
       },
       {
-        name: "adharcard",
+        name: "adharcard",  
+        maxCount: 1,
+      },
+      {
+        name: "markSheet",
+        maxCount: 1,
+      },
+      {
+        name: "othersdoc",
+        maxCount: 1,
+      },
+      {
+        name: "BirthDocument",
         maxCount: 1,
       },
     ]),

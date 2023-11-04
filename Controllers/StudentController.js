@@ -40,6 +40,9 @@ const Addstudent = async (req, res) => {
       pancardnno,
       batch,
       regisgrationfee,
+      markSheetname,
+      othersdocName,
+      Status,
     } = req.body;
 
     console.log("from form", req.body, req?.files);
@@ -94,11 +97,23 @@ const Addstudent = async (req, res) => {
         });
         if (user != null) {
           if (req?.files?.profileurl) {
-            removefile(`public/upload/${req?.files?.profileurl[0]?.filename}`);
+            removefile(`public/upload/${user.profileurl?.substring(7)}`);
           }
 
           if (req?.files?.adharcard) {
-            removefile(`public/upload/${req?.files?.adharcard[0]?.filename}`);
+            removefile(`public/upload/${user?.adharcard?.substring(7)}`);
+          }
+
+          if (req?.files?.BirthDocument) {
+            removefile(`public/upload/${user?.BirthDocument?.substring(7)}`);
+          }
+
+          if (req?.files?.othersdoc) {
+            removefile(`public/upload/${user?.othersdoc?.substring(7)}`);
+          }
+
+          if (req?.files?.markSheet) {
+            removefile(`public/upload/${user?.markSheet?.substring(7)}`);
           }
 
           return respHandler.error(res, {
@@ -140,6 +155,9 @@ const Addstudent = async (req, res) => {
           MathersName: MathersName,
           rollnumber: rollnumber,
           StudentStatus: StudentStatus,
+          markSheetname: markSheetname,
+          othersdocName: othersdocName,
+          Status: Status,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -148,6 +166,12 @@ const Addstudent = async (req, res) => {
             : "",
           markSheet: req?.files?.markSheet
             ? `images/${req?.files?.markSheet[0]?.filename}`
+            : "",
+          othersdoc: req?.files?.othersdoc
+            ? `images/${req?.files?.othersdoc[0]?.filename}`
+            : "",
+          BirthDocument: req?.files?.BirthDocument
+            ? `images/${req?.files?.BirthDocument[0]?.filename}`
             : "",
         };
 
@@ -237,6 +261,9 @@ const Addstudent = async (req, res) => {
           pancardnno: pancardnno,
           batch: batch,
           admissionDate: admissionDate,
+          markSheetname: markSheetname,
+          othersdocName: othersdocName,
+          Status: Status,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -245,6 +272,12 @@ const Addstudent = async (req, res) => {
             : "",
           markSheet: req?.files?.markSheet
             ? `images/${req?.files?.markSheet[0]?.filename}`
+            : "",
+          othersdoc: req?.files?.othersdoc
+            ? `images/${req?.files?.othersdoc[0]?.filename}`
+            : "",
+          BirthDocument: req?.files?.BirthDocument
+            ? `images/${req?.files?.BirthDocument[0]?.filename}`
             : "",
         };
 
@@ -355,12 +388,14 @@ const getAllStudent = async (req, res) => {
     if (fathers) {
       whereClause.fathersName = { [Op.regexp]: `^${fathers}.*` };
     }
-    if (rollnumber) {
-      whereClause.rollnumber = { [Op.regexp]: `^${rollnumber}.*` };
-    }
+    // if (rollnumber) {
+    //   whereClause.rollnumber = { [Op.regexp]: `^${rollnumber}.*` };
+    // }
     if (studentname) {
       whereClause.name = { [Op.regexp]: `^${studentname}.*` };
     }
+
+    console.log("con",whereClause);
 
     let students = await Student.findAll({
       where: whereClause,
@@ -416,9 +451,31 @@ const UpdateStudent = async (req, res) => {
       adharno,
       pancardnno,
       batch,
-      Status,
       id,
+      markSheetname,
+      othersdocName,
+      Status,
     } = req.body;
+
+    if (req?.files?.profileurl) {
+      removefile(`public/upload/${std.profileurl?.substring(7)}`);
+    }
+
+    if (req?.files?.adharcard) {
+      removefile(`public/upload/${std?.adharcard?.substring(7)}`);
+    }
+
+    if (req?.files?.BirthDocument) {
+      removefile(`public/upload/${std?.BirthDocument?.substring(7)}`);
+    }
+
+    if (req?.files?.othersdoc) {
+      removefile(`public/upload/${std?.othersdoc?.substring(7)}`);
+    }
+
+    if (req?.files?.markSheet) {
+      removefile(`public/upload/${std?.markSheet?.substring(7)}`);
+    }
 
     let status = await Student.update(
       {
@@ -447,15 +504,23 @@ const UpdateStudent = async (req, res) => {
         pancardnno: pancardnno,
         batch: batch,
         admissionDate: admissionDate,
+        markSheetname: markSheetname,
+        othersdocName: othersdocName,
         profileurl: req?.files?.profileurl
           ? `images/${req?.files?.profileurl[0]?.filename}`
-          : "",
+          : req.body.profileurl,
         adharcard: req?.files?.adharcard
           ? `images/${req?.files?.adharcard[0]?.filename}`
-          : "",
+          : req.body.profileurl,
         markSheet: req?.files?.markSheet
           ? `images/${req?.files?.markSheet[0]?.filename}`
-          : "",
+          : req.body.profileurl,
+        othersdoc: req?.files?.othersdoc
+          ? `images/${req?.files?.othersdoc[0]?.filename}`
+          : req.body.profileurl,
+        BirthDocument: req?.files?.BirthDocument
+          ? `images/${req?.files?.BirthDocument[0]?.filename}`
+          : req.body.profileurl,
       },
       {
         where: {
@@ -479,11 +544,6 @@ const UpdateStudent = async (req, res) => {
         data: categorys,
       });
     }
-    return respHandler.error(res, {
-      status: false,
-      msg: "Something Went Wrong!!",
-      error: [err.message],
-    });
   } catch (err) {
     return respHandler.error(res, {
       status: false,
