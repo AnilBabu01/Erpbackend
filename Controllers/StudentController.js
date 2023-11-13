@@ -363,8 +363,16 @@ const Loging = async (req, res) => {
 ///amdin or employee can get all studbnt list
 const getAllStudent = async (req, res) => {
   try {
-    const { name, batch, fromdate, todate, fathers, studentname, rollnumber } =
-      req.query;
+    const {
+      name,
+      batch,
+      fromdate,
+      todate,
+      fathers,
+      studentname,
+      rollnumber,
+      status,
+    } = req.query;
 
     let whereClause = {};
     let from = new Date(fromdate);
@@ -388,14 +396,17 @@ const getAllStudent = async (req, res) => {
     if (fathers) {
       whereClause.fathersName = { [Op.regexp]: `^${fathers}.*` };
     }
-    // if (rollnumber) {
-    //   whereClause.rollnumber = { [Op.regexp]: `^${rollnumber}.*` };
-    // }
+    if (rollnumber) {
+      whereClause.rollnumber = { [Op.regexp]: `^${Number(rollnumber)}.*` };
+    }
     if (studentname) {
       whereClause.name = { [Op.regexp]: `^${studentname}.*` };
     }
+    if (status) {
+      whereClause.Status = { [Op.regexp]: `^${status}.*` };
+    }
 
-    console.log("con",whereClause);
+    console.log("con", whereClause);
 
     let students = await Student.findAll({
       where: whereClause,

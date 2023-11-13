@@ -98,6 +98,7 @@ const MarkStudentAttendance = async (req, res) => {
         attendancedate: newdate,
         ClientCode: req.user?.ClientCode,
         institutename: req.user?.institutename,
+        attendaceStatusIntext: "Absent",
       },
     });
 
@@ -108,7 +109,7 @@ const MarkStudentAttendance = async (req, res) => {
         data: [],
       });
     }
-    if (checkattendance?.length != 0) {
+    if (checkattendance?.length > 0) {
       return respHandler.success(res, {
         status: true,
         msg: "Fetch Attendance successfully!!",
@@ -116,18 +117,18 @@ const MarkStudentAttendance = async (req, res) => {
       });
     } else {
       let students;
-      let whereClause = {};
-
-      if (req.user) {
-        whereClause.institutename = req.user.institutename;
-      }
-
-      if (batch) {
-        whereClause.batch = { [Op.regexp]: `^${batch}.*` };
-      }
 
       students = await Student.findAll({
-        where: whereClause,
+        where: {
+          institutename: req.user.institutename,
+          batch: { [Op.regexp]: `^${batch}.*` },
+          [Op.or]: [
+            { Status: "Unknown" },
+            { Status: "Left In Middle" },
+            { Status: "On Leave" },
+            { Status: "Active" },
+          ],
+        },
         order: [["rollnumber", "ASC"]],
       });
 
@@ -149,7 +150,8 @@ const MarkStudentAttendance = async (req, res) => {
           MathersName: item?.MathersName,
           rollnumber: item?.rollnumber,
           attendancedate: newdate,
-          attendaceStatusIntext: "Absent",
+          attendaceStatusIntext:
+            item?.Status === "Active" ? "Absent" : item?.Status,
           monthNumber: newdate?.getMonth() + 1,
         });
 
@@ -163,6 +165,7 @@ const MarkStudentAttendance = async (req, res) => {
             attendancedate: newdate,
             ClientCode: req.user?.ClientCode,
             institutename: req.user?.institutename,
+            attendaceStatusIntext: "Absent",
           },
         });
 
@@ -191,7 +194,9 @@ const DoneStudentAttendance = async (req, res) => {
         {
           attendaceStatus: item?.attendaceStatus,
           attendaceStatusIntext:
-            item?.attendaceStatus === true ? "Present" : "Absent",
+            item?.attendaceStatus === true
+              ? "Present"
+              : item?.attendaceStatusIntext,
         },
         {
           where: {
@@ -233,16 +238,39 @@ const DoneStudentAttendance = async (req, res) => {
 
 const AttendanceAnalasis = async (req, res) => {
   try {
-    const { batch, month, rollname, studentname } = req.body;
+    const { batch, month, rollname, studentname, status } = req.body;
     let days = monthdays[month];
 
     if (rollname) {
       let result = [];
-      let st = await Student.findOne({
-        where: {
-          rollnumber: rollname,
-        },
-      });
+      let st;
+      if (status) {
+        st = await Student.findOne({
+          where: {
+            rollnumber: rollname,
+            Status: status,
+            [Op.or]: [
+              { Status: "Unknown" },
+              { Status: "Left In Middle" },
+              { Status: "On Leave" },
+              { Status: "Active" },
+            ],
+          },
+        });
+      } else {
+        st = await Student.findOne({
+          where: {
+            rollnumber: rollname,
+            [Op.or]: [
+              { Status: "Unknown" },
+              { Status: "Left In Middle" },
+              { Status: "On Leave" },
+              { Status: "Active" },
+            ],
+          },
+        });
+      }
+
       let checkattendance = await sequelizes.query(
         `Select * FROM studentattendances WHERE institutename = '${req.user.institutename}' AND ClientCode= '${req.user?.ClientCode}' AND MONTH(attendancedate) ='${month}' AND rollnumber = '${rollname}';`,
         {
@@ -268,13 +296,37 @@ const AttendanceAnalasis = async (req, res) => {
         }
       }
     } else {
-      let Students = await Student.findAll({
-        where: {
-          batch: batch,
-          ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-        },
-      });
+      let Students;
+      if (status) {
+        Students = await Student.findAll({
+          where: {
+            batch: batch,
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+            Status: status,
+            [Op.or]: [
+              { Status: "Unknown" },
+              { Status: "Left In Middle" },
+              { Status: "On Leave" },
+              { Status: "Active" },
+            ],
+          },
+        });
+      } else {
+        Students = await Student.findAll({
+          where: {
+            batch: batch,
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+            [Op.or]: [
+              { Status: "Unknown" },
+              { Status: "Left In Middle" },
+              { Status: "On Leave" },
+              { Status: "Active" },
+            ],
+          },
+        });
+      }
 
       let result = [];
       const promises = Students?.map(async (item) => {

@@ -47,6 +47,22 @@ const Test = sequelize.define("test", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  marksperquestion: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  totalQuestions: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  passmark: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  testFileUrl: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
 Test.hasMany(Question, { primaryKey: "id" });
 Question.belongsTo(Test, { foreignKey: "testId" });

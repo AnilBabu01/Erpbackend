@@ -11,6 +11,10 @@ const Result = sequelize.define("result", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  testId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   ClientCode: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -55,6 +59,23 @@ const Result = sequelize.define("result", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  marksperquestion: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  totalQuestions: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  passmark: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  obtainmarks: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+
 });
 
 Result.hasMany(AnsQuestion, { primaryKey: "id" });

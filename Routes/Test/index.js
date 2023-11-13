@@ -31,4 +31,8 @@ router.put(
 router.delete("/deletetest", verifyToken, TestController.DeleteTest);
 router.get("/getstudentalltest", verifyToken, TestController.GetStudentTest);
 router.post("/addtestretult", verifyToken, TestController.AddTestResult);
+router.post("/checktesttime", verifyToken, TestController.CheckTestTime);
+router.post("/studentresult", verifyToken, TestController.GetStudentResult);
+
 module.exports = router;
+

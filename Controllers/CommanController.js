@@ -29,6 +29,7 @@ const RegisterEmployee = async (req, res) => {
     address,
     city,
     state,
+    status,
     pincode,
     joiningdate,
     resigndate,
@@ -124,6 +125,7 @@ const RegisterEmployee = async (req, res) => {
         address: address,
         city: city,
         state: state,
+        status: status,
         pincode: pincode,
         password: hash,
         basicsalary: Number(basicsalary),
@@ -313,6 +315,7 @@ const UpdateEmployee = async (req, res) => {
       address,
       city,
       state,
+      status,
       pincode,
       joiningdate,
       resigndate,
@@ -382,7 +385,7 @@ const UpdateEmployee = async (req, res) => {
         removefile(`public/upload/${req?.user?.JoningLater?.substring(7)}`);
       }
 
-      let status = await Employee.update(
+      let statuss = await Employee.update(
         {
           name: name,
           email: email,
@@ -408,6 +411,7 @@ const UpdateEmployee = async (req, res) => {
           BankName: BankName,
           Branch: Branch,
           IfscCode: IfscCode,
+          status: status,
           joiningdate: joiningdate,
           resigndate: resigndate,
           empsubject: empsubject,
@@ -444,6 +448,7 @@ const UpdateEmployee = async (req, res) => {
           masterWrite: masterWrite,
           masterEdit: masterEdit,
           masterDelete: masterDelete,
+
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req?.user?.profileurl,
@@ -471,7 +476,7 @@ const UpdateEmployee = async (req, res) => {
         },
       });
 
-      if (status) {
+      if (statuss) {
         return respHandler.success(res, {
           status: true,
           msg: "Employee Updated successfully!!",
@@ -495,8 +500,8 @@ const UpdateEmployee = async (req, res) => {
 
 const Getallemployee = async (req, res) => {
   try {
-    const { name, fromdate, todate } = req.query;
-    console.log("query data is ");
+    const { name, fromdate, todate, status } = req.query;
+ 
     let whereClause = {};
     let from = new Date(fromdate);
     let to = new Date(todate);
@@ -513,15 +518,17 @@ const Getallemployee = async (req, res) => {
     if (todate) {
       whereClause.resigndate = { to };
     }
-
-    if (name) {
-      whereClause.courseorclass = { [Op.regexp]: `^${name}.*` };
+    if (status) {
+      whereClause.status = { [Op.regexp]: `^${status}.*` };
     }
+    if (name) {
+      whereClause.name = { [Op.regexp]: `^${name}.*` };
+    }
+
+    console.log("query data is ",req.query,whereClause);
+
     let employees = await Employee.findAll({
-      where: {
-        institutename: req.user.institutename,
-        userId: req.user.id,
-      },
+      where: whereClause,
     });
 
     if (employees) {
