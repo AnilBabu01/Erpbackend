@@ -468,92 +468,99 @@ const UpdateStudent = async (req, res) => {
       Status,
     } = req.body;
 
-    if (req?.files?.profileurl) {
-      removefile(`public/upload/${std.profileurl?.substring(7)}`);
-    }
-
-    if (req?.files?.adharcard) {
-      removefile(`public/upload/${std?.adharcard?.substring(7)}`);
-    }
-
-    if (req?.files?.BirthDocument) {
-      removefile(`public/upload/${std?.BirthDocument?.substring(7)}`);
-    }
-
-    if (req?.files?.othersdoc) {
-      removefile(`public/upload/${std?.othersdoc?.substring(7)}`);
-    }
-
-    if (req?.files?.markSheet) {
-      removefile(`public/upload/${std?.markSheet?.substring(7)}`);
-    }
-
-    let status = await Student.update(
-      {
-        name: name,
-        email: email,
-        ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
-        logourl: req?.user?.logourl,
-        phoneno1: phoneno1,
-        phoneno2: phoneno2,
-        address: address,
-        city: city,
-        state: state,
-        pincode: pincode,
-        fathersPhoneNo: fathersPhoneNo,
-        fathersName: fathersName,
-        MathersName: MathersName,
-        rollnumber: rollnumber,
-        StudentStatus: StudentStatus,
-        Status: Status,
-        courseorclass: courseorclass,
-        courseduration: courseduration,
-        studentTotalFee: studentTotalFee,
-        permonthfee: permonthfee,
-        adharno: adharno,
-        pancardnno: pancardnno,
-        batch: batch,
-        admissionDate: admissionDate,
-        markSheetname: markSheetname,
-        othersdocName: othersdocName,
-        profileurl: req?.files?.profileurl
-          ? `images/${req?.files?.profileurl[0]?.filename}`
-          : req.body.profileurl,
-        adharcard: req?.files?.adharcard
-          ? `images/${req?.files?.adharcard[0]?.filename}`
-          : req.body.profileurl,
-        markSheet: req?.files?.markSheet
-          ? `images/${req?.files?.markSheet[0]?.filename}`
-          : req.body.profileurl,
-        othersdoc: req?.files?.othersdoc
-          ? `images/${req?.files?.othersdoc[0]?.filename}`
-          : req.body.profileurl,
-        BirthDocument: req?.files?.BirthDocument
-          ? `images/${req?.files?.BirthDocument[0]?.filename}`
-          : req.body.profileurl,
-      },
-      {
-        where: {
-          id: id,
-          ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-        },
-      }
-    );
-
-    let categorys = await Student.findOne({
+    let student = await Student.findOne({
       where: {
         id: id,
       },
     });
+    if (student) {
+      // if (req?.files?.profileurl) {
+      //   removefile(`public/upload/${student.profileurl?.substring(7)}`);
+      // }
 
-    if (status) {
-      return respHandler.success(res, {
-        status: true,
-        msg: "Student Updated successfully!!",
-        data: categorys,
+      // if (req?.files?.adharcard) {
+      //   removefile(`public/upload/${student?.adharcard?.substring(7)}`);
+      // }
+
+      // if (req?.files?.BirthDocument) {
+      //   removefile(`public/upload/${student?.BirthDocument?.substring(7)}`);
+      // }
+
+      // if (req?.files?.othersdoc) {
+      //   removefile(`public/upload/${student?.othersdoc?.substring(7)}`);
+      // }
+
+      // if (req?.files?.markSheet) {
+      //   removefile(`public/upload/${student?.markSheet?.substring(7)}`);
+      // }
+
+      let status = await Student.update(
+        {
+          name: name,
+          email: email,
+          ClientCode: req.user?.ClientCode,
+          institutename: req.user?.institutename,
+          logourl: req?.user?.logourl,
+          phoneno1: phoneno1,
+          phoneno2: phoneno2,
+          address: address,
+          city: city,
+          state: state,
+          pincode: pincode,
+          fathersPhoneNo: fathersPhoneNo,
+          fathersName: fathersName,
+          MathersName: MathersName,
+          rollnumber: rollnumber,
+          StudentStatus: StudentStatus,
+          Status: Status,
+          courseorclass: courseorclass,
+          courseduration: courseduration,
+          studentTotalFee: studentTotalFee,
+          permonthfee: permonthfee,
+          adharno: adharno,
+          pancardnno: pancardnno,
+          batch: batch,
+          admissionDate: admissionDate,
+          markSheetname: markSheetname,
+          othersdocName: othersdocName,
+          profileurl: req?.files?.profileurl
+            ? `images/${req?.files?.profileurl[0]?.filename}`
+            : req.body.profileurl,
+          adharcard: req?.files?.adharcard
+            ? `images/${req?.files?.adharcard[0]?.filename}`
+            : req.body.profileurl,
+          markSheet: req?.files?.markSheet
+            ? `images/${req?.files?.markSheet[0]?.filename}`
+            : req.body.profileurl,
+          othersdoc: req?.files?.othersdoc
+            ? `images/${req?.files?.othersdoc[0]?.filename}`
+            : req.body.profileurl,
+          BirthDocument: req?.files?.BirthDocument
+            ? `images/${req?.files?.BirthDocument[0]?.filename}`
+            : req.body.profileurl,
+        },
+        {
+          where: {
+            id: id,
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+          },
+        }
+      );
+
+      let categorys = await Student.findOne({
+        where: {
+          id: id,
+        },
       });
+
+      if (status) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Student Updated successfully!!",
+          data: categorys,
+        });
+      }
     }
   } catch (err) {
     return respHandler.error(res, {
