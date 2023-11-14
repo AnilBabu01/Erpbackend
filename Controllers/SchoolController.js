@@ -233,12 +233,12 @@ const updateprofile = async (req, res) => {
       let user = await Client.findOne({ where: { id: req.user.id } });
 
       if (user != null) {
-        if (req.files.logourl[0].filename) {
-          removefile(`public/upload/${req?.user?.logourl?.substring(7)}`);
-        }
-        if (req.files.profileurl[0].filename) {
-          removefile(`public/upload/${req?.user?.profileurl?.substring(7)}`);
-        }
+        // if (req.files.logourl[0].filename) {
+        //   removefile(`public/upload/${req?.user?.logourl?.substring(7)}`);
+        // }
+        // if (req.files.profileurl[0].filename) {
+        //   removefile(`public/upload/${req?.user?.profileurl?.substring(7)}`);
+        // }
         let updateUser = {
           name: name,
           email: email,

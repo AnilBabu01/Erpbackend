@@ -1325,15 +1325,15 @@ const updateCredentials = async (req, res) => {
       console.log("geting error", user?.logourl);
 
       if (user != null) {
-        if (req?.files?.logourl) {
-          removefile(`public/upload/${user?.logourl?.substring(7)}`);
-        }
-        if (req?.files?.profileurl) {
-          removefile(`public/upload/${user?.profileurl?.substring(7)}`);
-        }
-        if (req?.files?.certificatelogo) {
-          removefile(`public/upload/${user?.certificatelogo?.substring(7)}`);
-        }
+        // if (req?.files?.logourl) {
+        //   removefile(`public/upload/${user?.logourl?.substring(7)}`);
+        // }
+        // if (req?.files?.profileurl) {
+        //   removefile(`public/upload/${user?.profileurl?.substring(7)}`);
+        // }
+        // if (req?.files?.certificatelogo) {
+        //   removefile(`public/upload/${user?.certificatelogo?.substring(7)}`);
+        // }
         let updateUser = {
           name: name,
           email: email,
