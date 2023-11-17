@@ -26,6 +26,7 @@ const Ansquestion = require("../Models/ansquetion.model");
 const Credential = require('../Models/Credentials.model');
 const ReceiptPrefix = require('../Models/receiptprefix.model');
 const  ReceiptData = require('../Models/receiptdata.model');
+const AttendanceEmployee = require('../Models/employeeattendance.model');
 sequelize
   .sync({ alter: true })
   .then(() => {

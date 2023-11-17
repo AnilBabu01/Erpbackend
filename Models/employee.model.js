@@ -11,6 +11,11 @@ const Employee = sequelize.define("employee", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  empId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: "none",
+  },
   ClientCode: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -26,11 +31,11 @@ const Employee = sequelize.define("employee", {
   },
   employeetype: {
     type: DataTypes.STRING,
-    allowNull:true,
+    allowNull: true,
   },
   organizationtype: {
     type: DataTypes.STRING,
-    allowNull:true,
+    allowNull: true,
   },
   name: {
     type: DataTypes.STRING,
