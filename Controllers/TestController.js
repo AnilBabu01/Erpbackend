@@ -386,6 +386,7 @@ const AddTestResult = async (req, res) => {
       marksperquestion,
       passmark,
       testId,
+      testFileUrl,
     } = req.body;
     let newdate = new Date(date);
     let whereClause = {};
@@ -418,6 +419,7 @@ const AddTestResult = async (req, res) => {
       marksperquestion: marksperquestion,
       passmark: passmark,
       totalQuestions: questions.length,
+      testFileUrl: testFileUrl,
     });
     if (req.user) {
       whereClause.ClientCode = req.user?.ClientCode;
@@ -587,11 +589,20 @@ const CheckTestTime = async (req, res) => {
 
 const GetStudentResult = async (req, res) => {
   try {
+    const { date, title } = req.body;
     let whereClause = {};
 
     if (req.user) {
       whereClause.ClientCode = req?.user?.ClientCode;
       whereClause.studentId = req?.user?.id;
+    }
+
+    if (date) {
+      whereClause.testdate = new Date(date);
+    }
+
+    if (title) {
+      whereClause.testname = { [Op.regexp]: `^${title}.*` };
     }
 
     let alltest = await Result.findAll({

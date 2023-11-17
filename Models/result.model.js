@@ -75,7 +75,10 @@ const Result = sequelize.define("result", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-
+  testFileUrl: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
 
 Result.hasMany(AnsQuestion, { primaryKey: "id" });
