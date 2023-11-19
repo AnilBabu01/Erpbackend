@@ -86,6 +86,18 @@ const AttendanceStudent = sequelize.define("studentattendance", {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  MonthName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  MonthNo: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  yeay: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = AttendanceStudent;

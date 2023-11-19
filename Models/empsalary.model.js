@@ -1,41 +1,34 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../Helper/Connect");
-
-const AttendanceEmployee = sequelize.define("employeeattendance", {
+const EmployeeSalary = sequelize.define("employeesalary", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
-  userId: {
+  ClientCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  EmpId: {
     type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  OrEmpId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  email: {
+    type: DataTypes.STRING,
     allowNull: true,
   },
   ClientCode: {
     type: DataTypes.STRING,
     allowNull: true,
-  },
-  empId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-
-  EmployeeId: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  Designation: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
   },
   MonthName: {
     type: DataTypes.STRING,
@@ -45,41 +38,26 @@ const AttendanceEmployee = sequelize.define("employeeattendance", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  yeay: {
+  Year: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  monthNumber: {
+  Allowance: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  institutename: {
-    type: DataTypes.STRING,
+  BasicSlary: {
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
-  attendaceStatus: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false,
-  },
-  attendaceStatusIntext: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    defaultValue: "NONE",
-  },
-  holidaytype: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    defaultValue: "default",
-  },
-  Comment: {
-    type: DataTypes.STRING,
+  Deduction: {
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
-  attendancedate: {
-    type: DataTypes.DATE,
+  TotalSalary: {
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
 });
 
-module.exports = AttendanceEmployee;
+module.exports = EmployeeSalary;
