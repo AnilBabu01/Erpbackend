@@ -65,7 +65,7 @@ const MarkEmployeeAttendance = async (req, res) => {
         return respHandler.success(res, {
           status: true,
           msg: "Today Is Sunday!!",
-          data:'',
+          data: "",
         });
       } else {
         let allstudent = await Student.findAll({
@@ -203,9 +203,12 @@ const DoneEmployeeAttendance = async (req, res) => {
       await = AttendanceStudent.update(
         {
           attendaceStatus: item?.attendaceStatus,
+          attendanceType: item?.attendanceType,
           attendaceStatusIntext:
             item?.attendaceStatus === true
-              ? "Present"
+              ?  item?.attendanceType === "Half"
+                ? "Present Half"
+                : "Present"
               : item?.attendaceStatusIntext,
         },
         {

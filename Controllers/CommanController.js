@@ -77,12 +77,24 @@ const RegisterEmployee = async (req, res) => {
     masterWrite,
     masterEdit,
     masterDelete,
+    empId,
+    Allowance1,
+    AllowanceAmount1,
+    Allowance2,
+    AllowanceAmount2,
+    Allowance3,
+    AllowanceAmount3,
+    Deduction1,
+    DeductionAmount1,
+    Deduction2,
+    DeductionAmount2,
+    AllowLeave,
+    FathersName,
   } = req.body;
 
   const genSalt = 10;
   const hash = await bcrypt.hash(req?.user?.Employeepassword, genSalt);
 
-  console.log("profiel img ");
   if (
     req.file != "" ||
     name != "" ||
@@ -101,14 +113,28 @@ const RegisterEmployee = async (req, res) => {
       let user = await Employee.findOne({
         where: {
           email: email,
-          institutename: req.user.institutename,
+          ClientCode: req.user?.ClientCode,
           userId: req.user.id,
+          empId: empId,
         },
       });
       if (user != null) {
         return respHandler.error(res, {
           status: false,
-          msg: "Email or Mobile Number already exist",
+          msg: "Email or Mobile Number Allready exist",
+        });
+      }
+      let user1 = await Employee.findOne({
+        where: {
+          ClientCode: req.user?.ClientCode,
+          userId: req.user.id,
+          empId: empId,
+        },
+      });
+      if (user1 != null) {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Empployee Id Allready exist",
         });
       }
       let newUser = {
@@ -128,6 +154,19 @@ const RegisterEmployee = async (req, res) => {
         status: status,
         pincode: pincode,
         password: hash,
+        Allowance1: Allowance1,
+        AllowanceAmount1: AllowanceAmount1,
+        Allowance2: Allowance2,
+        AllowanceAmount2: AllowanceAmount2,
+        Allowance3: Allowance3,
+        AllowanceAmount3: AllowanceAmount3,
+        Deduction1: Deduction1,
+        DeductionAmount1: DeductionAmount1,
+        Deduction2: Deduction2,
+        DeductionAmount2: DeductionAmount2,
+        AllowLeave: AllowLeave,
+        FathersName: FathersName,
+        empId: empId,
         basicsalary: Number(basicsalary),
         Allowance: Number(Allowance),
         Deduction: Number(Deduction),
@@ -176,14 +215,34 @@ const RegisterEmployee = async (req, res) => {
         profileurl: req?.files?.profileurl
           ? `images/${req?.files?.profileurl[0]?.filename}`
           : "",
-        ResumeFile: req?.files?.ResumeFile
-          ? `images/${req?.files?.ResumeFile[0]?.filename}`
+        Aadharurl: req?.files?.Aadharurl
+          ? `images/${req?.files?.Aadharurl[0]?.filename}`
           : req?.user?.profileurl,
-        OfferLater: req?.files?.OfferLater
-          ? `images/${req?.files?.OfferLater[0]?.filename}`
+        Drivingurl: req?.files?.Drivingurl
+          ? `images/${req?.files?.Drivingurl[0]?.filename}`
           : "",
-        JoningLater: req?.files?.JoningLater
-          ? `images/${req?.files?.JoningLater[0]?.filename}`
+        tenurl: req?.files?.tenurl
+          ? `images/${req?.files?.tenurl[0]?.filename}`
+          : "",
+
+        twelturl: req?.files?.twelturl
+          ? `images/${req?.files?.twelturl[0]?.filename}`
+          : req?.user?.profileurl,
+        Graduationurl: req?.files?.Graduationurl
+          ? `images/${req?.files?.Graduationurl[0]?.filename}`
+          : "",
+        PostGraduationurl: req?.files?.PostGraduationurl
+          ? `images/${req?.files?.PostGraduationurl[0]?.filename}`
+          : "",
+
+        Certificate1url: req?.files?.Certificate1url
+          ? `images/${req?.files?.Certificate1url[0]?.filename}`
+          : req?.user?.profileurl,
+        Certificate2url: req?.files?.Certificate2url
+          ? `images/${req?.files?.Certificate2url[0]?.filename}`
+          : "",
+        Certificate3url: req?.files?.Certificate3url
+          ? `images/${req?.files?.Certificate3url[0]?.filename}`
           : "",
       };
 
@@ -364,6 +423,19 @@ const UpdateEmployee = async (req, res) => {
       masterEdit,
       masterDelete,
       id,
+      empId,
+      Allowance1,
+      AllowanceAmount1,
+      Allowance2,
+      AllowanceAmount2,
+      Allowance3,
+      AllowanceAmount3,
+      Deduction1,
+      DeductionAmount1,
+      Deduction2,
+      DeductionAmount2,
+      AllowLeave,
+      FathersName,
     } = req.body;
 
     let employees = await Employee.findOne({
@@ -372,17 +444,35 @@ const UpdateEmployee = async (req, res) => {
       },
     });
     if (employees != null) {
-      if (req?.files?.ResumeFile) {
-        removefile(`public/upload/${req?.user?.ResumeFile?.substring(7)}`);
-      }
       if (req?.files?.profileurl) {
-        removefile(`public/upload/${req?.user?.profileurl?.substring(7)}`);
+        removefile(`public/upload/${employees?.profileurl?.substring(7)}`);
       }
-      if (req?.files?.OfferLater) {
-        removefile(`public/upload/${req?.user?.OfferLater?.substring(7)}`);
+      if (req?.files?.Aadharurl) {
+        removefile(`public/upload/${employees?.OfferLater?.substring(7)}`);
       }
-      if (req?.files?.JoningLater) {
-        removefile(`public/upload/${req?.user?.JoningLater?.substring(7)}`);
+      if (req?.files?.Drivingurl) {
+        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+      }
+      if (req?.files?.tenurl) {
+        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+      }
+      if (req?.files?.twelturl) {
+        removefile(`public/upload/${employees.OfferLater?.substring(7)}`);
+      }
+      if (req?.files?.Graduationurl) {
+        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+      }
+      if (req?.files?.PostGraduationurl) {
+        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+      }
+      if (req?.files?.Certificate1url) {
+        removefile(`public/upload/${employees?.OfferLater?.substring(7)}`);
+      }
+      if (req?.files?.Certificate2url) {
+        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+      }
+      if (req?.files?.Certificate2url) {
+        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
       }
 
       let statuss = await Employee.update(
@@ -401,7 +491,19 @@ const UpdateEmployee = async (req, res) => {
           city: city,
           state: state,
           pincode: pincode,
-          // password: hash,
+          Allowance1: Allowance1,
+          AllowanceAmount1: AllowanceAmount1,
+          Allowance2: Allowance2,
+          AllowanceAmount2: AllowanceAmount2,
+          Allowance3: Allowance3,
+          AllowanceAmount3: AllowanceAmount3,
+          Deduction1: Deduction1,
+          DeductionAmount1: DeductionAmount1,
+          Deduction2: Deduction2,
+          DeductionAmount2: DeductionAmount2,
+          AllowLeave: AllowLeave,
+          FathersName: FathersName,
+          empId: empId,
           basicsalary: Number(basicsalary),
           Allowance: Number(Allowance),
           Deduction: Number(Deduction),
@@ -448,19 +550,38 @@ const UpdateEmployee = async (req, res) => {
           masterWrite: masterWrite,
           masterEdit: masterEdit,
           masterDelete: masterDelete,
-
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req?.user?.profileurl,
-          ResumeFile: req?.files?.ResumeFile
-            ? `images/${req?.files?.ResumeFile[0]?.filename}`
-            : req?.user?.ResumeFile,
-          OfferLater: req?.files?.OfferLater
-            ? `images/${req?.files?.OfferLater[0]?.filename}`
-            : req?.user?.OfferLater,
-          JoningLater: req?.files?.JoningLater
-            ? `images/${req?.files?.JoningLater[0]?.filename}`
-            : req?.user?.JoningLater,
+          Aadharurl: req?.files?.Aadharurl
+            ? `images/${req?.files?.Aadharurl[0]?.filename}`
+            : req?.user?.Aadharurl,
+          Drivingurl: req?.files?.Drivingurl
+            ? `images/${req?.files?.Drivingurl[0]?.filename}`
+            : req?.user?.Drivingurl,
+          JonitenurlngLater: req?.files?.tenurl
+            ? `images/${req?.files?.tenurl[0]?.filename}`
+            : req?.user?.tenurl,
+
+          twelturl: req?.files?.twelturl
+            ? `images/${req?.files?.twelturl[0]?.filename}`
+            : req?.user?.twelturl,
+          Graduationurl: req?.files?.Graduationurl
+            ? `images/${req?.files?.Graduationurl[0]?.filename}`
+            : req?.user?.Graduationurl,
+          PostGraduationurl: req?.files?.tenurl
+            ? `images/${req?.files?.PostGraduationurl[0]?.filename}`
+            : req?.user?.PostGraduationurl,
+
+          Certificate1url: req?.files?.Certificate1url
+            ? `images/${req?.files?.Certificate1url[0]?.filename}`
+            : req?.user?.Certificate1url,
+          Certificate2url: req?.files?.Certificate2url
+            ? `images/${req?.files?.Certificate2url[0]?.filename}`
+            : req?.user?.Certificate2url,
+          Certificate3url: req?.files?.Certificate3url
+            ? `images/${req?.files?.Certificate3url[0]?.filename}`
+            : req?.user?.Certificate3url,
         },
         {
           where: {
@@ -501,7 +622,7 @@ const UpdateEmployee = async (req, res) => {
 const Getallemployee = async (req, res) => {
   try {
     const { name, fromdate, todate, status } = req.query;
- 
+
     let whereClause = {};
     let from = new Date(fromdate);
     let to = new Date(todate);
@@ -525,7 +646,7 @@ const Getallemployee = async (req, res) => {
       whereClause.name = { [Op.regexp]: `^${name}.*` };
     }
 
-    console.log("query data is ",req.query,whereClause);
+    console.log("query data is ", req.query, whereClause);
 
     let employees = await Employee.findAll({
       where: whereClause,

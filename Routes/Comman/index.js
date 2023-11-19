@@ -14,15 +14,39 @@ router.post(
       maxCount: 1,
     },
     {
-      name: "ResumeFile",
+      name: "Aadharurl",
       maxCount: 1,
     },
     {
-      name: "OfferLater",
+      name: "Drivingurl",
       maxCount: 1,
     },
     {
-      name: "JoningLater",
+      name: "tenurl",
+      maxCount: 1,
+    },
+    {
+      name: "twelturl",
+      maxCount: 1,
+    },
+    {
+      name: "Graduationurl",
+      maxCount: 1,
+    },
+    {
+      name: "PostGraduationurl",
+      maxCount: 1,
+    },
+    {
+      name: "Certificate1url",
+      maxCount: 1,
+    },
+    {
+      name: "Certificate2url",
+      maxCount: 1,
+    },
+    {
+      name: "Certificate3url",
       maxCount: 1,
     },
   ]),
@@ -39,15 +63,39 @@ router.put(
       maxCount: 1,
     },
     {
-      name: "ResumeFile",
+      name: "Aadharurl",
       maxCount: 1,
     },
     {
-      name: "OfferLater",
+      name: "Drivingurl",
       maxCount: 1,
     },
     {
-      name: "JoningLater",
+      name: "tenurl",
+      maxCount: 1,
+    },
+    {
+      name: "twelturl",
+      maxCount: 1,
+    },
+    {
+      name: "Graduationurl",
+      maxCount: 1,
+    },
+    {
+      name: "PostGraduationurl",
+      maxCount: 1,
+    },
+    {
+      name: "Certificate1url",
+      maxCount: 1,
+    },
+    {
+      name: "Certificate2url",
+      maxCount: 1,
+    },
+    {
+      name: "Certificate3url",
       maxCount: 1,
     },
   ]),

@@ -108,11 +108,47 @@ const Employee = sequelize.define("employee", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  Allowance: {
+  Allowance1: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  AllowanceAmount1: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  Deduction: {
+  Allowance2: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  AllowanceAmount2: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  Allowance3: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  AllowanceAmount3: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  Deduction1: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  DeductionAmount1: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  Deduction2: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  DeductionAmount2: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  AllowLeave: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
@@ -120,6 +156,11 @@ const Employee = sequelize.define("employee", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  FathersName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+
   AccountHolder: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -140,11 +181,39 @@ const Employee = sequelize.define("employee", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  ResumeFile: {
+  Aadharurl: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  OfferLater: {
+  tenurl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  twelturl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Drivingurl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Graduationurl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  PostGraduationurl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Certificate1url: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Certificate2url: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Certificate3url: {
     type: DataTypes.STRING,
     allowNull: true,
   },

@@ -49,6 +49,11 @@ const AttendanceEmployee = sequelize.define("employeeattendance", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  attendanceType: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue:"Full"
+  },
   monthNumber: {
     type: DataTypes.INTEGER,
     allowNull: true,
