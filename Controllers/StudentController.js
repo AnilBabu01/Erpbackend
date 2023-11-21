@@ -43,6 +43,10 @@ const Addstudent = async (req, res) => {
       markSheetname,
       othersdocName,
       Status,
+      Transport,
+      Library,
+      hostal,
+      StudentCategory,
     } = req.body;
 
     console.log("from form", req.body, req?.files);
@@ -158,6 +162,10 @@ const Addstudent = async (req, res) => {
           markSheetname: markSheetname,
           othersdocName: othersdocName,
           Status: Status,
+          StudentCategory: StudentCategory,
+          Transport: Transport,
+          Library: Library,
+          hostal: hostal,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -264,6 +272,10 @@ const Addstudent = async (req, res) => {
           markSheetname: markSheetname,
           othersdocName: othersdocName,
           Status: Status,
+          StudentCategory: StudentCategory,
+          Transport: Transport,
+          Library: Library,
+          hostal: hostal,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -372,8 +384,10 @@ const getAllStudent = async (req, res) => {
       studentname,
       rollnumber,
       status,
+      categoryname,
+      library,
     } = req.query;
-
+    console.log("libraray is data is ", req.query);
     let whereClause = {};
     let from = new Date(fromdate);
     let to = new Date(todate);
@@ -404,6 +418,12 @@ const getAllStudent = async (req, res) => {
     }
     if (status) {
       whereClause.Status = { [Op.regexp]: `^${status}.*` };
+    }
+    if (categoryname) {
+      whereClause.StudentCategory = { [Op.regexp]: `^${categoryname}.*` };
+    }
+    if (library) {
+      whereClause.Library = library;
     }
 
     console.log("con", whereClause);
@@ -466,6 +486,10 @@ const UpdateStudent = async (req, res) => {
       markSheetname,
       othersdocName,
       Status,
+      Transport,
+      Library,
+      StudentCategory,
+      hostal,
     } = req.body;
 
     let student = await Student.findOne({
@@ -513,6 +537,7 @@ const UpdateStudent = async (req, res) => {
           rollnumber: rollnumber,
           StudentStatus: StudentStatus,
           Status: Status,
+          StudentCategory: StudentCategory,
           courseorclass: courseorclass,
           courseduration: courseduration,
           studentTotalFee: studentTotalFee,
@@ -520,6 +545,9 @@ const UpdateStudent = async (req, res) => {
           adharno: adharno,
           pancardnno: pancardnno,
           batch: batch,
+          Transport: Transport,
+          Library: Library,
+          hostal: hostal,
           admissionDate: admissionDate,
           markSheetname: markSheetname,
           othersdocName: othersdocName,
@@ -828,8 +856,8 @@ const getStudentFee = async (req, res) => {
       whereClause.institutename = req.user.institutename;
       whereClause.id = req?.user?.id;
     }
-      
-     let students = await Student.findAll({
+
+    let students = await Student.findAll({
       where: whereClause,
       include: [
         {

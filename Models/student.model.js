@@ -192,6 +192,25 @@ const Student = sequelize.define("student", {
     allowNull: true,
     defaultValue: "IN Institute",
   },
+  Transport: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+  },
+  Library: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+  },
+  hostal: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+  },
+  StudentCategory: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 Student.hasOne(Coachingfeestatus, { primaryKey: "id" });
 Coachingfeestatus.belongsTo(Student, { foreignKey: "studentId" });
