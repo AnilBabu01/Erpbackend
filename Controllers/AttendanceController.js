@@ -308,11 +308,12 @@ const AttendanceAnalasis = async (req, res) => {
     if (rollname) {
       let result = [];
       let st;
-      if (status) {
+      if (batch) {
         st = await Student.findOne({
           where: {
-            rollnumber: rollname,
-            Status: status,
+            batch: batch,
+            rollnumber:rollname,
+            ClientCode: req.user?.ClientCode,
             [Op.or]: [
               { Status: "Unknown" },
               { Status: "Left In Middle" },
@@ -321,10 +322,13 @@ const AttendanceAnalasis = async (req, res) => {
             ],
           },
         });
-      } else {
+      }
+      if (classname) {
         st = await Student.findOne({
           where: {
-            rollnumber: rollname,
+            courseorclass: classname,
+            rollnumber:rollname,
+            ClientCode: req.user?.ClientCode,
             [Op.or]: [
               { Status: "Unknown" },
               { Status: "Left In Middle" },
@@ -335,14 +339,27 @@ const AttendanceAnalasis = async (req, res) => {
         });
       }
 
-      let checkattendance = await sequelizes.query(
-        `Select * FROM studentattendances WHERE AND ClientCode= '${req.user?.ClientCode}' AND MONTH(attendancedate) ='${month}' AND rollnumber = '${rollname}';`,
-        {
-          nest: true,
-          type: QueryTypes.SELECT,
-          raw: true,
-        }
-      );
+      let checkattendance;
+      if (batch) {
+        checkattendance = await sequelizes.query(
+          `Select * FROM studentattendances WHERE ClientCode= '${req.user?.ClientCode}' AND MONTH(attendancedate) ='${month}' AND rollnumber = '${rollname}' AND batch = '${batch}';`,
+          {
+            nest: true,
+            type: QueryTypes.SELECT,
+            raw: true,
+          }
+        );
+      }
+      if (classname) {
+        checkattendance = await sequelizes.query(
+          `Select * FROM studentattendances WHERE ClientCode= '${req.user?.ClientCode}' AND MONTH(attendancedate) ='${month}' AND rollnumber = '${rollname}' AND courseorclass = '${classname}';`,
+          {
+            nest: true,
+            type: QueryTypes.SELECT,
+            raw: true,
+          }
+        );
+      }
 
       if (checkattendance) {
         if (st) {
@@ -362,46 +379,88 @@ const AttendanceAnalasis = async (req, res) => {
     } else {
       let Students;
       if (status) {
-        Students = await Student.findAll({
-          where: {
-            batch: batch,
-            ClientCode: req.user?.ClientCode,
-            institutename: req.user?.institutename,
-            Status: status,
-            [Op.or]: [
-              { Status: "Unknown" },
-              { Status: "Left In Middle" },
-              { Status: "On Leave" },
-              { Status: "Active" },
-            ],
-          },
-        });
+        if (classname) {
+          Students = await Student.findAll({
+            where: {
+              courseorclass: classname,
+              ClientCode: req.user?.ClientCode,
+              Status: status,
+              [Op.or]: [
+                { Status: "Unknown" },
+                { Status: "Left In Middle" },
+                { Status: "On Leave" },
+                { Status: "Active" },
+              ],
+            },
+          });
+        } else {
+          Students = await Student.findAll({
+            where: {
+              batch: batch,
+              ClientCode: req.user?.ClientCode,
+              Status: status,
+              [Op.or]: [
+                { Status: "Unknown" },
+                { Status: "Left In Middle" },
+                { Status: "On Leave" },
+                { Status: "Active" },
+              ],
+            },
+          });
+        }
       } else {
-        Students = await Student.findAll({
-          where: {
-            batch: batch,
-            ClientCode: req.user?.ClientCode,
-            institutename: req.user?.institutename,
-            [Op.or]: [
-              { Status: "Unknown" },
-              { Status: "Left In Middle" },
-              { Status: "On Leave" },
-              { Status: "Active" },
-            ],
-          },
-        });
+        if (classname) {
+          Students = await Student.findAll({
+            where: {
+              courseorclass: classname,
+              ClientCode: req.user?.ClientCode,
+              [Op.or]: [
+                { Status: "Unknown" },
+                { Status: "Left In Middle" },
+                { Status: "On Leave" },
+                { Status: "Active" },
+              ],
+            },
+          });
+        } else {
+          Students = await Student.findAll({
+            where: {
+              batch: batch,
+              ClientCode: req.user?.ClientCode,
+              [Op.or]: [
+                { Status: "Unknown" },
+                { Status: "Left In Middle" },
+                { Status: "On Leave" },
+                { Status: "Active" },
+              ],
+            },
+          });
+        }
       }
 
       let result = [];
       const promises = Students?.map(async (item) => {
-        let checkattendance = await sequelizes.query(
-          `Select * FROM studentattendances WHERE AND ClientCode= '${req.user?.ClientCode}' AND MONTH(attendancedate) ='${month}' AND rollnumber = '${item?.rollnumber}';`,
-          {
-            nest: true,
-            type: QueryTypes.SELECT,
-            raw: true,
-          }
-        );
+        let checkattendance;
+        if (batch) {
+          checkattendance = await sequelizes.query(
+            `Select * FROM studentattendances WHERE ClientCode= '${req.user?.ClientCode}' AND MONTH(attendancedate) ='${month}' AND rollnumber = '${item?.rollnumber}' AND batch = '${item?.batch}';`,
+            {
+              nest: true,
+              type: QueryTypes.SELECT,
+              raw: true,
+            }
+          );
+        }
+        if (classname) {
+          checkattendance = await sequelizes.query(
+            `Select * FROM studentattendances WHERE ClientCode= '${req.user?.ClientCode}' AND MONTH(attendancedate) ='${month}' AND rollnumber = '${item?.rollnumber}'  AND courseorclass = '${item?.courseorclass}';`,
+            {
+              nest: true,
+              type: QueryTypes.SELECT,
+              raw: true,
+            }
+          );
+        }
 
         if (checkattendance) {
           result.push({
