@@ -79,7 +79,9 @@ const Addstudent = async (req, res) => {
       ) {
         let checkrollno = await Student.findOne({
           where: {
+            courseorclass: courseorclass,
             rollnumber: rollnumber,
+            ClientCode: req.user?.ClientCode,
           },
         });
         if (checkrollno != null) {
@@ -96,7 +98,6 @@ const Addstudent = async (req, res) => {
             courseorclass: courseorclass,
             rollnumber: rollnumber,
             ClientCode: req.user?.ClientCode,
-            institutename: req.user?.institutename,
           },
         });
         if (user != null) {
@@ -387,7 +388,9 @@ const getAllStudent = async (req, res) => {
       categoryname,
       library,
     } = req.query;
-    console.log("libraray is data is ", req.query);
+
+    console.log("geting ",req?.query)
+
     let whereClause = {};
     let from = new Date(fromdate);
     let to = new Date(todate);
@@ -402,7 +405,7 @@ const getAllStudent = async (req, res) => {
     }
 
     if (name) {
-      whereClause.courseorclass = { [Op.regexp]: `^${name}.*` };
+      whereClause.courseorclass = name;
     }
     if (batch) {
       whereClause.batch = { [Op.regexp]: `^${batch}.*` };

@@ -135,7 +135,6 @@ const MarkStudentAttendance = async (req, res) => {
           batch: batch ? batch : classname,
           attendancedate: newdate,
           ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
           // attendaceStatusIntext: "Absent",
           MonthName: monthName,
           yeay: newdate?.getFullYear(),
@@ -161,8 +160,8 @@ const MarkStudentAttendance = async (req, res) => {
         if (classname) {
           students = await Student.findAll({
             where: {
-              institutename: req.user.institutename,
-              courseorclass: { [Op.regexp]: `^${classname}.*` },
+              ClientCode: req.user?.ClientCode,
+              courseorclass: classname,
               [Op.or]: [
                 { Status: "Unknown" },
                 { Status: "Left In Middle" },
@@ -175,8 +174,8 @@ const MarkStudentAttendance = async (req, res) => {
         } else {
           students = await Student.findAll({
             where: {
-              institutename: req.user.institutename,
-              batch: { [Op.regexp]: `^${batch}.*` },
+              ClientCode: req.user?.ClientCode,
+              batch: batch,
               [Op.or]: [
                 { Status: "Unknown" },
                 { Status: "Left In Middle" },
@@ -187,6 +186,8 @@ const MarkStudentAttendance = async (req, res) => {
             order: [["rollnumber", "ASC"]],
           });
         }
+
+        console.log("student List", students);
 
         const promises = students?.map(async (item) => {
           let result = await AttendanceStudent.create({
