@@ -16,8 +16,10 @@ const AttendanceStudent = require("./Routes/Attendance");
 const Test = require("./Routes/Test");
 const clientVerify = require("./Routes/ClientVerify");
 const Reports = require("./Routes/report");
-const EmployeeAttendance = require('./Routes/EmployeeAttendance');
-const Payroll = require('./Routes/Payroll');
+const EmployeeAttendance = require("./Routes/EmployeeAttendance");
+const Payroll = require("./Routes/Payroll");
+const Library = require("./Routes/Library");
+
 // to run migrations run command - --------  npm run migrate ---------------------
 
 app.use(cors());
@@ -47,6 +49,7 @@ app.use("/api/clientVerify", clientVerify);
 app.use("/api/report", Reports);
 app.use("/api/EmployeeAttendance", EmployeeAttendance);
 app.use("/api/payroll", Payroll);
+app.use("/api/library", Library);
 app.use("*", (req, res) => {
   return res.status(404).json({
     status: false,

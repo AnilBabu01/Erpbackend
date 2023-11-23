@@ -312,7 +312,7 @@ const AttendanceAnalasis = async (req, res) => {
         st = await Student.findOne({
           where: {
             batch: batch,
-            rollnumber:rollname,
+            rollnumber: rollname,
             ClientCode: req.user?.ClientCode,
             [Op.or]: [
               { Status: "Unknown" },
@@ -327,7 +327,7 @@ const AttendanceAnalasis = async (req, res) => {
         st = await Student.findOne({
           where: {
             courseorclass: classname,
-            rollnumber:rollname,
+            rollnumber: rollname,
             ClientCode: req.user?.ClientCode,
             [Op.or]: [
               { Status: "Unknown" },

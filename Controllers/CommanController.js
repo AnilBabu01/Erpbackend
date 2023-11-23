@@ -629,7 +629,6 @@ const Getallemployee = async (req, res) => {
 
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
-      whereClause.institutename = req.user.institutename;
     }
 
     if (fromdate) {
@@ -645,8 +644,6 @@ const Getallemployee = async (req, res) => {
     if (name) {
       whereClause.name = { [Op.regexp]: `^${name}.*` };
     }
-
-    console.log("query data is ", req.query, whereClause);
 
     let employees = await Employee.findAll({
       where: whereClause,

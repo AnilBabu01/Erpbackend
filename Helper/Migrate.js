@@ -28,6 +28,8 @@ const ReceiptPrefix = require('../Models/receiptprefix.model');
 const ReceiptData = require('../Models/receiptdata.model');
 const AttendanceEmployee = require('../Models/employeeattendance.model');
 const EmployeeSalary = require('../Models/empsalary.model');
+const Book = require('../Models/book.model');
+const BookedBook = require('../Models/bookedbook.model');
 sequelize
   .sync({ alter: true })
   .then(() => {
