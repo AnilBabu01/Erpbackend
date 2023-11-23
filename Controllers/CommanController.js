@@ -90,6 +90,21 @@ const RegisterEmployee = async (req, res) => {
     DeductionAmount2,
     AllowLeave,
     FathersName,
+    transport,
+    transportRead,
+    transportWrite,
+    transportEdit,
+    transportDelete,
+    hostel,
+    hostelRead,
+    hostelWrite,
+    hostelEdit,
+    hostelDelete,
+    library,
+    libraryRead,
+    libraryWrite,
+    libraryEdit,
+    libraryDelete,
   } = req.body;
 
   const genSalt = 10;
@@ -212,6 +227,21 @@ const RegisterEmployee = async (req, res) => {
         masterWrite: masterWrite,
         masterEdit: masterEdit,
         masterDelete: masterDelete,
+        transport: transport,
+        transportRead: transportRead,
+        transportWrite: transportWrite,
+        transportEdit: transportEdit,
+        transportDelete: transportDelete,
+        hostel: hostel,
+        hostelRead: hostelRead,
+        hostelWrite: hostelWrite,
+        hostelEdit: hostelEdit,
+        hostelDelete: hostelDelete,
+        library: library,
+        libraryRead: libraryRead,
+        libraryWrite: libraryWrite,
+        libraryEdit: libraryEdit,
+        libraryDelete: libraryDelete,
         profileurl: req?.files?.profileurl
           ? `images/${req?.files?.profileurl[0]?.filename}`
           : "",
@@ -224,7 +254,6 @@ const RegisterEmployee = async (req, res) => {
         tenurl: req?.files?.tenurl
           ? `images/${req?.files?.tenurl[0]?.filename}`
           : "",
-
         twelturl: req?.files?.twelturl
           ? `images/${req?.files?.twelturl[0]?.filename}`
           : req?.user?.profileurl,
@@ -234,7 +263,6 @@ const RegisterEmployee = async (req, res) => {
         PostGraduationurl: req?.files?.PostGraduationurl
           ? `images/${req?.files?.PostGraduationurl[0]?.filename}`
           : "",
-
         Certificate1url: req?.files?.Certificate1url
           ? `images/${req?.files?.Certificate1url[0]?.filename}`
           : req?.user?.profileurl,
@@ -436,6 +464,21 @@ const UpdateEmployee = async (req, res) => {
       DeductionAmount2,
       AllowLeave,
       FathersName,
+      transport,
+      transportRead,
+      transportWrite,
+      transportEdit,
+      transportDelete,
+      hostel,
+      hostelRead,
+      hostelWrite,
+      hostelEdit,
+      hostelDelete,
+      library,
+      libraryRead,
+      libraryWrite,
+      libraryEdit,
+      libraryDelete,
     } = req.body;
 
     let employees = await Employee.findOne({
@@ -550,6 +593,21 @@ const UpdateEmployee = async (req, res) => {
           masterWrite: masterWrite,
           masterEdit: masterEdit,
           masterDelete: masterDelete,
+          transport: transport,
+          transportRead: transportRead,
+          transportWrite: transportWrite,
+          transportEdit: transportEdit,
+          transportDelete: transportDelete,
+          hostel: hostel,
+          hostelRead: hostelRead,
+          hostelWrite: hostelWrite,
+          hostelEdit: hostelEdit,
+          hostelDelete: hostelDelete,
+          library: library,
+          libraryRead: libraryRead,
+          libraryWrite: libraryWrite,
+          libraryEdit: libraryEdit,
+          libraryDelete: libraryDelete,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req?.user?.profileurl,
