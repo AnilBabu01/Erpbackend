@@ -10,6 +10,7 @@ const VehicleType = sequelize.define("vehicletype", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  
   Vahicletype: {
     type: DataTypes.STRING,
     allowNull: false,

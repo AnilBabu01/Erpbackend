@@ -17,7 +17,7 @@ const VehicleDetails = sequelize.define("vehicledetails", {
   },
   routeId: {
     type: DataTypes.INTEGER,
-    autoIncrement: true,
+    allowNull: true,
   },
   BusNumber: {
     type: DataTypes.STRING,
@@ -33,6 +33,10 @@ const VehicleDetails = sequelize.define("vehicledetails", {
   },
   GPSDeviceURL: {
     type: DataTypes.STRING,
+    allowNull: true,
+  },
+  DriverId: {
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
 });

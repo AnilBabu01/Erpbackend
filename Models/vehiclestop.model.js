@@ -9,19 +9,20 @@ const VehicleStop = sequelize.define("vehiclestop", {
   },
   RouteId: {
     type: DataTypes.INTEGER,
-    autoIncrement: true,
+    allowNull: false,
   },
   ClientCode: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  FromRoute: {
+  StopName: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  ToRoute: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  StopStatus: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue:false
   },
 });
 

@@ -456,6 +456,14 @@ const Employee = sequelize.define("employee", {
     defaultValue: "Active",
     allowNull: true,
   },
+  BusNo: {
+    type: DataTypes.STRING,
+    defaultValue: false,
+  },
+  BusColor: {
+    type: DataTypes.STRING,
+    defaultValue: false,
+  },
 });
 
 // Employee.hasMany(parent, { foreignKey: "userId" });
