@@ -484,7 +484,7 @@ const UpdateVehicleDetails = async (req, res) => {
 
 const GetVehicleDetails = async (req, res) => {
   try {
-    const {ClientCode} = req.query;
+    const { ClientCode } = req.query;
     let whereClause = {};
     let result = [];
     if (req.user) {
@@ -571,6 +571,73 @@ const DeleteVehicleDetails = async (req, res) => {
   }
 };
 
+const GetVehicleList = async (req, res) => {
+  try {
+    const { FromRoute, ToRoute } = req.query;
+    let whereClause = {};
+    let result = [];
+
+    let vehicleroute = VehicleRoute.findOne({
+      where: {
+        FromRoute: FromRoute,
+        ToRoute: ToRoute,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+
+    if (vehicleroute) {
+      if (req.user) {
+        whereClause.ClientCode = req.user.ClientCode;
+        whereClause.routeId = vehicleroute?.routeId;
+      }
+
+      let vehicledetails = await VehicleDetails.findAll({
+        where: whereClause,
+      });
+
+      if (vehicledetails) {
+        vehicledetails?.map(async (item) => {
+          let vehicleroutes = await VehicleRoute.findAll({
+            where: {
+              routeId: item?.routeId,
+              ClientCode: req?.user?.ClientCode,
+            },
+            include: [
+              {
+                model: VehicleStop,
+              },
+            ],
+            order: [["id", "DESC"]],
+          });
+
+          result.push({
+            vehicledetails: item,
+            vehicleroute: vehicleroutes,
+          });
+        });
+
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch All Bus successfully!!",
+          data: result,
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: [""],
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   CreateVehicleType,
   UpdateVehicleType,
@@ -584,4 +651,5 @@ module.exports = {
   UpdateVehicleDetails,
   GetVehicleDetails,
   DeleteVehicleDetails,
+  GetVehicleList,
 };

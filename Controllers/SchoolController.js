@@ -207,6 +207,7 @@ const updateprofile = async (req, res) => {
     city,
     state,
     pincode,
+    BusNumber
   } = req.body;
 
   if (!req.files.profileurl || !req.files.logourl) {
@@ -252,6 +253,7 @@ const updateprofile = async (req, res) => {
           state: state,
           pincode: pincode,
           userType: userType,
+          BusNumber:BusNumber,
           logourl: req.files.logourl[0]
             ? `images/${req.files.logourl[0].filename}`
             : "",

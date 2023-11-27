@@ -282,6 +282,7 @@ const RegisterEmployee = async (req, res) => {
         },
         SECRET
       );
+      
       if (token) {
         return respHandler.success(res, {
           status: true,

@@ -34,6 +34,10 @@ const VehicleDetails = require("../Models/vehicledetails.mode");
 const VehicleRoute = require("../Models/vehicleroute.model");
 const VehicleStop = require("../Models/vehiclestop.model");
 const VehicleType = require("../Models/vehicletype.model");
+const RoomHostel = require('../Models/roomHostel.model');
+const RoomCategory = require('../Models/roomHostel.model');
+const Roomfacility = require('../Models/roomFacility.model');
+const Room = require('../Models/room.model');
 sequelize
   .sync({ alter: true })
   .then(() => {

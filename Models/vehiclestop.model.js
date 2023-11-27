@@ -22,7 +22,7 @@ const VehicleStop = sequelize.define("vehiclestop", {
   StopStatus: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
-    defaultValue:false
+    defaultValue: false,
   },
 });
 

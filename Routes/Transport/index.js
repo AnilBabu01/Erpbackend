@@ -17,13 +17,15 @@ router
   .put(verifyToken, TransportController.UpdateRoute)
   .delete(verifyToken, TransportController.DeleteRoute);
 
-  
 router
-.route("/vehicledetails", verifyToken)
-.post(verifyToken, TransportController.CreateVehicleDetails)
-.get(verifyToken, TransportController.GetVehicleDetails)
-.put(verifyToken, TransportController.UpdateVehicleDetails)
-.delete(verifyToken, TransportController.DeleteVehicleDetails);
+  .route("/vehicledetails", verifyToken)
+  .post(verifyToken, TransportController.CreateVehicleDetails)
+  .get(verifyToken, TransportController.GetVehicleDetails)
+  .put(verifyToken, TransportController.UpdateVehicleDetails)
+  .delete(verifyToken, TransportController.DeleteVehicleDetails);
 
+router
+  .route("/busavailability", verifyToken)
+  .get(verifyToken, TransportController.GetVehicleList);
 
 module.exports = router;
