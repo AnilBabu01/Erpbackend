@@ -100,6 +100,7 @@ const Addstudent = async (req, res) => {
       TotalHostelFee,
       TransportPerMonthFee,
       TransportTotalHostelFee,
+      AnnualFee,
     } = req.body;
 
     const genSalt = 10;
@@ -222,6 +223,7 @@ const Addstudent = async (req, res) => {
           TotalHostelFee: TotalHostelFee,
           TransportPerMonthFee: TransportPerMonthFee,
           TransportTotalHostelFee: TransportTotalHostelFee,
+          AnnualFee:AnnualFee,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -427,6 +429,7 @@ const Addstudent = async (req, res) => {
           Transport: Transport,
           Library: Library,
           hostal: hostal,
+          AnnualFee: AnnualFee,
           HostelPerMonthFee: HostelPerMonthFee,
           TotalHostelFee: TotalHostelFee,
           TransportPerMonthFee: TransportPerMonthFee,
@@ -743,6 +746,7 @@ const UpdateStudent = async (req, res) => {
       TotalHostelFee,
       TransportPerMonthFee,
       TransportTotalHostelFee,
+      AnnualFee
     } = req.body;
 
     let student = await Student.findOne({
@@ -808,6 +812,7 @@ const UpdateStudent = async (req, res) => {
           TotalHostelFee: TotalHostelFee,
           TransportPerMonthFee: TransportPerMonthFee,
           TransportTotalHostelFee: TransportTotalHostelFee,
+          AnnualFee:AnnualFee,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req.body.profileurl,
