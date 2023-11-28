@@ -28,4 +28,8 @@ router
   .route("/busavailability", verifyToken)
   .get(verifyToken, TransportController.GetVehicleList);
 
+router
+  .route("/gettransportfee", verifyToken)
+  .post(verifyToken, TransportController.GetTransportFee);
+
 module.exports = router;

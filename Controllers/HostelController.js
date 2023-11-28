@@ -713,6 +713,49 @@ const DeleteRoom = async (req, res) => {
   }
 };
 
+const GetHostelFee = async (req, res) => {
+  try {
+    const { hostelname, Category, Facility } = req.query;
+    let whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+    }
+    if (hostelname) {
+      whereClause.hostelname = { [Op.regexp]: `^${hostelname}.*` };
+    }
+    if (Category) {
+      whereClause.hostelname = { [Op.regexp]: `^${Category}.*` };
+    }
+    if (Facility) {
+      whereClause.hostelname = { [Op.regexp]: `^${Facility}.*` };
+    }
+
+    let Roomrent = await Room.findOne({
+      where: whereClause,
+    });
+    if (Roomrent) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Room Rent successfully!!",
+        data: Roomrent,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   CreateCategory,
   UpdateCategory,
@@ -730,4 +773,5 @@ module.exports = {
   UpdateRoom,
   GetRoom,
   DeleteRoom,
+  GetHostelFee
 };

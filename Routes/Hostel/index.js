@@ -49,4 +49,8 @@ router
   .put(verifyToken, HostelController.UpdateRoom)
   .delete(verifyToken, HostelController.DeleteRoom);
 
+router
+  .route("/gethostelfee", verifyToken)
+  .post(verifyToken, HostelController.GetHostelFee);
+
 module.exports = router;

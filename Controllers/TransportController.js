@@ -1,3 +1,4 @@
+const { sequelize, QueryTypes, Op, where, literal } = require("sequelize");
 const { config } = require("dotenv");
 const respHandler = require("../Handlers");
 const VehicleType = require("../Models/vehicletype.model");
@@ -103,13 +104,15 @@ const UpdateVehicleType = async (req, res) => {
 
 const GetVehicleType = async (req, res) => {
   try {
-    const {} = req.query;
+    const { Vehicletype } = req.query;
     let whereClause = {};
-
+    console.log("ndsxdc", Vehicletype);
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
     }
-
+    if (Vehicletype) {
+      whereClause.Vahicletype = Vehicletype;
+    }
     let vehicletype = await VehicleType.findAll({
       where: whereClause,
     });
@@ -169,49 +172,74 @@ const DeleteVehicleType = async (req, res) => {
 
 const CreateRoute = async (req, res) => {
   try {
-    const { FromRoute, ToRoute, stopslist } = req.body;
-    let vehicleroute = await VehicleRoute.create({
-      FromRoute: FromRoute,
-      ToRoute: ToRoute,
-      ClientCode: req.user.ClientCode,
+    const { FromRoute, ToRoute, BusRentPermonth, stopslist } = req.body;
+    let result = [];
+    let check = await VehicleRoute.findOne({
+      where: {
+        FromRoute: FromRoute,
+        ToRoute: ToRoute,
+        ClientCode: req.user.ClientCode,
+      },
     });
-    if (vehicleroute) {
-      const promises = stopslist?.map(async (item) => {
-        let result = await VehicleStop.create({
-          RouteId: vehicleroute?.id,
-          StopName: item?.StopName,
-          StopStatus: item?.StopStatus,
-          ClientCode: req.user.ClientCode,
-        });
-        return result;
+    if (check) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Already Exist!!",
+        error: [""],
       });
-      if (await Promise.all(promises)) {
-        let vehicleroutes = await VehicleRoute.findAll({
-          where: {
+    } else {
+      let vehicleroute = await VehicleRoute.create({
+        FromRoute: FromRoute,
+        ToRoute: ToRoute,
+        ClientCode: req.user.ClientCode,
+        BusRentPermonth: BusRentPermonth,
+      });
+      if (vehicleroute) {
+        const promises = stopslist?.map(async (item) => {
+          let result = await VehicleStop.create({
             RouteId: vehicleroute?.id,
-            ClientCode: req?.user?.ClientCode,
-          },
-          include: [
-            {
-              model: VehicleStop,
-            },
-          ],
-          order: [["id", "DESC"]],
+            StopName: item?.StopName,
+            StopStatus: item?.StopStatus,
+            ClientCode: req.user.ClientCode,
+          });
+          return result;
         });
+        if (await Promise.all(promises)) {
+          let vehicleroutes = await VehicleRoute.findOne({
+            where: {
+              id: vehicleroute?.id,
+              ClientCode: req?.user?.ClientCode,
+            },
+          });
 
-        if (vehicleroutes) {
-          return respHandler.success(res, {
-            status: true,
-            msg: "Routes Added successfully!!",
-            data: vehicleroutes,
+          if (vehicleroutes) {
+            let stops = await VehicleStop.findAll({
+              where: {
+                ClientCode: req?.user?.ClientCode,
+                RouteId: vehicleroutes?.id,
+              },
+            });
+
+            if (stops) {
+              result.push({
+                routeName: stops,
+                StopName: stops,
+              });
+            }
+
+            return respHandler.success(res, {
+              status: true,
+              msg: "Routes Added successfully!!",
+              data: result,
+            });
+          }
+        } else {
+          return respHandler.error(res, {
+            status: false,
+            msg: "Something Went Wrong!!",
+            error: [""],
           });
         }
-      } else {
-        return respHandler.error(res, {
-          status: false,
-          msg: "Something Went Wrong!!",
-          error: [""],
-        });
       }
     }
   } catch (err) {
@@ -225,51 +253,87 @@ const CreateRoute = async (req, res) => {
 
 const UpdateRoute = async (req, res) => {
   try {
-    const { stopslist, id } = req.body;
-
+    const { FromRoute, ToRoute, BusRentPermonth, stopslist, id } = req.body;
+    let resultdata = [];
     let vehicleroute = await VehicleRoute.findOne({
       where: {
         id: id,
+        ClientCode: req.user?.ClientCode,
       },
     });
-    if (vehicleroute) {
-      const promises = stopslist?.map(async (item) => {
-        let result = await VehicleStop.update(
-          {
-            RouteId: vehicleroute?.id,
-            StopName: item?.StopName,
-            StopStatus: item?.StopStatus,
-            ClientCode: req.user.ClientCode,
-          },
-          {
-            where: {
-              id: item?.id,
-              ClientCode: req.user?.ClientCode,
-            },
-          }
-        );
-        return result;
-      });
 
-      if (await Promise.all(promises)) {
-        let vehicleroutes = await VehicleRoute.findAll({
+    if (vehicleroute) {
+      let result = await VehicleRoute.update(
+        {
+          FromRoute: FromRoute,
+          ToRoute: ToRoute,
+          BusRentPermonth: BusRentPermonth,
+        },
+        {
           where: {
-            RouteId: vehicleroute?.id,
-            ClientCode: req?.user?.ClientCode,
+            id: id,
+            ClientCode: req.user?.ClientCode,
           },
-          include: [
-            {
-              model: VehicleStop,
+        }
+      );
+      if (result) {
+        const promises = stopslist?.map(async (item) => {
+          let result;
+          const [stop, created] = await VehicleStop.findOrCreate({
+            where: {
+              RouteId: id,
+              ClientCode: req.user.ClientCode,
             },
-          ],
-          order: [["id", "DESC"]],
+            defaults: {
+              RouteId: id,
+              StopName: item?.StopName,
+              StopStatus: item?.StopStatus,
+              ClientCode: req.user.ClientCode,
+            },
+          });
+          if (stop) {
+            result = await stop.update({
+              StopName: item?.StopName,
+              StopStatus: item?.StopStatus,
+              ClientCode: req.user.ClientCode,
+            });
+          }
+          return result;
         });
 
-        if (vehicleroutes) {
-          return respHandler.success(res, {
-            status: true,
-            msg: "Route Updated successfully!!",
-            data: vehicleroutes,
+        if (await Promise.all(promises)) {
+          let vehicleroutes = await VehicleRoute.findOne({
+            where: {
+              id: id,
+              ClientCode: req?.user?.ClientCode,
+            },
+          });
+
+          if (vehicleroutes) {
+            let stops = await VehicleStop.findAll({
+              where: {
+                ClientCode: req?.user?.ClientCode,
+                RouteId: vehicleroutes?.id,
+              },
+            });
+
+            if (stops) {
+              resultdata.push({
+                routeName: vehicleroutes,
+                StopName: stops,
+              });
+            }
+            return respHandler.success(res, {
+              status: true,
+              msg: "Route Updated successfully!!",
+              data: resultdata,
+            });
+          }
+        } else {
+          return respHandler.error(res, {
+            status: false,
+            msg: "Something Went Wrong!!",
+            error: [""],
           });
         }
       } else {
@@ -297,31 +361,45 @@ const UpdateRoute = async (req, res) => {
 
 const GetRoute = async (req, res) => {
   try {
-    const {} = req.query;
+    const { stopName } = req.query;
     let whereClause = {};
-
-    if (req.user) {
+    let result = [];
+    if (req?.user) {
       whereClause.ClientCode = req.user.ClientCode;
     }
-
+    if (stopName) {
+      whereClause.FromRoute = { [Op.regexp]: `^${stopName}.*` };
+    }
     let vehicleroutes = await VehicleRoute.findAll({
       where: {
         ClientCode: req?.user?.ClientCode,
       },
-      include: [
-        {
-          model: VehicleStop,
-        },
-      ],
-      order: [["id", "DESC"]],
     });
 
     if (vehicleroutes) {
-      return respHandler.success(res, {
-        status: true,
-        msg: "Fetch All Route successfully!!",
-        data: vehicleroutes,
+      const promises = vehicleroutes?.map(async (item) => {
+        let stops = await VehicleStop.findAll({
+          where: {
+            ClientCode: req?.user?.ClientCode,
+            RouteId: item?.id,
+          },
+        });
+
+        if (stops) {
+          result.push({
+            routeName: item,
+            StopName: stops,
+          });
+        }
       });
+
+      if (await Promise.all(promises)) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch All Route successfully!!",
+          data: result,
+        });
+      }
     } else {
       return respHandler.error(res, {
         status: false,
@@ -343,25 +421,34 @@ const DeleteRoute = async (req, res) => {
     const { id } = req.body;
     let vehicleroute = await VehicleRoute.findOne({ where: { id: id } });
     if (vehicleroute) {
-      await VehicleRoute.destroy({
-        where: {
-          id: id,
-          ClientCode: req.user?.ClientCode,
-        },
+      let allstops = await VehicleStop.findAll({
+        id: vehicleroute?.id,
+        ClientCode: req.user?.ClientCode,
       });
 
-      await VehicleStop.destroy({
-        where: {
-          id: vehicleroute?.id,
-          ClientCode: req.user?.ClientCode,
-        },
+      const promises = allstops?.map(async (item) => {
+        let result = await VehicleStop.destroy({
+          where: {
+            id: item?.id,
+            ClientCode: req.user?.ClientCode,
+          },
+        });
+        return result;
       });
 
-      return respHandler.success(res, {
-        status: true,
-        data: [],
-        msg: "Route Deleted Successfully!!",
-      });
+      if (await Promise.all(promises)) {
+        await VehicleRoute.destroy({
+          where: {
+            id: id,
+            ClientCode: req.user?.ClientCode,
+          },
+        });
+        return respHandler.success(res, {
+          status: true,
+          data: [],
+          msg: "Route Deleted Successfully!!",
+        });
+      }
     } else {
       return respHandler.error(res, {
         status: false,
@@ -434,8 +521,15 @@ const CreateVehicleDetails = async (req, res) => {
 
 const UpdateVehicleDetails = async (req, res) => {
   try {
-    const { Vahicletype, BusNumber, FualType, Color, GPSDeviceURL, id } =
-      req.body;
+    const {
+      routeId,
+      Vahicletype,
+      BusNumber,
+      FualType,
+      Color,
+      GPSDeviceURL,
+      id,
+    } = req.body;
 
     let status = await VehicleDetails.update(
       {
@@ -484,11 +578,14 @@ const UpdateVehicleDetails = async (req, res) => {
 
 const GetVehicleDetails = async (req, res) => {
   try {
-    const { ClientCode } = req.query;
+    const { BusNumber } = req.query;
     let whereClause = {};
     let result = [];
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
+    }
+    if (BusNumber) {
+      whereClause.BusNumber = { [Op.regexp]: `^${BusNumber}.*` };
     }
 
     let vehicledetails = await VehicleDetails.findAll({
@@ -496,31 +593,36 @@ const GetVehicleDetails = async (req, res) => {
     });
 
     if (vehicledetails) {
-      vehicledetails?.map(async (item) => {
-        let vehicleroutes = await VehicleRoute.findAll({
+      const promises = vehicledetails?.map(async (item) => {
+        let routeDetails = await VehicleRoute.findOne({
           where: {
-            routeId: item?.routeId,
-            ClientCode: req?.user?.ClientCode,
+            id: item?.routeId,
+            ClientCode: req.user.ClientCode,
           },
-          include: [
-            {
-              model: VehicleStop,
-            },
-          ],
-          order: [["id", "DESC"]],
         });
-
-        result.push({
-          vehicledetails: item,
-          vehicleroute: vehicleroutes,
+        let StopNames = await VehicleStop.findAll({
+          where: {
+            RouteId: item?.routeId,
+            ClientCode: req.user.ClientCode,
+          },
         });
+        if (routeDetails || StopNames) {
+          result.push({
+            bus: item,
+            routeDetails: routeDetails,
+            StopNames: StopNames,
+          });
+        }
+        return StopNames;
       });
 
-      return respHandler.success(res, {
-        status: true,
-        msg: "Fetch All Vehicle Details successfully!!",
-        data: result,
-      });
+      if (await Promise.all(promises)) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch All Vehicle Details successfully!!",
+          data: result,
+        });
+      }
     } else {
       return respHandler.error(res, {
         status: false,
@@ -560,6 +662,51 @@ const DeleteVehicleDetails = async (req, res) => {
         status: false,
         msg: "Something Went Wrong!!",
         error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetTransportFee = async (req, res) => {
+  try {
+    const { FromRoute, ToRoute } = req.body;
+
+    let whereClause = {};
+
+    console.log("sjfhdgsjc", FromRoute, ToRoute);
+
+    if (req.user) {
+      whereClause.ClientCode = req.user?.ClientCode;
+    }
+    if (FromRoute) {
+      whereClause.FromRoute = FromRoute;
+    }
+
+    if (ToRoute) {
+      whereClause.ToRoute = ToRoute;
+    }
+
+    let vehicleroute = await VehicleRoute.findOne({
+      where: whereClause,
+    });
+
+    if (vehicleroute) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Bus Fee Successfully!!",
+        data: vehicleroute,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
       });
     }
   } catch (err) {
@@ -652,4 +799,5 @@ module.exports = {
   GetVehicleDetails,
   DeleteVehicleDetails,
   GetVehicleList,
+  GetTransportFee,
 };

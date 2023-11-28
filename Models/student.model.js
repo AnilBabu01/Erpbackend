@@ -215,6 +215,22 @@ const Student = sequelize.define("student", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  HostelPerMonthFee: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  TotalHostelFee: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  TransportPerMonthFee: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  TransportTotalHostelFee: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 });
 Student.hasOne(Coachingfeestatus, { primaryKey: "id" });
 Coachingfeestatus.belongsTo(Student, { foreignKey: "studentId" });

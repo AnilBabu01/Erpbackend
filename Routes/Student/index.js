@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const StudentController = require("../../Controllers/StudentController");
+const SchoolStudentController = require("../../Controllers/SchoolStudentController");
 const upload = require("../../Middleware/upload");
 const verifyToken = require("../../Middleware/Auth");
 const { Validation } = require("../../Middleware/Validate");
@@ -15,7 +16,7 @@ router
         maxCount: 1,
       },
       {
-        name: "adharcard",  
+        name: "adharcard",
         maxCount: 1,
       },
       {
@@ -33,7 +34,7 @@ router
     ]),
     StudentController.Addstudent
   )
-  
+
   .get(verifyToken, StudentController.getAllStudent)
   .put(
     verifyToken,
@@ -43,7 +44,7 @@ router
         maxCount: 1,
       },
       {
-        name: "adharcard",  
+        name: "adharcard",
         maxCount: 1,
       },
       {
@@ -63,6 +64,7 @@ router
   )
   .delete(verifyToken, StudentController.deleteStudent);
 router.post("/login", StudentController.Loging);
-router.post("/pacoachingfee",verifyToken, StudentController.addfee);
-router.get("/getreceiptdata",verifyToken, StudentController.getReceipt);
+router.post("/pacoachingfee", verifyToken, StudentController.addfee);
+router.get("/getreceiptdata", verifyToken, StudentController.getReceipt);
+router.post("/schoolfee", verifyToken, SchoolStudentController.getSchoolFee);
 module.exports = router;

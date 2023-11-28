@@ -38,6 +38,9 @@ const RoomHostel = require('../Models/roomHostel.model');
 const RoomCategory = require('../Models/roomHostel.model');
 const Roomfacility = require('../Models/roomFacility.model');
 const Room = require('../Models/room.model');
+const SchoolFeeStatus = require('../Models/schoolfeestatus.model');
+const SchoolHostelFeeStatus = require("../Models/schoolhostelfee.model");
+const SchoolTransportFeeStatus = require('../Models/schooltransportfee.model');
 sequelize
   .sync({ alter: true })
   .then(() => {

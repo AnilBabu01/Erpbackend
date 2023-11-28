@@ -81,6 +81,7 @@ const Result = sequelize.define("result", {
   },
 });
 
+
 Result.hasMany(AnsQuestion, { primaryKey: "id" });
 AnsQuestion.belongsTo(Result, { foreignKey: "resultId" });
 module.exports = Result;

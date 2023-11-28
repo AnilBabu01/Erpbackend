@@ -19,6 +19,10 @@ const VehicleRoute = sequelize.define("vehicleroute", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  BusRentPermonth: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 });
 
 VehicleRoute.hasMany(VehicleStop, { primaryKey: "id" });

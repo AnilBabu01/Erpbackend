@@ -4,8 +4,12 @@ var bcrypt = require("bcrypt");
 const Student = require("../Models/student.model");
 const Parent = require("../Models/parent.model");
 const Coachingfeestatus = require("../Models/coachingfeestatus.model");
+const SchoolFeeStatus = require("../Models/schoolfeestatus.model");
+const SchoolHostelFeeStatus = require("../Models/schoolhostelfee.model");
+const SchoolTransportFeeStatus = require("../Models/schooltransportfee.model");
 const ReceiptData = require("../Models/receiptdata.model");
 const ReceiptPrefix = require("../Models/receiptprefix.model");
+const Fee = require("../Models/fee.model");
 const { Coachingfeemon } = require("../Helper/Constant");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
@@ -14,6 +18,51 @@ config();
 
 const SECRET = process.env.SECRET;
 //admin
+const MonthanameArray = {
+  1: "April",
+  2: "May",
+  3: "June",
+  4: "July",
+  5: "August",
+  6: "September",
+  7: "October",
+  8: "November",
+  9: "December",
+  10: "January",
+  11: "February",
+  12: "March",
+};
+function printMonthAndYear() {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+
+  let result = [];
+
+  for (let i = 3; i <= 14; i++) {
+    const monthIndex = i % 12;
+    const year = currentYear + Math.floor(i / 12);
+    const monthYear = `${months[monthIndex]} ${year}`;
+    result.push(monthYear);
+  }
+
+  return result;
+}
+
 const Addstudent = async (req, res) => {
   try {
     const {
@@ -47,9 +96,11 @@ const Addstudent = async (req, res) => {
       Library,
       hostal,
       StudentCategory,
+      HostelPerMonthFee,
+      TotalHostelFee,
+      TransportPerMonthFee,
+      TransportTotalHostelFee,
     } = req.body;
-
-    console.log("from form", req.body, req?.files);
 
     const genSalt = 10;
     const hash = await bcrypt.hash(req?.user?.Studentpassword, genSalt);
@@ -167,6 +218,10 @@ const Addstudent = async (req, res) => {
           Transport: Transport,
           Library: Library,
           hostal: hostal,
+          HostelPerMonthFee: HostelPerMonthFee,
+          TotalHostelFee: TotalHostelFee,
+          TransportPerMonthFee: TransportPerMonthFee,
+          TransportTotalHostelFee: TransportTotalHostelFee,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -185,26 +240,121 @@ const Addstudent = async (req, res) => {
         };
 
         let createdUser = await Student.create(newUser);
-        let data = {
-          ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-          studentId: createdUser?.id,
-        };
-        let fee = await Coachingfeestatus.create(data);
-        var token = jwt.sign(
-          {
-            id: createdUser.id,
-            userType: createdUser.userType,
-          },
-          SECRET
-        );
+        let fee;
+        if (req.user?.userType === "institute") {
+          let data = {
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+            studentId: createdUser?.id,
+          };
 
-        if (token) {
-          return respHandler.success(res, {
-            status: true,
-            data: [{ token: token, user: createdUser, fee: fee }],
-            msg: "Student Added Successfully!!",
+          fee = await Coachingfeestatus.create(data);
+          var token = jwt.sign(
+            {
+              id: createdUser.id,
+              userType: createdUser.userType,
+            },
+            SECRET
+          );
+
+          if (token) {
+            return respHandler.success(res, {
+              status: true,
+              data: [{ token: token, user: createdUser, fee: fee }],
+              msg: "Student Added Successfully!!",
+            });
+          }
+        }
+        if (req.user?.userType === "school") {
+          let monthnameAndYaer = printMonthAndYear();
+          let feemonth = await Fee.findOne({
+            where: {
+              coursename: courseorclass,
+              ClientCode: req.user?.ClientCode,
+            },
           });
+          if (feemonth) {
+            const promises1 = monthnameAndYaer?.map(async (item, index) => {
+              var words = item.split(/\s+/);
+              var firstWord = words[0];
+              var lastWord = words[words.length - 1];
+              console.log(firstWord, lastWord);
+              let result = await SchoolFeeStatus.create({
+                ClientCode: req.user?.ClientCode,
+                studentId: createdUser?.id,
+                MonthName: MonthanameArray[index + 1],
+                Year: lastWord,
+                PerMonthFee: feemonth?.feepermonth,
+              });
+              firstWord = "";
+              lastWord = "";
+              return result;
+            });
+
+            const promises2 = monthnameAndYaer?.map(async (item, index) => {
+              var words = item.split(/\s+/);
+              var firstWord = words[0];
+              var lastWord = words[words.length - 1];
+              console.log(firstWord, lastWord);
+
+              let result = await SchoolHostelFeeStatus.create({
+                ClientCode: req.user?.ClientCode,
+                studentId: createdUser?.id,
+                MonthName: MonthanameArray[index + 1],
+                Year: lastWord,
+                PerMonthFee: createdUser?.HostelPerMonthFee,
+              });
+              firstWord = "";
+              lastWord = "";
+              return result;
+            });
+
+            const promises3 = monthnameAndYaer?.map(async (item, index) => {
+              var words = item.split(/\s+/);
+              var firstWord = words[0];
+              var lastWord = words[words.length - 1];
+              console.log(firstWord, lastWord);
+
+              let result = await SchoolTransportFeeStatus.create({
+                ClientCode: req.user?.ClientCode,
+                studentId: createdUser?.id,
+                MonthName: MonthanameArray[index + 1],
+                Year: lastWord,
+                PerMonthFee: createdUser?.TransportPerMonthFee,
+              });
+              firstWord = "";
+              lastWord = "";
+              return result;
+            });
+
+            if (
+              (await Promise.all(promises1)) &&
+              (await Promise.all(promises2)) &&
+              (await Promise.all(promises3))
+            ) {
+              let fee = SchoolFeeStatus.findAll({
+                where: {
+                  ClientCode: req.user?.ClientCode,
+                  studentId: createdUser?.id,
+                },
+              });
+              var token = jwt.sign(
+                {
+                  id: createdUser.id,
+                  userType: createdUser.userType,
+                },
+                SECRET
+              );
+
+              if (token) {
+                return respHandler.success(res, {
+                  status: true,
+                  data: [{ token: token, user: createdUser, fee: fee }],
+                  msg: "Student Added Successfully!!",
+                });
+              }
+            }
+          }
         }
       } else {
         return respHandler.error(res, {
@@ -277,6 +427,10 @@ const Addstudent = async (req, res) => {
           Transport: Transport,
           Library: Library,
           hostal: hostal,
+          HostelPerMonthFee: HostelPerMonthFee,
+          TotalHostelFee: TotalHostelFee,
+          TransportPerMonthFee: TransportPerMonthFee,
+          TransportTotalHostelFee: TransportTotalHostelFee,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -295,25 +449,118 @@ const Addstudent = async (req, res) => {
         };
 
         let createdUser = await Student.create(newUser);
-        let data = {
-          ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-          studentId: createdUser?.id,
-        };
-        let fee = await Coachingfeestatus.create(data);
-        var token = jwt.sign(
-          {
-            id: createdUser.id,
-            userType: createdUser.userType,
-          },
-          SECRET
-        );
-        if (token) {
-          return respHandler.success(res, {
-            status: true,
-            data: [{ token: token, user: createdUser, fee: fee }],
-            msg: "Student Added Created Successfully!!",
+        let fee;
+        if (req.user?.userType === "institute") {
+          let data = {
+            ClientCode: req.user?.ClientCode,
+            institutename: req.user?.institutename,
+            studentId: createdUser?.id,
+          };
+
+          fee = await Coachingfeestatus.create(data);
+          var token = jwt.sign(
+            {
+              id: createdUser.id,
+              userType: createdUser.userType,
+            },
+            SECRET
+          );
+
+          if (token) {
+            return respHandler.success(res, {
+              status: true,
+              data: [{ token: token, user: createdUser, fee: fee }],
+              msg: "Student Added Successfully!!",
+            });
+          }
+        }
+        if (req.user?.userType === "school") {
+          let monthnameAndYaer = printMonthAndYear();
+          let feemonth = await Fee.findOne({
+            where: {
+              coursename: courseorclass,
+              ClientCode: req.user?.ClientCode,
+            },
           });
+          if (feemonth) {
+            const promises1 = monthnameAndYaer?.map(async (item, index) => {
+              var words = item.split(/\s+/);
+              var firstWord = words[0];
+              var lastWord = words[words.length - 1];
+
+              let result = await SchoolFeeStatus.create({
+                ClientCode: req.user?.ClientCode,
+                studentId: createdUser?.id,
+                MonthName: MonthanameArray[index + 1],
+                Year: lastWord,
+                PerMonthFee: feemonth?.feepermonth,
+              });
+              firstWord = "";
+              lastWord = "";
+              return result;
+            });
+            const promises2 = monthnameAndYaer?.map(async (item, index) => {
+              var words = item.split(/\s+/);
+              var firstWord = words[0];
+              var lastWord = words[words.length - 1];
+
+              let result = await SchoolHostelFeeStatus.create({
+                ClientCode: req.user?.ClientCode,
+                studentId: createdUser?.id,
+                MonthName: MonthanameArray[index + 1],
+                Year: lastWord,
+                PerMonthFee: createdUser?.HostelPerMonthFee,
+              });
+              firstWord = "";
+              lastWord = "";
+              return result;
+            });
+
+            const promises3 = monthnameAndYaer?.map(async (item, index) => {
+              var words = item.split(/\s+/);
+              var firstWord = words[0];
+              var lastWord = words[words.length - 1];
+
+              let result = await SchoolTransportFeeStatus.create({
+                ClientCode: req.user?.ClientCode,
+                studentId: createdUser?.id,
+                MonthName: MonthanameArray[index + 1],
+                Year: lastWord,
+                PerMonthFee: createdUser?.TransportPerMonthFee,
+              });
+              firstWord = "";
+              lastWord = "";
+              return result;
+            });
+
+            if (
+              (await Promise.all(promises1)) &&
+              (await Promise.all(promises2)) &&
+              (await Promise.all(promises3))
+            ) {
+              let fee = SchoolFeeStatus.findAll({
+                where: {
+                  ClientCode: req.user?.ClientCode,
+                  studentId: createdUser?.id,
+                },
+              });
+              var token = jwt.sign(
+                {
+                  id: createdUser.id,
+                  userType: createdUser.userType,
+                },
+                SECRET
+              );
+
+              if (token) {
+                return respHandler.success(res, {
+                  status: true,
+                  data: [{ token: token, user: createdUser, fee: fee }],
+                  msg: "Student Added Successfully!!",
+                });
+              }
+            }
+          }
         }
       }
     }
@@ -389,7 +636,7 @@ const getAllStudent = async (req, res) => {
       library,
     } = req.query;
 
-    console.log("geting ",req?.query)
+    console.log("geting ", req?.query);
 
     let whereClause = {};
     let from = new Date(fromdate);
@@ -397,7 +644,6 @@ const getAllStudent = async (req, res) => {
 
     if (req.user) {
       whereClause.ClientCode = req.user?.ClientCode;
-      whereClause.institutename = req.user.institutename;
     }
 
     if (fromdate && todate) {
@@ -493,6 +739,10 @@ const UpdateStudent = async (req, res) => {
       Library,
       StudentCategory,
       hostal,
+      HostelPerMonthFee,
+      TotalHostelFee,
+      TransportPerMonthFee,
+      TransportTotalHostelFee,
     } = req.body;
 
     let student = await Student.findOne({
@@ -554,6 +804,10 @@ const UpdateStudent = async (req, res) => {
           admissionDate: admissionDate,
           markSheetname: markSheetname,
           othersdocName: othersdocName,
+          HostelPerMonthFee: HostelPerMonthFee,
+          TotalHostelFee: TotalHostelFee,
+          TransportPerMonthFee: TransportPerMonthFee,
+          TransportTotalHostelFee: TransportTotalHostelFee,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req.body.profileurl,
