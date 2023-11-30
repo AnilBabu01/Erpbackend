@@ -46,9 +46,10 @@ router.post(
 );
 
 router
-.route("/enquiry", verifyToken)
-.post(verifyToken,  SchoolController.Addenquiry)
-.get(verifyToken,   SchoolController.Getallenquuiry)
-.put(verifyToken, SchoolController.UpdateEnquiry)
-.delete(verifyToken,  SchoolController.DeleteEnquiry);
+  .route("/enquiry", verifyToken)
+  .post(verifyToken, SchoolController.Addenquiry)
+  .get(verifyToken, SchoolController.Getallenquuiry)
+  .put(verifyToken, SchoolController.UpdateEnquiry)
+  .delete(verifyToken, SchoolController.DeleteEnquiry);
+
 module.exports = router;

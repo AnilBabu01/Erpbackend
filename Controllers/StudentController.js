@@ -223,7 +223,9 @@ const Addstudent = async (req, res) => {
           TotalHostelFee: TotalHostelFee,
           TransportPerMonthFee: TransportPerMonthFee,
           TransportTotalHostelFee: TransportTotalHostelFee,
-          AnnualFee:AnnualFee,
+          HostelPendingFee: TotalHostelFee,
+          TransportPendingFee: TransportTotalHostelFee,
+          AnnualFee: AnnualFee,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -286,7 +288,7 @@ const Addstudent = async (req, res) => {
                 studentId: createdUser?.id,
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
-                PerMonthFee: feemonth?.feepermonth,
+                PerMonthFee: createdUser?.permonthfee,
               });
               firstWord = "";
               lastWord = "";
@@ -434,6 +436,8 @@ const Addstudent = async (req, res) => {
           TotalHostelFee: TotalHostelFee,
           TransportPerMonthFee: TransportPerMonthFee,
           TransportTotalHostelFee: TransportTotalHostelFee,
+          HostelPendingFee: TotalHostelFee,
+          TransportPendingFee: TransportTotalHostelFee,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -496,7 +500,7 @@ const Addstudent = async (req, res) => {
                 studentId: createdUser?.id,
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
-                PerMonthFee: feemonth?.feepermonth,
+                PerMonthFee: createdUser?.permonthfee,
               });
               firstWord = "";
               lastWord = "";
@@ -746,7 +750,7 @@ const UpdateStudent = async (req, res) => {
       TotalHostelFee,
       TransportPerMonthFee,
       TransportTotalHostelFee,
-      AnnualFee
+      AnnualFee,
     } = req.body;
 
     let student = await Student.findOne({
@@ -812,7 +816,7 @@ const UpdateStudent = async (req, res) => {
           TotalHostelFee: TotalHostelFee,
           TransportPerMonthFee: TransportPerMonthFee,
           TransportTotalHostelFee: TransportTotalHostelFee,
-          AnnualFee:AnnualFee,
+          AnnualFee: AnnualFee,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req.body.profileurl,
@@ -1065,7 +1069,6 @@ const getReceipt = async (req, res) => {
 
     if (req.user) {
       whereClause.ClientCode = req.user?.ClientCode;
-      whereClause.institutename = req.user.institutename;
     }
     if (fromdate) {
       whereClause.PaidDate = { [Op.regexp]: `^${Dates}.*` };
@@ -1148,7 +1151,323 @@ const getStudentFee = async (req, res) => {
     });
   }
 };
+///Add school academy Fee
+const addSchoolFee = async (req, res) => {
+  try {
+    const { id, acadminArray, studentData, feetype } = req.body;
 
+    let prefix;
+
+    if (req?.user) {
+      prefix = await ReceiptPrefix.findOne({
+        where: {
+          ClientCode: req?.user?.ClientCode,
+        },
+      });
+
+      if (prefix) {
+        const promises = acadminArray?.map(async (item) => {
+          let result = await SchoolFeeStatus.update(
+            {
+              paidStatus: true,
+            },
+            {
+              where: {
+                studentId: id,
+                id: item?.id,
+                ClientCode: req?.user?.ClientCode,
+              },
+            }
+          );
+          return result;
+        });
+
+        if (await Promise.all(promises)) {
+          let studentone = await Student.findOne({
+            where: {
+              id: id,
+            },
+          });
+
+          if (studentone) {
+            let updated = await Student.update(
+              {
+                paidfee:
+                  studentone?.paidfee +
+                  studentone?.permonthfee * acadminArray.length,
+                pendingfee:
+                  Number(studentone?.pendingfee) -
+                  studentone?.permonthfee * acadminArray.length,
+              },
+              {
+                where: {
+                  id: id,
+                  ClientCode: req?.user?.ClientCode,
+                  institutename: req?.user?.institutename,
+                },
+              }
+            );
+            if (updated) {
+              let count = await getClientCount(req);
+              let receipno = `${prefix?.receiptPrefix}${count}`;
+
+              let result = await ReceiptData.create({
+                ClientCode: req?.user?.ClientCode,
+                ReceiptNo: receipno,
+                Feetype: feetype,
+                PaidDate: new Date(),
+                PaidAmount:
+                  feetype === "Registration"
+                    ? studentData?.regisgrationfee
+                    : studentData?.permonthfee * acadminArray.length,
+                RollNo: studentData?.rollnumber,
+                studentName: studentData?.name,
+                fathername: studentData?.fathersName,
+                Course: studentData?.courseorclass,
+                fathersid: studentData?.parentId,
+                studentid: studentData?.id,
+                batchname: studentData?.batch,
+              });
+              if (result) {
+                return respHandler.success(res, {
+                  status: true,
+                  msg: "Academy Fee Added Successfully!!",
+                  data: result,
+                });
+              }
+            }
+          }
+        }
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Please Add Receipt Prefix !!",
+          error: [""],
+        });
+      }
+
+      console.log("dd", prefix?.receiptPrefix);
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+///Add school academy Fee
+const addHostelFee = async (req, res) => {
+  try {
+    const { id, acadminArray, studentData, feetype } = req.body;
+
+    let prefix;
+
+    if (req?.user) {
+      prefix = await ReceiptPrefix.findOne({
+        where: {
+          ClientCode: req?.user?.ClientCode,
+        },
+      });
+
+      if (prefix) {
+        const promises = acadminArray?.map(async (item) => {
+          let result = await SchoolHostelFeeStatus.update(
+            {
+              paidStatus: true,
+            },
+            {
+              where: {
+                studentId: id,
+                id: item?.id,
+                ClientCode: req?.user?.ClientCode,
+              },
+            }
+          );
+          return result;
+        });
+
+        if (await Promise.all(promises)) {
+          let studentone = await Student.findOne({
+            where: {
+              id: id,
+            },
+          });
+
+          if (studentone) {
+            let updated = await Student.update(
+              {
+                HostelPaidFee:
+                  studentone?.HostelPaidFee +
+                  studentone?.HostelPerMonthFee * acadminArray.length,
+                HostelPendingFee:
+                  Number(studentone?.HostelPendingFee) -
+                  studentone?.HostelPerMonthFee * acadminArray.length,
+              },
+              {
+                where: {
+                  id: id,
+                  ClientCode: req?.user?.ClientCode,
+                  institutename: req?.user?.institutename,
+                },
+              }
+            );
+            if (updated) {
+              let count = await getClientCount(req);
+              let receipno = `${prefix?.receiptPrefix}${count}`;
+
+              let result = await ReceiptData.create({
+                ClientCode: req?.user?.ClientCode,
+                ReceiptNo: receipno,
+                Feetype: feetype,
+                PaidDate: new Date(),
+                PaidAmount:
+                  feetype === "Registration"
+                    ? studentData?.regisgrationfee
+                    : studentData?.HostelPerMonthFee * acadminArray.length,
+                RollNo: studentData?.rollnumber,
+                studentName: studentData?.name,
+                fathername: studentData?.fathersName,
+                Course: studentData?.courseorclass,
+                fathersid: studentData?.parentId,
+                studentid: studentData?.id,
+                batchname: studentData?.batch,
+              });
+              if (result) {
+                return respHandler.success(res, {
+                  status: true,
+                  msg: "Hostel Fee Added Successfully!!",
+                  data: result,
+                });
+              }
+            }
+          }
+        }
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Please Add Receipt Prefix !!",
+          error: [""],
+        });
+      }
+
+      console.log("dd", prefix?.receiptPrefix);
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+///Add school academy Fee
+const addTransportFee = async (req, res) => {
+  try {
+    const { id, acadminArray, studentData, feetype } = req.body;
+
+    let prefix;
+
+    if (req?.user) {
+      prefix = await ReceiptPrefix.findOne({
+        where: {
+          ClientCode: req?.user?.ClientCode,
+        },
+      });
+
+      if (prefix) {
+        const promises = acadminArray?.map(async (item) => {
+          let result = await SchoolTransportFeeStatus.update(
+            {
+              paidStatus: true,
+            },
+            {
+              where: {
+                studentId: id,
+                id: item?.id,
+                ClientCode: req?.user?.ClientCode,
+              },
+            }
+          );
+          return result;
+        });
+
+        if (await Promise.all(promises)) {
+          let studentone = await Student.findOne({
+            where: {
+              id: id,
+            },
+          });
+
+          if (studentone) {
+            let updated = await Student.update(
+              {
+                TransportPaidFee:
+                  studentone?.TransportPaidFee +
+                  studentone?.TransportPerMonthFee * acadminArray.length,
+                TransportPendingFee:
+                  Number(studentone?.TransportPendingFee) -
+                  studentone?.TransportPerMonthFee * acadminArray.length,
+              },
+              {
+                where: {
+                  id: id,
+                  ClientCode: req?.user?.ClientCode,
+                  institutename: req?.user?.institutename,
+                },
+              }
+            );
+            if (updated) {
+              let count = await getClientCount(req);
+              let receipno = `${prefix?.receiptPrefix}${count}`;
+
+              let result = await ReceiptData.create({
+                ClientCode: req?.user?.ClientCode,
+                ReceiptNo: receipno,
+                Feetype: feetype,
+                PaidDate: new Date(),
+                PaidAmount:
+                  feetype === "Registration"
+                    ? studentData?.regisgrationfee
+                    : studentData?.TransportPerMonthFee * acadminArray.length,
+                RollNo: studentData?.rollnumber,
+                studentName: studentData?.name,
+                fathername: studentData?.fathersName,
+                Course: studentData?.courseorclass,
+                fathersid: studentData?.parentId,
+                studentid: studentData?.id,
+                batchname: studentData?.batch,
+              });
+              if (result) {
+                return respHandler.success(res, {
+                  status: true,
+                  msg: "Transport Fee Added Successfully!!",
+                  data: result,
+                });
+              }
+            }
+          }
+        }
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Please Add Receipt Prefix !!",
+          error: [""],
+        });
+      }
+
+      console.log("dd", prefix?.receiptPrefix);
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   Addstudent,
   getAllStudent,
@@ -1159,4 +1478,7 @@ module.exports = {
   addfee,
   getReceipt,
   getStudentFee,
+  addSchoolFee,
+  addHostelFee,
+  addTransportFee,
 };

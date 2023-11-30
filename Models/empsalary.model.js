@@ -42,7 +42,47 @@ const EmployeeSalary = sequelize.define("employeesalary", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  Allowance: {
+  Allowance1: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  AllowanceAmount1: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  Allowance2: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  AllowanceAmount2: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  Allowance3: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  AllowanceAmount3: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  Deduction1: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  DeductionAmount1: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  Deduction2: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  DeductionAmount2: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  AllowLeave: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
@@ -50,13 +90,19 @@ const EmployeeSalary = sequelize.define("employeesalary", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  Deduction: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
+
   TotalSalary: {
     type: DataTypes.INTEGER,
     allowNull: true,
+  },
+  PaidAmount: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  SalaryPaid: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: 0,
   },
 });
 

@@ -67,4 +67,7 @@ router.post("/login", StudentController.Loging);
 router.post("/pacoachingfee", verifyToken, StudentController.addfee);
 router.get("/getreceiptdata", verifyToken, StudentController.getReceipt);
 router.post("/schoolfee", verifyToken, SchoolStudentController.getSchoolFee);
+router.post("/addacadmyfee", verifyToken, StudentController.addSchoolFee);
+router.post("/addhostelfee", verifyToken, StudentController.addHostelFee);
+router.post("/addtransportfee", verifyToken, StudentController.addTransportFee);
 module.exports = router;

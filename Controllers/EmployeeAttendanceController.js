@@ -106,6 +106,8 @@ const MarkEmployeeAttendance = async (req, res) => {
       let checkattendance = await AttendanceStudent.findAll({
         where: {
           attendancedate: newdate,
+          yeay: newdate?.getFullYear(),
+          MonthNo: newdate?.getMonth() + 1,
           ClientCode: req.user?.ClientCode,
         },
       });

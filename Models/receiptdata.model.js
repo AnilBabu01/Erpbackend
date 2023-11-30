@@ -16,7 +16,7 @@ const ReceiptData = sequelize.define("receiptdata", {
   },
   institutename: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   typeoforganization: {
     type: DataTypes.STRING,

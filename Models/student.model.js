@@ -218,21 +218,51 @@ const Student = sequelize.define("student", {
   HostelPerMonthFee: {
     type: DataTypes.INTEGER,
     allowNull: true,
+    defaultValue:0
   },
+  
   TotalHostelFee: {
     type: DataTypes.INTEGER,
     allowNull: true,
+    defaultValue:0
+  },
+  HostelPendingFee: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue:0
+  },
+  HostelPaidFee: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue:0
   },
   TransportPerMonthFee: {
     type: DataTypes.INTEGER,
     allowNull: true,
+    defaultValue:0
   },
   TransportTotalHostelFee: {
     type: DataTypes.INTEGER,
     allowNull: true,
+    defaultValue:0
+  },
+  TransportPendingFee: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue:0
+  },
+  TransportPaidFee: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue:0
   },
   AnnualFee: {
     type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue:0
+  },
+  AnnualFeeStatus: {
+    type: DataTypes.BOOLEAN,
     allowNull: true,
   },
 });
