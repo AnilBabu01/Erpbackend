@@ -86,7 +86,7 @@ const EmployeeSalary = sequelize.define("employeesalary", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  BasicSlary: {
+  basicsalary: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
@@ -99,10 +99,23 @@ const EmployeeSalary = sequelize.define("employeesalary", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  employeeof: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  department: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   SalaryPaid: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
     defaultValue: 0,
+  },
+  PaidDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: new Date(),
   },
 });
 

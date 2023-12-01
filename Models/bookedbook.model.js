@@ -53,6 +53,11 @@ const BookedBook = sequelize.define("bookedbook", {
     allowNull: true,
     defaultValue: true,
   },
+  returnStatus: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+  },
 });
 
 module.exports = BookedBook;

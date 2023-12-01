@@ -12,4 +12,11 @@ router
 //   .put(verifyToken, AttendanceController.Updateholiday)
 //   .delete(verifyToken, AttendanceController.Deleteholiday);
 
+router
+  .route("/payempsalary", verifyToken)
+  .post(verifyToken, AttendanceController.PaySalary)
+  .get(verifyToken, AttendanceController.GetEmpSalaryList);
+//.put(verifyToken, AttendanceController.Updateholiday)
+//.delete(verifyToken, AttendanceController.Deleteholiday);
+
 module.exports = router;

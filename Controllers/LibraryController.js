@@ -198,58 +198,74 @@ const BookIssue = async (req, res) => {
       },
     });
     if (student) {
-      const promises = bookDeatils?.map(async (item) => {
-        let book = await Book.findOne({
-          where: {
-            id: item?.id,
-            courseorclass: courseorclass,
-            ClientCode: req.user.ClientCode,
-          },
-        });
-        if (book) {
-          await Book.update(
-            {
-              quantity: Number(book?.quantity - 1),
-            },
-            {
-              where: {
-                id: book?.id,
-                courseorclass: courseorclass,
-                ClientCode: req.user?.ClientCode,
-              },
-            }
-          );
-        }
-        let result = await BookedBook.create({
-          IssueDate: new Date(),
-          courseorclass: courseorclass,
-          studentid: studentid,
+      let isBooksIssued = await BookedBook.findAll({
+        where: {
+          id: studentid,
           rollnumber: rollnumber,
-          BookId: item?.BookId,
-          BookTitle: item?.BookTitle,
-          auther: item?.auther,
-          IssueStatus: item?.issueStatus,
+          courseorclass: courseorclass,
           ClientCode: req.user.ClientCode,
-        });
-
-        return result;
+        },
       });
-
-      if (await Promise.all(promises)) {
-        let bookedBook = await BookedBook.findAll({
-          where: {
-            id: studentid,
-            rollnumber: rollnumber,
-            courseorclass: courseorclass,
-            ClientCode: req.user.ClientCode,
-          },
-        });
-
+      if (isBooksIssued?.length > 0) {
         return respHandler.success(res, {
           status: true,
-          msg: "Book Issue Successfully!!",
-          data: bookedBook,
+          msg: "Books Already Issue Successfully!!",
+          data: isBooksIssued,
         });
+      } else {
+        const promises = bookDeatils?.map(async (item) => {
+          let book = await Book.findOne({
+            where: {
+              id: item?.id,
+              courseorclass: courseorclass,
+              ClientCode: req.user.ClientCode,
+            },
+          });
+          if (book) {
+            await Book.update(
+              {
+                quantity: Number(book?.quantity - 1),
+              },
+              {
+                where: {
+                  id: book?.id,
+                  courseorclass: courseorclass,
+                  ClientCode: req.user?.ClientCode,
+                },
+              }
+            );
+          }
+          let result = await BookedBook.create({
+            IssueDate: new Date(),
+            courseorclass: courseorclass,
+            studentid: studentid,
+            rollnumber: rollnumber,
+            BookId: item?.BookId,
+            BookTitle: item?.BookTitle,
+            auther: item?.auther,
+            IssueStatus: item?.issueStatus,
+            ClientCode: req.user.ClientCode,
+          });
+
+          return result;
+        });
+
+        if (await Promise.all(promises)) {
+          let bookedBook = await BookedBook.findAll({
+            where: {
+              id: studentid,
+              rollnumber: rollnumber,
+              courseorclass: courseorclass,
+              ClientCode: req.user.ClientCode,
+            },
+          });
+
+          return respHandler.success(res, {
+            status: true,
+            msg: "Book Issue Successfully!!",
+            data: bookedBook,
+          });
+        }
       }
     } else {
       return respHandler.error(res, {
@@ -271,7 +287,30 @@ const UpdateBookIssue = async (req, res) => {
   try {
     const { studentid, rollnumber, courseorclass, bookDeatils } = req.body;
     const promises = bookDeatils?.map(async (item) => {
-      console.log(item);
+      let book = await Book.findOne({
+        where: {
+          id: item?.id,
+          courseorclass: courseorclass,
+          ClientCode: req.user.ClientCode,
+        },
+      });
+      if (book) {
+        await Book.update(
+          {
+            quantity:
+              item?.issueStatus === true
+                ? Number(book?.quantity + 1)
+                : book?.quantity,
+          },
+          {
+            where: {
+              id: book?.id,
+              courseorclass: courseorclass,
+              ClientCode: req.user?.ClientCode,
+            },
+          }
+        );
+      }
       let result = await BookedBook.update(
         {
           ReturnDate: new Date(),
@@ -281,8 +320,8 @@ const UpdateBookIssue = async (req, res) => {
           BookId: item?.BookId,
           BookTitle: item?.BookTitle,
           auther: item?.auther,
-          issueStatus: item?.issueStatus,
           ClientCode: req.user.ClientCode,
+          returnStatus: item?.issueStatus,
         },
         {
           where: {
@@ -310,7 +349,7 @@ const UpdateBookIssue = async (req, res) => {
 
       return respHandler.success(res, {
         status: true,
-        msg: "Book Return Successfully!!",
+        msg: "Books Return Successfully!!",
         data: bookedBook,
       });
     } else {
@@ -333,6 +372,7 @@ const GetBookIssue = async (req, res) => {
   try {
     const { studentid, rollnumber, courseorclass } = req.query;
     let whereClause = {};
+    let returnStatus = 0;
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
     }
@@ -344,6 +384,9 @@ const GetBookIssue = async (req, res) => {
     }
     if (rollnumber) {
       whereClause.rollnumber = rollnumber;
+    }
+    if (returnStatus) {
+      whereClause.returnStatus = returnStatus;
     }
 
     let bookedBook = await BookedBook.findAll({

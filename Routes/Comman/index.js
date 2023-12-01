@@ -204,4 +204,18 @@ router
   .get(verifyToken, CommanController.getReceiptPrefix)
   .put(verifyToken, CommanController.UpdateReceiprefix);
 
+router
+  .route("/session", verifyToken)
+  .post(verifyToken, CommanController.CreateSession)
+  .get(verifyToken, CommanController.getSession)
+  .put(verifyToken, CommanController.UpdateSession)
+  .delete(verifyToken, CommanController.DeleteSession);
+
+router
+  .route("/section", verifyToken)
+  .post(verifyToken, CommanController.CreateSection)
+  .get(verifyToken, CommanController.getSection)
+  .put(verifyToken, CommanController.UpdateSection)
+  .delete(verifyToken, CommanController.DeleteSection);
+
 module.exports = router;

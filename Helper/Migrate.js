@@ -42,6 +42,7 @@ const SchoolFeeStatus = require('../Models/schoolfeestatus.model');
 const SchoolHostelFeeStatus = require("../Models/schoolhostelfee.model");
 const SchoolTransportFeeStatus = require('../Models/schooltransportfee.model');
 const Empsalary = require('../Models/empsalary.model');
+const Session = require('../Models/session.model');
 sequelize
   .sync({ alter: true })
   .then(() => {

@@ -12,6 +12,7 @@ const Departments = require("../Models/depart.model");
 const Coursemonth = require("../Models/coursemonth.model");
 const Credentials = require("../Models/Credentials.model");
 const ReceiptPrefix = require("../Models/receiptprefix.model");
+const Session = require("../Models/session.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -282,7 +283,7 @@ const RegisterEmployee = async (req, res) => {
         },
         SECRET
       );
-      
+
       if (token) {
         return respHandler.success(res, {
           status: true,
@@ -743,157 +744,6 @@ const Getprofile = async (req, res) => {
         status: false,
         msg: "Something Went Wrong!!",
         error: ["Not Found"],
-      });
-    }
-  } catch (err) {
-    return respHandler.error(res, {
-      status: false,
-      msg: "Something Went Wrong!!",
-      error: [err.message],
-    });
-  }
-};
-
-const CreateSection = async (req, res) => {
-  try {
-    const { section } = req.body;
-    let sectionv = await Section.findOne({
-      where: {
-        section: section,
-        ClientCode: req.user.ClientCode,
-        institutename: req.user?.institutename,
-      },
-    });
-    if (sectionv) {
-      if (sectionv?.section?.toLowerCase() === section.toLowerCase()) {
-        return respHandler.error(res, {
-          status: false,
-          msg: "Something Went Wrong!!",
-          error: ["AllReady Exsist !!"],
-        });
-      }
-    }
-
-    let sections = await Section.create({
-      ClientCode: req.user?.ClientCode,
-      institutename: req.user?.institutename,
-      section: section,
-    });
-    if (sections) {
-      return respHandler.success(res, {
-        status: true,
-        msg: "Section Created successfully!!",
-        data: [sections],
-      });
-    }
-    return respHandler.error(res, {
-      status: false,
-      msg: "Something Went Wrong!!",
-      error: [err.message],
-    });
-  } catch (err) {
-    return respHandler.error(res, {
-      status: false,
-      msg: "Something Went Wrong!!",
-      error: [err.message],
-    });
-  }
-};
-
-const UpdateSection = async (req, res) => {
-  try {
-    const { section, id } = req.body;
-
-    let status = await Section.update(
-      {
-        section: section,
-      },
-      {
-        where: {
-          id: id,
-          ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-        },
-      }
-    );
-    let studentclass = await Section.findOne({
-      where: {
-        id: id,
-      },
-    });
-
-    if (status) {
-      return respHandler.success(res, {
-        status: true,
-        msg: "Section Updated successfully!!",
-        data: [studentclass],
-      });
-    }
-    return respHandler.error(res, {
-      status: false,
-      msg: "Something Went Wrong!!",
-      error: [err.message],
-    });
-  } catch (err) {
-    return respHandler.error(res, {
-      status: false,
-      msg: "Something Went Wrong!!",
-      error: [err.message],
-    });
-  }
-};
-
-const getSection = async (req, res) => {
-  try {
-    let organizations = await Section.findAll({
-      where: {
-        ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
-      },
-    });
-    if (organizations) {
-      return respHandler.success(res, {
-        status: true,
-        msg: "All Sections successfully!!",
-        data: organizations,
-      });
-    }
-    return respHandler.error(res, {
-      status: false,
-      msg: "Something Went Wrong!!",
-      error: [err.message],
-    });
-  } catch (err) {
-    return respHandler.error(res, {
-      status: false,
-      msg: "Something Went Wrong!!",
-      error: [err.message],
-    });
-  }
-};
-
-const DeleteSection = async (req, res) => {
-  try {
-    const { id } = req.body;
-    let organization = await Section.findOne({ where: { id: id } });
-    if (organization) {
-      await Section.destroy({
-        where: {
-          id: id,
-          ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-        },
-      });
-      return respHandler.success(res, {
-        status: true,
-        data: [],
-        msg: "Section Deleted Successfully!!",
-      });
-    } else {
-      return respHandler.error(res, {
-        status: false,
-        msg: "Something Went Wrong!!",
-        error: ["not found"],
       });
     }
   } catch (err) {
@@ -2333,6 +2183,298 @@ const getReceiptPrefix = async (req, res) => {
   }
 };
 
+const CreateSection = async (req, res) => {
+  try {
+    const { section } = req.body;
+    let sectionv = await Section.findOne({
+      where: {
+        section: section,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (sectionv) {
+      if (sectionv?.section?.toLowerCase() === section.toLowerCase()) {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: ["AllReady Exsist !!"],
+        });
+      }
+    }
+
+    let sections = await Section.create({
+      ClientCode: req.user?.ClientCode,
+      section: section,
+    });
+    if (sections) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Section Created successfully!!",
+        data: [sections],
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateSection = async (req, res) => {
+  try {
+    const { section, id } = req.body;
+
+    let status = await Section.update(
+      {
+        section: section,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      }
+    );
+    let studentclass = await Section.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (status) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Section Updated successfully!!",
+        data: [studentclass],
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const getSection = async (req, res) => {
+  try {
+    let organizations = await Section.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (organizations) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "All Sections successfully!!",
+        data: organizations,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteSection = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let organization = await Section.findOne({ where: { id: id } });
+    if (organization) {
+      await Section.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Section Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const CreateSession = async (req, res) => {
+  try {
+    const { session } = req.body;
+    let sectionv = await Session.findOne({
+      where: {
+        Session: session,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (sectionv) {
+      if (sectionv?.Session?.toLowerCase() === session.toLowerCase()) {
+        return respHandler.error(res, {
+          status: false,
+          msg: "AlReady Exists!!",
+          error: ["AlReady Exsist !!"],
+        });
+      }
+    }
+
+    let sections = await Session.create({
+      ClientCode: req.user?.ClientCode,
+      Session: session,
+    });
+    if (sections) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Session Created successfully!!",
+        data: [sections],
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateSession = async (req, res) => {
+  try {
+    const { session, id } = req.body;
+
+    let status = await Session.update(
+      {
+        Session: session,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      }
+    );
+    let studentclass = await Session.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (status) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Session Updated successfully!!",
+        data: [studentclass],
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const getSession = async (req, res) => {
+  try {
+    let organizations = await Session.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (organizations) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "All Sessions successfully!!",
+        data: organizations,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteSession = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let organization = await Session.findOne({ where: { id: id } });
+    if (organization) {
+      await Session.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Session Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   Getprofile,
   updateprofile,
@@ -2378,4 +2520,8 @@ module.exports = {
   CreateReceiptPrefix,
   UpdateReceiprefix,
   getReceiptPrefix,
+  CreateSession,
+  UpdateSession,
+  getSession,
+  DeleteSession,
 };
