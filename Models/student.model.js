@@ -265,6 +265,30 @@ const Student = sequelize.define("student", {
     type: DataTypes.BOOLEAN,
     allowNull: true,
   },
+  Session: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Section: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  SrNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  hostelname: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Category: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Facility: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 Student.hasOne(Coachingfeestatus, { primaryKey: "id" });
 Coachingfeestatus.belongsTo(Student, { foreignKey: "studentId" });

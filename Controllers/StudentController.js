@@ -101,6 +101,13 @@ const Addstudent = async (req, res) => {
       TransportPerMonthFee,
       TransportTotalHostelFee,
       AnnualFee,
+      Session,
+      Section,
+      whatsappNo,
+      SrNumber,
+      hostelname,
+      Category,
+      Facility,
     } = req.body;
 
     const genSalt = 10;
@@ -133,22 +140,38 @@ const Addstudent = async (req, res) => {
           where: {
             courseorclass: courseorclass,
             rollnumber: rollnumber,
+            Session: Session,
+            Section: Section,
             ClientCode: req.user?.ClientCode,
           },
         });
+
         if (checkrollno != null) {
           return respHandler.error(res, {
             status: false,
-            msg: "Roll NO already exist!!",
+            msg: "Roll No Already Exist!!",
           });
         }
+
+        let checkSno = await Student.findOne({
+          where: {
+            SrNumber: SrNumber,
+            ClientCode: req.user?.ClientCode,
+          },
+        });
+        if (checkSno != null) {
+          return respHandler.error(res, {
+            status: false,
+            msg: "Sr NO Already Exist!!",
+          });
+        }
+
         let user = await Student.findOne({
           where: {
-            email: email,
-            name: name,
-            phoneno1: phoneno1,
             courseorclass: courseorclass,
             rollnumber: rollnumber,
+            Session: Session,
+            Section: Section,
             ClientCode: req.user?.ClientCode,
           },
         });
@@ -226,6 +249,13 @@ const Addstudent = async (req, res) => {
           HostelPendingFee: TotalHostelFee,
           TransportPendingFee: TransportTotalHostelFee,
           AnnualFee: AnnualFee,
+          Session: Session,
+          Section: Section,
+          SrNumber: SrNumber,
+          whatsappNo: whatsappNo,
+          hostelname: hostelname,
+          Category: Category,
+          Facility: Facility,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -243,20 +273,20 @@ const Addstudent = async (req, res) => {
             : "",
         };
 
-        let createdUser = await Student.create(newUser);
+        let CreatedStudent = await Student.create(newUser);
         let fee;
         if (req.user?.userType === "institute") {
           let data = {
             ClientCode: req.user?.ClientCode,
             institutename: req.user?.institutename,
-            studentId: createdUser?.id,
+            studentId: CreatedStudent?.id,
           };
 
           fee = await Coachingfeestatus.create(data);
           var token = jwt.sign(
             {
-              id: createdUser.id,
-              userType: createdUser.userType,
+              id: CreatedStudent.id,
+              userType: CreatedStudent.userType,
             },
             SECRET
           );
@@ -264,7 +294,7 @@ const Addstudent = async (req, res) => {
           if (token) {
             return respHandler.success(res, {
               status: true,
-              data: [{ token: token, user: createdUser, fee: fee }],
+              data: [{ token: token, user: CreatedStudent, fee: fee }],
               msg: "Student Added Successfully!!",
             });
           }
@@ -285,10 +315,10 @@ const Addstudent = async (req, res) => {
               console.log(firstWord, lastWord);
               let result = await SchoolFeeStatus.create({
                 ClientCode: req.user?.ClientCode,
-                studentId: createdUser?.id,
+                studentId: CreatedStudent?.id,
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
-                PerMonthFee: createdUser?.permonthfee,
+                PerMonthFee: CreatedStudent?.permonthfee,
               });
               firstWord = "";
               lastWord = "";
@@ -303,10 +333,10 @@ const Addstudent = async (req, res) => {
 
               let result = await SchoolHostelFeeStatus.create({
                 ClientCode: req.user?.ClientCode,
-                studentId: createdUser?.id,
+                studentId: CreatedStudent?.id,
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
-                PerMonthFee: createdUser?.HostelPerMonthFee,
+                PerMonthFee: CreatedStudent?.HostelPerMonthFee,
               });
               firstWord = "";
               lastWord = "";
@@ -321,10 +351,10 @@ const Addstudent = async (req, res) => {
 
               let result = await SchoolTransportFeeStatus.create({
                 ClientCode: req.user?.ClientCode,
-                studentId: createdUser?.id,
+                studentId: CreatedStudent?.id,
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
-                PerMonthFee: createdUser?.TransportPerMonthFee,
+                PerMonthFee: CreatedStudent?.TransportPerMonthFee,
               });
               firstWord = "";
               lastWord = "";
@@ -339,13 +369,13 @@ const Addstudent = async (req, res) => {
               let fee = SchoolFeeStatus.findAll({
                 where: {
                   ClientCode: req.user?.ClientCode,
-                  studentId: createdUser?.id,
+                  studentId: CreatedStudent?.id,
                 },
               });
               var token = jwt.sign(
                 {
-                  id: createdUser.id,
-                  userType: createdUser.userType,
+                  id: CreatedStudent.id,
+                  userType: CreatedStudent.userType,
                 },
                 SECRET
               );
@@ -353,7 +383,7 @@ const Addstudent = async (req, res) => {
               if (token) {
                 return respHandler.success(res, {
                   status: true,
-                  data: [{ token: token, user: createdUser, fee: fee }],
+                  data: [{ token: token, user: CreatedStudent, fee: fee }],
                   msg: "Student Added Successfully!!",
                 });
               }
@@ -432,6 +462,13 @@ const Addstudent = async (req, res) => {
           Library: Library,
           hostal: hostal,
           AnnualFee: AnnualFee,
+          Session: Session,
+          Section: Section,
+          hostelname: hostelname,
+          Category: Category,
+          Facility: Facility,
+          SrNumber: SrNumber,
+          whatsappNo: whatsappNo,
           HostelPerMonthFee: HostelPerMonthFee,
           TotalHostelFee: TotalHostelFee,
           TransportPerMonthFee: TransportPerMonthFee,
@@ -455,20 +492,19 @@ const Addstudent = async (req, res) => {
             : "",
         };
 
-        let createdUser = await Student.create(newUser);
+        let CreatedStudent = await Student.create(newUser);
         let fee;
         if (req.user?.userType === "institute") {
           let data = {
             ClientCode: req.user?.ClientCode,
-            institutename: req.user?.institutename,
-            studentId: createdUser?.id,
+            studentId: CreatedStudent?.id,
           };
 
           fee = await Coachingfeestatus.create(data);
           var token = jwt.sign(
             {
-              id: createdUser.id,
-              userType: createdUser.userType,
+              id: CreatedStudent.id,
+              userType: CreatedStudent.userType,
             },
             SECRET
           );
@@ -476,7 +512,7 @@ const Addstudent = async (req, res) => {
           if (token) {
             return respHandler.success(res, {
               status: true,
-              data: [{ token: token, user: createdUser, fee: fee }],
+              data: [{ token: token, user: CreatedStudent, fee: fee }],
               msg: "Student Added Successfully!!",
             });
           }
@@ -497,10 +533,10 @@ const Addstudent = async (req, res) => {
 
               let result = await SchoolFeeStatus.create({
                 ClientCode: req.user?.ClientCode,
-                studentId: createdUser?.id,
+                studentId: CreatedStudent?.id,
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
-                PerMonthFee: createdUser?.permonthfee,
+                PerMonthFee: CreatedStudent?.permonthfee,
               });
               firstWord = "";
               lastWord = "";
@@ -513,10 +549,10 @@ const Addstudent = async (req, res) => {
 
               let result = await SchoolHostelFeeStatus.create({
                 ClientCode: req.user?.ClientCode,
-                studentId: createdUser?.id,
+                studentId: CreatedStudent?.id,
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
-                PerMonthFee: createdUser?.HostelPerMonthFee,
+                PerMonthFee: CreatedStudent?.HostelPerMonthFee,
               });
               firstWord = "";
               lastWord = "";
@@ -530,10 +566,10 @@ const Addstudent = async (req, res) => {
 
               let result = await SchoolTransportFeeStatus.create({
                 ClientCode: req.user?.ClientCode,
-                studentId: createdUser?.id,
+                studentId: CreatedStudent?.id,
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
-                PerMonthFee: createdUser?.TransportPerMonthFee,
+                PerMonthFee: CreatedStudent?.TransportPerMonthFee,
               });
               firstWord = "";
               lastWord = "";
@@ -548,13 +584,13 @@ const Addstudent = async (req, res) => {
               let fee = SchoolFeeStatus.findAll({
                 where: {
                   ClientCode: req.user?.ClientCode,
-                  studentId: createdUser?.id,
+                  studentId: CreatedStudent?.id,
                 },
               });
               var token = jwt.sign(
                 {
-                  id: createdUser.id,
-                  userType: createdUser.userType,
+                  id: CreatedStudent.id,
+                  userType: CreatedStudent.userType,
                 },
                 SECRET
               );
@@ -562,7 +598,7 @@ const Addstudent = async (req, res) => {
               if (token) {
                 return respHandler.success(res, {
                   status: true,
-                  data: [{ token: token, user: createdUser, fee: fee }],
+                  data: [{ token: token, user: CreatedStudent, fee: fee }],
                   msg: "Student Added Successfully!!",
                 });
               }
@@ -641,6 +677,8 @@ const getAllStudent = async (req, res) => {
       status,
       categoryname,
       library,
+      sessionname,
+      sectionname,
     } = req.query;
 
     console.log("geting ", req?.query);
@@ -677,6 +715,12 @@ const getAllStudent = async (req, res) => {
     }
     if (categoryname) {
       whereClause.StudentCategory = { [Op.regexp]: `^${categoryname}.*` };
+    }
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+    }
+    if (sectionname) {
+      whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
     }
     if (library) {
       whereClause.Library = library;
@@ -751,6 +795,13 @@ const UpdateStudent = async (req, res) => {
       TransportPerMonthFee,
       TransportTotalHostelFee,
       AnnualFee,
+      Session,
+      Section,
+      whatsappNo,
+      SrNumber,
+      hostelname,
+      Category,
+      Facility,
     } = req.body;
 
     let student = await Student.findOne({
@@ -817,6 +868,13 @@ const UpdateStudent = async (req, res) => {
           TransportPerMonthFee: TransportPerMonthFee,
           TransportTotalHostelFee: TransportTotalHostelFee,
           AnnualFee: AnnualFee,
+          Session: Session,
+          SrNumber: SrNumber,
+          Section: Section,
+          hostelname: hostelname,
+          Category: Category,
+          Facility: Facility,
+          whatsappNo: whatsappNo,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req.body.profileurl,
@@ -1468,6 +1526,163 @@ const addTransportFee = async (req, res) => {
     });
   }
 };
+
+const ChangeSession = async (req, res) => {
+  try {
+    const { studentlist, session, section, classname } = req.body;
+    let newsate = new Date();
+    const promises = studentlist?.map(async (item) => {
+      let result = await Student.create({
+        name: item?.name,
+        email: item?.email,
+        ClientCode: req.user?.ClientCode,
+        logourl: req?.user?.logourl,
+        phoneno1: item?.phoneno1,
+        phoneno2: item?.phoneno2,
+        address: item?.address,
+        parentId: item?.parentId,
+        city: item?.city,
+        state: item?.state,
+        pincode: item?.pincode,
+        fathersPhoneNo: item?.fathersPhoneNo,
+        fathersName: item?.fathersName,
+        MathersName: item?.MathersName,
+        rollnumber: item?.rollnumber,
+        StudentStatus: item?.StudentStatus,
+        Status: item?.Status,
+        StudentCategory: item?.StudentCategory,
+        courseorclass: item?.courseorclass,
+        courseduration: item?.courseduration,
+        studentTotalFee: item?.studentTotalFee,
+        regisgrationfee:item?.regisgrationfee,
+        permonthfee: item?.permonthfee,
+        adharno: item?.adharno,
+        pancardnno: item?.pancardnno,
+        courseorclass: classname,
+        Transport: item?.Transport,
+        Library: item?.Library,
+        hostal: item?.hostal,
+        admissionDate: newsate,
+        password: item?.password,
+        markSheetname: item?.markSheetname,
+        othersdocName: item?.othersdocName,
+        HostelPerMonthFee: item?.HostelPerMonthFee,
+        TotalHostelFee: item?.TotalHostelFee,
+        TransportPerMonthFee: item?.TransportPerMonthFee,
+        TransportTotalHostelFee: item?.TransportTotalHostelFee,
+        AnnualFee: item?.AnnualFee,
+        Session: session,
+        SrNumber: item?.SrNumber,
+        Section: section,
+        hostelname: item?.hostelname,
+        Category: item?.Category,
+        Facility: item?.Facility,
+        whatsappNo: item?.whatsappNo,
+        profileurl: item?.profileurl,
+        adharcard: item?.adharcard,
+        markSheet: item?.markSheet,
+        othersdoc: item?.othersdoc,
+        BirthDocument: item?.BirthDocument,
+        pendingfee: item?.studentTotalFee,
+        HostelPendingFee: item?.TotalHostelFee,
+        TransportPendingFee: item?.TransportTotalHostelFee,
+      });
+
+      return result;
+    });
+
+    if (await Promise.all(promises)) {
+      let allchangedSession = await Student.findAll({
+        where: {
+          Session: session,
+          courseorclass: classname,
+          Section: section,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      if (allchangedSession) {
+        let promises = allchangedSession?.map(async (items) => {
+          let monthnameAndYaer = printMonthAndYear();
+          const promises1 = monthnameAndYaer?.map(async (item, index) => {
+            var words = item.split(/\s+/);
+            var firstWord = words[0];
+            var lastWord = words[words.length - 1];
+            console.log(firstWord, lastWord);
+            let result = await SchoolFeeStatus.create({
+              ClientCode: req.user?.ClientCode,
+              studentId: items?.id,
+              MonthName: MonthanameArray[index + 1],
+              Year: lastWord,
+              PerMonthFee: items?.permonthfee,
+            });
+            firstWord = "";
+            lastWord = "";
+            return result;
+          });
+
+          const promises2 = monthnameAndYaer?.map(async (item, index) => {
+            var words = item.split(/\s+/);
+            var firstWord = words[0];
+            var lastWord = words[words.length - 1];
+            console.log(firstWord, lastWord);
+
+            let result = await SchoolHostelFeeStatus.create({
+              ClientCode: req.user?.ClientCode,
+              studentId: items?.id,
+              MonthName: MonthanameArray[index + 1],
+              Year: lastWord,
+              PerMonthFee: items?.HostelPerMonthFee,
+            });
+            firstWord = "";
+            lastWord = "";
+            return result;
+          });
+
+          const promises3 = monthnameAndYaer?.map(async (item, index) => {
+            var words = item.split(/\s+/);
+            var firstWord = words[0];
+            var lastWord = words[words.length - 1];
+            console.log(firstWord, lastWord);
+
+            let result = await SchoolTransportFeeStatus.create({
+              ClientCode: req.user?.ClientCode,
+              studentId: items?.id,
+              MonthName: MonthanameArray[index + 1],
+              Year: lastWord,
+              PerMonthFee: items?.TransportPerMonthFee,
+            });
+            firstWord = "";
+            lastWord = "";
+            return result;
+          });
+          if (
+            (await Promise.all(promises1)) &&
+            (await Promise.all(promises2)) &&
+            (await Promise.all(promises3))
+          ) {
+            return 1;
+          }
+        });
+
+        if (await Promise.all(promises)) {
+          if (allchangedSession) {
+            return respHandler.success(res, {
+              status: true,
+              msg: "Session Changed Successfully!!",
+              data: allchangedSession,
+            });
+          }
+        }
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   Addstudent,
   getAllStudent,
@@ -1481,4 +1696,5 @@ module.exports = {
   addSchoolFee,
   addHostelFee,
   addTransportFee,
+  ChangeSession,
 };

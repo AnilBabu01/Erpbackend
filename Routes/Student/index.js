@@ -70,4 +70,5 @@ router.post("/schoolfee", verifyToken, SchoolStudentController.getSchoolFee);
 router.post("/addacadmyfee", verifyToken, StudentController.addSchoolFee);
 router.post("/addhostelfee", verifyToken, StudentController.addHostelFee);
 router.post("/addtransportfee", verifyToken, StudentController.addTransportFee);
+router.post("/changesession", verifyToken, StudentController.ChangeSession);
 module.exports = router;

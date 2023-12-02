@@ -725,10 +725,10 @@ const GetHostelFee = async (req, res) => {
       whereClause.hostelname = { [Op.regexp]: `^${hostelname}.*` };
     }
     if (Category) {
-      whereClause.hostelname = { [Op.regexp]: `^${Category}.*` };
+      whereClause.Category = { [Op.regexp]: `^${Category}.*` };
     }
     if (Facility) {
-      whereClause.hostelname = { [Op.regexp]: `^${Facility}.*` };
+      whereClause.Facility = { [Op.regexp]: `^${Facility}.*` };
     }
 
     let Roomrent = await Room.findOne({
@@ -773,5 +773,5 @@ module.exports = {
   UpdateRoom,
   GetRoom,
   DeleteRoom,
-  GetHostelFee
+  GetHostelFee,
 };
