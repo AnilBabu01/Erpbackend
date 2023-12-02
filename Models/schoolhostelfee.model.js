@@ -35,6 +35,14 @@ const SchoolHostelFeeStatus = sequelize.define("schoolhostelfeestatus", {
     allowNull: true,
     defaultValue: false,
   },
+  SrNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Session: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = SchoolHostelFeeStatus;

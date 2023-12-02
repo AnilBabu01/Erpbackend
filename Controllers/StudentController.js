@@ -249,8 +249,8 @@ const Addstudent = async (req, res) => {
           HostelPendingFee: TotalHostelFee,
           TransportPendingFee: TransportTotalHostelFee,
           AnnualFee: AnnualFee,
-          Session: Session,
           Section: Section,
+          Session: Session,
           SrNumber: SrNumber,
           whatsappNo: whatsappNo,
           hostelname: hostelname,
@@ -319,6 +319,8 @@ const Addstudent = async (req, res) => {
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
                 PerMonthFee: CreatedStudent?.permonthfee,
+                Session: Session,
+                SrNumber: SrNumber,
               });
               firstWord = "";
               lastWord = "";
@@ -337,6 +339,8 @@ const Addstudent = async (req, res) => {
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
                 PerMonthFee: CreatedStudent?.HostelPerMonthFee,
+                Session: Session,
+                SrNumber: SrNumber,
               });
               firstWord = "";
               lastWord = "";
@@ -355,6 +359,8 @@ const Addstudent = async (req, res) => {
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
                 PerMonthFee: CreatedStudent?.TransportPerMonthFee,
+                Session: Session,
+                SrNumber: SrNumber,
               });
               firstWord = "";
               lastWord = "";
@@ -537,6 +543,8 @@ const Addstudent = async (req, res) => {
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
                 PerMonthFee: CreatedStudent?.permonthfee,
+                Session: Session,
+                SrNumber: SrNumber,
               });
               firstWord = "";
               lastWord = "";
@@ -553,6 +561,8 @@ const Addstudent = async (req, res) => {
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
                 PerMonthFee: CreatedStudent?.HostelPerMonthFee,
+                Session: Session,
+                SrNumber: SrNumber,
               });
               firstWord = "";
               lastWord = "";
@@ -570,6 +580,8 @@ const Addstudent = async (req, res) => {
                 MonthName: MonthanameArray[index + 1],
                 Year: lastWord,
                 PerMonthFee: CreatedStudent?.TransportPerMonthFee,
+                Session: Session,
+                SrNumber: SrNumber,
               });
               firstWord = "";
               lastWord = "";
@@ -978,7 +990,6 @@ const addfee = async (req, res) => {
           where: {
             id: id,
             ClientCode: req?.user?.ClientCode,
-            institutename: req?.user?.institutename,
           },
         }
       );
@@ -995,7 +1006,6 @@ const addfee = async (req, res) => {
         prefix = await ReceiptPrefix.findOne({
           where: {
             ClientCode: req?.user?.ClientCode,
-            institutename: req?.user?.institutename,
           },
         });
         if (prefix) {
@@ -1010,7 +1020,6 @@ const addfee = async (req, res) => {
                 where: {
                   studentId: id,
                   ClientCode: req?.user?.ClientCode,
-                  institutename: req?.user?.institutename,
                 },
               }
             );
@@ -1078,6 +1087,9 @@ const addfee = async (req, res) => {
               fathersid: studentData?.parentId,
               studentid: studentData?.id,
               batchname: studentData?.batch,
+              SNO: studentData?.SrNumber,
+              Session: studentData?.Session,
+              Course: studentData?.courseorclass,
             });
             if (result) {
               let student = await Student.findOne({
@@ -1176,7 +1188,6 @@ const getStudentFee = async (req, res) => {
 
     if (req.user) {
       whereClause.ClientCode = req.user?.ClientCode;
-      whereClause.institutename = req.user.institutename;
       whereClause.id = req?.user?.id;
     }
 
@@ -1282,6 +1293,8 @@ const addSchoolFee = async (req, res) => {
                 studentName: studentData?.name,
                 fathername: studentData?.fathersName,
                 Course: studentData?.courseorclass,
+                SNO: studentData?.SrNumber,
+                Session: studentData?.Session,
                 fathersid: studentData?.parentId,
                 studentid: studentData?.id,
                 batchname: studentData?.batch,
@@ -1391,6 +1404,8 @@ const addHostelFee = async (req, res) => {
                 fathersid: studentData?.parentId,
                 studentid: studentData?.id,
                 batchname: studentData?.batch,
+                SNO: studentData?.SrNumber,
+                Session: studentData?.Session,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1497,6 +1512,8 @@ const addTransportFee = async (req, res) => {
                 fathersid: studentData?.parentId,
                 studentid: studentData?.id,
                 batchname: studentData?.batch,
+                SNO: studentData?.SrNumber,
+                Session: studentData?.Session,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1554,7 +1571,7 @@ const ChangeSession = async (req, res) => {
         courseorclass: item?.courseorclass,
         courseduration: item?.courseduration,
         studentTotalFee: item?.studentTotalFee,
-        regisgrationfee:item?.regisgrationfee,
+        regisgrationfee: item?.regisgrationfee,
         permonthfee: item?.permonthfee,
         adharno: item?.adharno,
         pancardnno: item?.pancardnno,

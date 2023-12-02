@@ -26,11 +26,11 @@ const ReceiptData = sequelize.define("receiptdata", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  fathername:{
+  fathername: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  batchname:{
+  batchname: {
     type: DataTypes.STRING,
     allowNull: true,
   },
@@ -41,7 +41,7 @@ const ReceiptData = sequelize.define("receiptdata", {
   Feetype: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue:'Registration'
+    defaultValue: "Registration",
   },
   // PayForMonth: {
   //   type: DataTypes.STRING,
@@ -70,6 +70,14 @@ const ReceiptData = sequelize.define("receiptdata", {
   studentid: {
     type: DataTypes.INTEGER,
     allowNull: false,
+  },
+  SNO: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Session: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
 });
 
