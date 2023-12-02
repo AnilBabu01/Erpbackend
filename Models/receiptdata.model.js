@@ -79,6 +79,10 @@ const ReceiptData = sequelize.define("receiptdata", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  Section: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = ReceiptData;

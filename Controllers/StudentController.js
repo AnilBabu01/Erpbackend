@@ -1090,6 +1090,7 @@ const addfee = async (req, res) => {
               SNO: studentData?.SrNumber,
               Session: studentData?.Session,
               Course: studentData?.courseorclass,
+              Section:studentData?.Section
             });
             if (result) {
               let student = await Student.findOne({
@@ -1295,6 +1296,7 @@ const addSchoolFee = async (req, res) => {
                 Course: studentData?.courseorclass,
                 SNO: studentData?.SrNumber,
                 Session: studentData?.Session,
+                Section:studentData?.Section,
                 fathersid: studentData?.parentId,
                 studentid: studentData?.id,
                 batchname: studentData?.batch,
@@ -1406,6 +1408,7 @@ const addHostelFee = async (req, res) => {
                 batchname: studentData?.batch,
                 SNO: studentData?.SrNumber,
                 Session: studentData?.Session,
+                Section:studentData?.Section
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1514,6 +1517,7 @@ const addTransportFee = async (req, res) => {
                 batchname: studentData?.batch,
                 SNO: studentData?.SrNumber,
                 Session: studentData?.Session,
+                Section:studentData?.Section
               });
               if (result) {
                 return respHandler.success(res, {
