@@ -10,10 +10,12 @@ const SchoolTransportFeeStatus = require("../Models/schooltransportfee.model");
 const ReceiptData = require("../Models/receiptdata.model");
 const ReceiptPrefix = require("../Models/receiptprefix.model");
 const Fee = require("../Models/fee.model");
+const OtherFee = require("../Models/otherfee.model");
 const { Coachingfeemon } = require("../Helper/Constant");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
+var moment = require("moment");
 config();
 
 const SECRET = process.env.SECRET;
@@ -691,9 +693,8 @@ const getAllStudent = async (req, res) => {
       library,
       sessionname,
       sectionname,
+      seno,
     } = req.query;
-
-    console.log("geting ", req?.query);
 
     let whereClause = {};
     let from = new Date(fromdate);
@@ -738,7 +739,9 @@ const getAllStudent = async (req, res) => {
       whereClause.Library = library;
     }
 
-    console.log("con", whereClause);
+    if (seno) {
+      whereClause.SrNumber = { [Op.regexp]: `^${seno}.*` };
+    }
 
     let students = await Student.findAll({
       where: whereClause,
@@ -967,15 +970,15 @@ const deleteStudent = async (req, res) => {
     });
   }
 };
+
 getClientCount = async (req) => {
-  let count = await ReceiptData.findAll({
+  let count = await ReceiptData.count({
     where: {
       ClientCode: req?.user?.ClientCode,
-      institutename: req?.user?.institutename,
     },
   });
 
-  return count?.length + 1;
+  return count;
 };
 
 const addfee = async (req, res) => {
@@ -1068,14 +1071,14 @@ const addfee = async (req, res) => {
 
             let count = await getClientCount(req);
             let receipno = `${prefix?.receiptPrefix}${count}`;
-
+            let newdate = new Date();
             let result = await ReceiptData.create({
               ClientCode: req?.user?.ClientCode,
               institutename: req?.user?.institutename,
               typeoforganization: req?.user?.institutename,
               ReceiptNo: receipno,
               Feetype: feetype,
-              PaidDate: new Date(),
+              PaidDate: moment(new Date()).format("YYYY/MM/DD"),
               PaidAmount:
                 feetype === "Registration"
                   ? studentData?.regisgrationfee
@@ -1090,7 +1093,7 @@ const addfee = async (req, res) => {
               SNO: studentData?.SrNumber,
               Session: studentData?.Session,
               Course: studentData?.courseorclass,
-              Section:studentData?.Section
+              Section: studentData?.Section,
             });
             if (result) {
               let student = await Student.findOne({
@@ -1134,15 +1137,23 @@ const addfee = async (req, res) => {
 ///amdin or employee can get all studbnt list
 const getReceipt = async (req, res) => {
   try {
-    const { fromdate, name, studentname, rollnumber } = req.query;
+    const {
+      fromdate,
+      name,
+      studentname,
+      rollnumber,
+      sessionname,
+      sectionname,
+      sno,
+    } = req.query;
     let Dates = new Date(fromdate);
     let whereClause = {};
-
+    console.log("paramers", req.query);
     if (req.user) {
       whereClause.ClientCode = req.user?.ClientCode;
     }
     if (fromdate) {
-      whereClause.PaidDate = { [Op.regexp]: `^${Dates}.*` };
+      whereClause.PaidDate = { Dates };
     }
 
     if (name) {
@@ -1150,10 +1161,19 @@ const getReceipt = async (req, res) => {
     }
 
     if (rollnumber) {
-      whereClause.RollNo = { [Op.regexp]: `^${rollnumber}.*` };
+      whereClause.RollNo = { [Op.regexp]: `^${Number(rollnumber)}.*` }
     }
     if (studentname) {
       whereClause.studentName = { [Op.regexp]: `^${studentname}.*` };
+    }
+    if (sno) {
+      whereClause.SNO = { [Op.regexp]: `^${sno}.*` };
+    }
+    if (sectionname) {
+      whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
+    }
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
     }
 
     let receipts = await ReceiptData.findAll({
@@ -1280,12 +1300,12 @@ const addSchoolFee = async (req, res) => {
             if (updated) {
               let count = await getClientCount(req);
               let receipno = `${prefix?.receiptPrefix}${count}`;
-
+              let newdate = new Date();
               let result = await ReceiptData.create({
                 ClientCode: req?.user?.ClientCode,
                 ReceiptNo: receipno,
                 Feetype: feetype,
-                PaidDate: new Date(),
+                PaidDate: moment(Date()).format("YYYY/MM/DD"),
                 PaidAmount:
                   feetype === "Registration"
                     ? studentData?.regisgrationfee
@@ -1296,7 +1316,7 @@ const addSchoolFee = async (req, res) => {
                 Course: studentData?.courseorclass,
                 SNO: studentData?.SrNumber,
                 Session: studentData?.Session,
-                Section:studentData?.Section,
+                Section: studentData?.Section,
                 fathersid: studentData?.parentId,
                 studentid: studentData?.id,
                 batchname: studentData?.batch,
@@ -1389,12 +1409,12 @@ const addHostelFee = async (req, res) => {
             if (updated) {
               let count = await getClientCount(req);
               let receipno = `${prefix?.receiptPrefix}${count}`;
-
+              let newdate = new Date();
               let result = await ReceiptData.create({
                 ClientCode: req?.user?.ClientCode,
                 ReceiptNo: receipno,
                 Feetype: feetype,
-                PaidDate: new Date(),
+                PaidDate: moment(new Date()).format("YYYY/MM/DD"),
                 PaidAmount:
                   feetype === "Registration"
                     ? studentData?.regisgrationfee
@@ -1408,7 +1428,7 @@ const addHostelFee = async (req, res) => {
                 batchname: studentData?.batch,
                 SNO: studentData?.SrNumber,
                 Session: studentData?.Session,
-                Section:studentData?.Section
+                Section: studentData?.Section,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1498,12 +1518,12 @@ const addTransportFee = async (req, res) => {
             if (updated) {
               let count = await getClientCount(req);
               let receipno = `${prefix?.receiptPrefix}${count}`;
-
+              let newdate = new Date();
               let result = await ReceiptData.create({
                 ClientCode: req?.user?.ClientCode,
                 ReceiptNo: receipno,
                 Feetype: feetype,
-                PaidDate: new Date(),
+                PaidDate: moment(new Date()).format("YYYY/MM/DD"),
                 PaidAmount:
                   feetype === "Registration"
                     ? studentData?.regisgrationfee
@@ -1517,7 +1537,7 @@ const addTransportFee = async (req, res) => {
                 batchname: studentData?.batch,
                 SNO: studentData?.SrNumber,
                 Session: studentData?.Session,
-                Section:studentData?.Section
+                Section: studentData?.Section,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1704,6 +1724,465 @@ const ChangeSession = async (req, res) => {
     });
   }
 };
+
+///Add school academy Fee
+const PaySchoolAnualRegister = async (req, res) => {
+  try {
+    const { id, feetype, annualfee } = req.body;
+
+    let prefix;
+
+    if (req?.user) {
+      prefix = await ReceiptPrefix.findOne({
+        where: {
+          ClientCode: req?.user?.ClientCode,
+        },
+      });
+
+      if (prefix) {
+        let studentone = await Student.findOne({
+          where: {
+            id: id,
+          },
+        });
+
+        if (studentone) {
+          let updated;
+          if (feetype === "Registration" && annualfee === "Annual") {
+            updated = await Student.update(
+              {
+                Registrationfeestatus: 1,
+                AnnualFeeStatus: 1,
+              },
+              {
+                where: {
+                  id: id,
+                  ClientCode: req?.user?.ClientCode,
+                },
+              }
+            );
+          } else {
+            if (feetype === "Registration") {
+              updated = await Student.update(
+                {
+                  Registrationfeestatus: 1,
+                },
+                {
+                  where: {
+                    id: id,
+                    ClientCode: req?.user?.ClientCode,
+                  },
+                }
+              );
+            }
+
+            if (annualfee === "Annual") {
+              updated = await Student.update(
+                {
+                  AnnualFeeStatus: 1,
+                },
+                {
+                  where: {
+                    id: id,
+                    ClientCode: req?.user?.ClientCode,
+                  },
+                }
+              );
+            }
+          }
+
+          if (updated) {
+            let count = await getClientCount(req);
+            let receipno = `${prefix?.receiptPrefix}${count}`;
+            let newdate = new Date();
+            let result = await ReceiptData.create({
+              ClientCode: req?.user?.ClientCode,
+              ReceiptNo: receipno,
+              Feetype:
+                feetype === "Registration" && annualfee === "Annual"
+                  ? `${feetype} ${annualfee}`
+                  : feetype === "Registration"
+                  ? feetype
+                  : annualfee === "Annual"
+                  ? annualfee
+                  : "",
+              PaidDate: moment(new Date()).format("YYYY/MM/DD"),
+              PaidAmount:
+                feetype === "Registration" && annualfee === "Annual"
+                  ? Number(studentone?.regisgrationfee) +
+                    Number(studentone?.AnnualFee)
+                  : feetype === "Registration"
+                  ? Number(studentone?.regisgrationfee)
+                  : annualfee === "Annual"
+                  ? Number(studentone?.AnnualFee)
+                  : 0,
+              RollNo: studentone?.rollnumber,
+              studentName: studentone?.name,
+              fathername: studentone?.fathersName,
+              Course: studentone?.courseorclass,
+              SNO: studentone?.SrNumber,
+              Session: studentone?.Session,
+              Section: studentone?.Section,
+              fathersid: studentone?.parentId,
+              studentid: studentone?.id,
+              batchname: studentone?.batch,
+            });
+            if (result) {
+              return respHandler.success(res, {
+                status: true,
+                msg: `${annualfee} ${feetype} Fee Added Successfully!!`,
+                data: result,
+              });
+            }
+          }
+        }
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: `Please Add Receipt Prefix !!`,
+          error: [""],
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const CreateOtherFee = async (req, res) => {
+  try {
+    const {
+      courseorclass,
+      Session,
+      Section,
+      OtherFeeName,
+      FeeAmount,
+      DuesDate,
+    } = req.body;
+    let students = await Student.findAll({
+      where: {
+        courseorclass: courseorclass,
+        Session: Session,
+        Section: Section,
+        ClientCode: req?.user?.ClientCode,
+      },
+    });
+
+    if (students != null) {
+      const promises = students?.map(async (item) => {
+        let result = await OtherFee.create({
+          ClientCode: req?.user?.ClientCode,
+          studentName: item?.name,
+          fathername: item?.fathersName,
+          Course: item?.courseorclass,
+          fathersid: item?.parentId,
+          studentid: item?.id,
+          batchname: item?.batch,
+          SNO: item?.SrNumber,
+          Session: item?.Session,
+          Section: item?.Section,
+          OtherFeeName: OtherFeeName,
+          FeeAmount: FeeAmount,
+          DuesDate: DuesDate,
+        });
+
+        return result;
+      });
+
+      if (await Promise.all(promises)) {
+        let allOthersFee = await OtherFee.findAll({
+          courseorclass: courseorclass,
+          Session: Session,
+          Section: Section,
+          ClientCode: req?.user?.ClientCode,
+        });
+
+        return respHandler.success(res, {
+          status: true,
+          msg: "Other Fee Added successfully!!",
+          data: allOthersFee,
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Student Not Found!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateOtherFee = async (req, res) => {
+  try {
+    const { othersfeeobj, OtherFeeName, FeeAmount, DuesDate } = req.body;
+
+    let AllOtherfee = await OtherFee.findAll({
+      where: {
+        Course: othersfeeobj?.Course,
+        Session: othersfeeobj?.Session,
+        Section: othersfeeobj?.Section,
+        ClientCode: req?.user?.ClientCode,
+      },
+    });
+
+    if (AllOtherfee) {
+      const promises = AllOtherfee?.map(async (item) => {
+        `1`;
+        let result = await OtherFee.update(
+          {
+            ClientCode: req?.user?.ClientCode,
+            studentName: item?.name,
+            fathername: item?.fathersName,
+            Course: item?.courseorclass,
+            fathersid: item?.parentId,
+            studentid: item?.id,
+            batchname: item?.batch,
+            SNO: item?.SrNumber,
+            Session: item?.Session,
+            Section: item?.Section,
+            OtherFeeName: OtherFeeName,
+            FeeAmount: FeeAmount,
+            DuesDate: DuesDate,
+          },
+          {
+            where: {
+              id: item?.id,
+              Course: item?.Course,
+              Session: item?.Session,
+              Section: item?.Section,
+              ClientCode: req?.user?.ClientCode,
+            },
+          }
+        );
+
+        return result;
+      });
+
+      if (await Promise.all(promises)) {
+        let allOthersFee = await OtherFee.findAll({
+          Course: othersfeeobj?.Course,
+          Session: othersfeeobj?.Session,
+          Section: othersfeeobj?.Section,
+          ClientCode: req?.user?.ClientCode,
+        });
+
+        return respHandler.success(res, {
+          status: true,
+          msg: "Other Fee Updated Successfully!!",
+          data: allOthersFee,
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Other Fee Not Found!!",
+        error: [e],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetOtherFee = async (req, res) => {
+  try {
+    const { courseorclass, sessionname, sectionname, date } = req.query;
+
+    let whereClause = {};
+    let newdate = new Date(date);
+    if (req.user) {
+      whereClause.ClientCode = req.user?.ClientCode;
+    }
+
+    if (courseorclass) {
+      whereClause.batch = { [Op.regexp]: `^${courseorclass}.*` };
+    }
+
+    if (sectionname) {
+      whereClause.Course = { [Op.regexp]: `^${sectionname}.*` };
+    }
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+    }
+    // if (newdate) {
+    //   whereClause.DuesDate = {newdate};
+    // }
+    let othersFeelist = await OtherFee.findAll({
+      where: whereClause,
+      group: ["createdAt"],
+    });
+
+    if (othersFeelist) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Other Fee Successfully!!",
+        data: othersFeelist,
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteOtherFee = async (req, res) => {
+  try {
+    const { othersfeeobj } = req.body;
+
+    let AllOtherfee = await OtherFee.findAll({
+      where: {
+        Course: othersfeeobj?.Course,
+        Session: othersfeeobj?.Session,
+        Section: othersfeeobj?.Section,
+        ClientCode: req?.user?.ClientCode,
+      },
+    });
+
+    if (AllOtherfee) {
+      const promises = AllOtherfee?.map(async (item) => {
+        let result = await OtherFee.destroy({
+          where: {
+            id: item?.id,
+            Course: item?.Course,
+            Session: item?.Session,
+            Section: item?.Section,
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+
+        return result;
+      });
+
+      if (await Promise.all(promises)) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Other Fee Delete Successfully!!",
+          data: "",
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Other Fee Not Found!!",
+        error: othersfeeobj,
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+///Add school academy Fee
+const addOtherFee = async (req, res) => {
+  try {
+    const { id, acadminArray, studentData, feetype } = req.body;
+
+    let prefix;
+
+    if (req?.user) {
+      prefix = await ReceiptPrefix.findOne({
+        where: {
+          ClientCode: req?.user?.ClientCode,
+        },
+      });
+
+      if (prefix) {
+        const promises = acadminArray?.map(async (item) => {
+          let result = await OtherFee.update(
+            {
+              PaidStatus: true,
+            },
+            {
+              where: {
+                studentid: id,
+                id: item?.id,
+                ClientCode: req?.user?.ClientCode,
+              },
+            }
+          );
+          return result;
+        });
+
+        if (await Promise.all(promises)) {
+          let studentone = await Student.findOne({
+            where: {
+              id: id,
+            },
+          });
+
+          if (studentone) {
+            let count = await getClientCount(req);
+            let receipno = `${prefix?.receiptPrefix}${count}`;
+
+            let result = await ReceiptData.create({
+              ClientCode: req?.user?.ClientCode,
+              ReceiptNo: receipno,
+              Feetype: feetype,
+              PaidDate: new Date(),
+              PaidAmount: acadminArray?.reduce(
+                (n, { FeeAmount }) => parseFloat(n) + parseFloat(FeeAmount),
+                0
+              ),
+              RollNo: studentData?.rollnumber,
+              studentName: studentData?.name,
+              fathername: studentData?.fathersName,
+              Course: studentData?.courseorclass,
+              fathersid: studentData?.parentId,
+              studentid: studentData?.id,
+              batchname: studentData?.batch,
+              SNO: studentData?.SrNumber,
+              Session: studentData?.Session,
+              Section: studentData?.Section,
+            });
+            if (result) {
+              return respHandler.success(res, {
+                status: true,
+                msg: "Other Fee Added Successfully!!",
+                data: result,
+              });
+            }
+          }
+        }
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Please Add Receipt Prefix !!",
+          error: [""],
+        });
+      }
+
+      console.log("dd", prefix?.receiptPrefix);
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   Addstudent,
   getAllStudent,
@@ -1718,4 +2197,10 @@ module.exports = {
   addHostelFee,
   addTransportFee,
   ChangeSession,
+  PaySchoolAnualRegister,
+  CreateOtherFee,
+  GetOtherFee,
+  UpdateOtherFee,
+  DeleteOtherFee,
+  addOtherFee,
 };

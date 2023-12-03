@@ -809,8 +809,6 @@ const GetHolidays = async (req, res) => {
   try {
     const { month } = req.body;
 
-    console.log("month no is ", month);
-
     let checkattendance = await AttendanceStudent.findAll({
       where: {
         monthNumber: month,

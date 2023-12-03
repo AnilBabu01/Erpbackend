@@ -6,6 +6,7 @@ const removefile = require("../Middleware/removefile");
 const SchoolFeeStatus = require("../Models/schoolfeestatus.model");
 const SchoolHostelFeeStatus = require("../Models/schoolhostelfee.model");
 const SchoolTransportFeeStatus = require("../Models/schooltransportfee.model");
+const OtherFee = require("../Models/otherfee.model");
 config();
 
 const getSchoolFee = async (req, res) => {
@@ -31,7 +32,10 @@ const getSchoolFee = async (req, res) => {
     let transportfee = await SchoolTransportFeeStatus.findAll({
       where: whereClause,
     });
-    if (schollfee && hostelfee && transportfee) {
+    let otherfee = await OtherFee.findAll({
+      where: whereClause,
+    });
+    if (schollfee && hostelfee && transportfee&&otherfee) {
       return respHandler.success(res, {
         status: true,
         msg: "Fetch School Fee successfully!!",
@@ -39,6 +43,7 @@ const getSchoolFee = async (req, res) => {
           schollfee: schollfee,
           hostelfee: hostelfee,
           transportfee: transportfee,
+          otherfee: otherfee,
         },
       });
     } else {

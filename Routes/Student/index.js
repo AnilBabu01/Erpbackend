@@ -70,5 +70,19 @@ router.post("/schoolfee", verifyToken, SchoolStudentController.getSchoolFee);
 router.post("/addacadmyfee", verifyToken, StudentController.addSchoolFee);
 router.post("/addhostelfee", verifyToken, StudentController.addHostelFee);
 router.post("/addtransportfee", verifyToken, StudentController.addTransportFee);
+router.post("/addotherfee", verifyToken, StudentController.addOtherFee);
+router.post(
+  "/payschoolanualregister",
+  verifyToken,
+  StudentController.PaySchoolAnualRegister
+);
 router.post("/changesession", verifyToken, StudentController.ChangeSession);
+
+router
+  .route("/otherfee", verifyToken)
+  .post(verifyToken, StudentController.CreateOtherFee)
+  .get(verifyToken, StudentController.GetOtherFee)
+  .put(verifyToken, StudentController.UpdateOtherFee)
+  .delete(verifyToken, StudentController.DeleteOtherFee);
+
 module.exports = router;

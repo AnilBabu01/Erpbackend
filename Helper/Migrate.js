@@ -34,15 +34,16 @@ const VehicleDetails = require("../Models/vehicledetails.mode");
 const VehicleRoute = require("../Models/vehicleroute.model");
 const VehicleStop = require("../Models/vehiclestop.model");
 const VehicleType = require("../Models/vehicletype.model");
-const RoomHostel = require('../Models/roomHostel.model');
-const RoomCategory = require('../Models/roomHostel.model');
-const Roomfacility = require('../Models/roomFacility.model');
-const Room = require('../Models/room.model');
-const SchoolFeeStatus = require('../Models/schoolfeestatus.model');
+const RoomHostel = require("../Models/roomHostel.model");
+const RoomCategory = require("../Models/roomHostel.model");
+const Roomfacility = require("../Models/roomFacility.model");
+const Room = require("../Models/room.model");
+const SchoolFeeStatus = require("../Models/schoolfeestatus.model");
 const SchoolHostelFeeStatus = require("../Models/schoolhostelfee.model");
-const SchoolTransportFeeStatus = require('../Models/schooltransportfee.model');
-const Empsalary = require('../Models/empsalary.model');
-const Session = require('../Models/session.model');
+const SchoolTransportFeeStatus = require("../Models/schooltransportfee.model");
+const Empsalary = require("../Models/empsalary.model");
+const Session = require("../Models/session.model");
+const OtherFee = require("../Models/otherfee.model");
 sequelize
   .sync({ alter: true })
   .then(() => {
