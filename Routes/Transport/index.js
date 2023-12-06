@@ -32,4 +32,16 @@ router
   .route("/gettransportfee", verifyToken)
   .post(verifyToken, TransportController.GetTransportFee);
 
+router
+  .route("/getbusbyrouteid", verifyToken)
+  .post(verifyToken, TransportController.GetBusListByRouteID);
+
+router
+  .route("/assignbus", verifyToken)
+  .post(verifyToken, TransportController.GiveBusToStudent);
+
+router
+  .route("/changebus", verifyToken)
+  .post(verifyToken, TransportController.ChangeBus);
+
 module.exports = router;

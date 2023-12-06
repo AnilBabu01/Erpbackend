@@ -35,7 +35,24 @@ const VehicleDetails = sequelize.define("vehicledetails", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  DriverId: {
+  NoOfSheets: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue:0
+  },
+  DriverId1: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  DriverId2: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  HelferId1: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  HelferId2: {
     type: DataTypes.INTEGER,
     allowNull: true,
   },

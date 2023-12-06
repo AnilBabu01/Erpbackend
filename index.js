@@ -21,6 +21,7 @@ const Payroll = require("./Routes/Payroll");
 const Library = require("./Routes/Library");
 const Transport = require("./Routes/Transport");
 const Hostel = require("./Routes/Hostel");
+const Expenses = require("./Routes/Expenses");
 
 // to run migrations run command - --------  npm run migrate ---------------------
 
@@ -54,6 +55,7 @@ app.use("/api/payroll", Payroll);
 app.use("/api/library", Library);
 app.use("/api/transport", Transport);
 app.use("/api/hostel", Hostel);
+app.use("/api/expenses", Expenses);
 app.use("*", (req, res) => {
   return res.status(404).json({
     status: false,

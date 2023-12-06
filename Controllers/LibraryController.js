@@ -23,7 +23,23 @@ const CreateBook = async (req, res) => {
       if (book?.BookId?.toLowerCase() === BookId.toLowerCase()) {
         return respHandler.error(res, {
           status: false,
-          msg: "AllReady Exist!!",
+          msg: "AlReady Exist!!",
+          error: ["AllReady Exsist !!"],
+        });
+      }
+    }
+
+    let checkbkId = await Book.findOne({
+      where: {
+        BookId: BookId,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (checkbkId) {
+      if (checkbkId?.BookId?.toLowerCase() === BookId.toLowerCase()) {
+        return respHandler.error(res, {
+          status: false,
+          msg: "AlReady Exist!!",
           error: ["AllReady Exsist !!"],
         });
       }
@@ -289,7 +305,7 @@ const UpdateBookIssue = async (req, res) => {
     const promises = bookDeatils?.map(async (item) => {
       let book = await Book.findOne({
         where: {
-          id: item?.id,
+          BookId: item?.BookId,
           courseorclass: courseorclass,
           ClientCode: req.user.ClientCode,
         },
@@ -313,15 +329,8 @@ const UpdateBookIssue = async (req, res) => {
       }
       let result = await BookedBook.update(
         {
-          ReturnDate: new Date(),
-          courseorclass: courseorclass,
-          studentid: studentid,
-          rollnumber: rollnumber,
-          BookId: item?.BookId,
-          BookTitle: item?.BookTitle,
-          auther: item?.auther,
-          ClientCode: req.user.ClientCode,
           returnStatus: item?.issueStatus,
+          issueStatus: false,
         },
         {
           where: {

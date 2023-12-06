@@ -11,6 +11,7 @@ const ReceiptData = require("../Models/receiptdata.model");
 const ReceiptPrefix = require("../Models/receiptprefix.model");
 const Fee = require("../Models/fee.model");
 const OtherFee = require("../Models/otherfee.model");
+const VehicleDetails = require("../Models/vehicledetails.mode");
 const { Coachingfeemon } = require("../Helper/Constant");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
@@ -310,6 +311,33 @@ const Addstudent = async (req, res) => {
             },
           });
           if (feemonth) {
+            let otherfee = await OtherFee.findAll({
+              where: {
+                Course: courseorclass,
+                Session: Session,
+                Section: Section,
+                ClientCode: req?.user?.ClientCode,
+              },
+            });
+            if (otherfee) {
+              otherfee?.map(async (item, index) => {
+                await OtherFee.create({
+                  ClientCode: req?.user?.ClientCode,
+                  studentName: CreatedStudent?.name,
+                  fathername: CreatedStudent?.fathersName,
+                  Course: CreatedStudent?.courseorclass,
+                  fathersid: CreatedStudent?.parentId,
+                  studentid: CreatedStudent?.id,
+                  batchname: CreatedStudent?.batch,
+                  SNO: CreatedStudent?.SrNumber,
+                  Session: item?.Session,
+                  Section: CreatedStudent?.Section,
+                  OtherFeeName: item?.OtherFeeName,
+                  FeeAmount: item?.FeeAmount,
+                  DuesDate: item?.DuesDate,
+                });
+              });
+            }
             const promises1 = monthnameAndYaer?.map(async (item, index) => {
               var words = item.split(/\s+/);
               var firstWord = words[0];
@@ -534,6 +562,33 @@ const Addstudent = async (req, res) => {
             },
           });
           if (feemonth) {
+            let otherfee = await OtherFee.findAll({
+              where: {
+                Course: courseorclass,
+                Session: Session,
+                Section: Section,
+                ClientCode: req?.user?.ClientCode,
+              },
+            });
+            if (otherfee) {
+              otherfee?.map(async (item, index) => {
+                await OtherFee.create({
+                  ClientCode: req?.user?.ClientCode,
+                  studentName: CreatedStudent?.name,
+                  fathername: CreatedStudent?.fathersName,
+                  Course: CreatedStudent?.courseorclass,
+                  fathersid: CreatedStudent?.parentId,
+                  studentid: CreatedStudent?.id,
+                  batchname: CreatedStudent?.batch,
+                  SNO: CreatedStudent?.SrNumber,
+                  Session: item?.Session,
+                  Section: CreatedStudent?.Section,
+                  OtherFeeName: item?.OtherFeeName,
+                  FeeAmount: item?.FeeAmount,
+                  DuesDate: item?.DuesDate,
+                });
+              });
+            }
             const promises1 = monthnameAndYaer?.map(async (item, index) => {
               var words = item.split(/\s+/);
               var firstWord = words[0];
@@ -693,7 +748,7 @@ const getAllStudent = async (req, res) => {
       library,
       sessionname,
       sectionname,
-      seno,
+      sno,
     } = req.query;
 
     let whereClause = {};
@@ -739,8 +794,8 @@ const getAllStudent = async (req, res) => {
       whereClause.Library = library;
     }
 
-    if (seno) {
-      whereClause.SrNumber = { [Op.regexp]: `^${seno}.*` };
+    if (sno) {
+      whereClause.SrNumber = { [Op.regexp]: `^${sno}.*` };
     }
 
     let students = await Student.findAll({
@@ -817,6 +872,11 @@ const UpdateStudent = async (req, res) => {
       hostelname,
       Category,
       Facility,
+      hostelstatus,
+      transportstatus,
+      FromRoute,
+      ToRoute,
+      BusNumber,
     } = req.body;
 
     let student = await Student.findOne({
@@ -890,6 +950,9 @@ const UpdateStudent = async (req, res) => {
           Category: Category,
           Facility: Facility,
           whatsappNo: whatsappNo,
+          FromRoute: FromRoute,
+          ToRoute: ToRoute,
+          BusNumber: BusNumber,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req.body.profileurl,
@@ -915,18 +978,116 @@ const UpdateStudent = async (req, res) => {
         }
       );
 
-      let categorys = await Student.findOne({
-        where: {
-          id: id,
-        },
-      });
-
       if (status) {
-        return respHandler.success(res, {
-          status: true,
-          msg: "Student Updated successfully!!",
-          data: categorys,
+        let UpdatedStudent = await Student.findOne({
+          where: {
+            id: id,
+          },
         });
+        if (UpdatedStudent) {
+          let allhostelfee = await SchoolHostelFeeStatus.findAll({
+            where: {
+              studentId: id,
+              SrNumber: UpdatedStudent?.SrNumber,
+              Session: UpdatedStudent?.Session,
+            },
+          });
+
+          let alltransportfee = await SchoolTransportFeeStatus.findAll({
+            where: {
+              studentId: id,
+              SrNumber: UpdatedStudent?.SrNumber,
+              Session: UpdatedStudent?.Session,
+            },
+          });
+
+          if (allhostelfee && alltransportfee) {
+            let promises1 = allhostelfee?.map(async (item) => {
+              await SchoolHostelFeeStatus.update(
+                {
+                  ClientCode: req.user?.ClientCode,
+                  studentId: UpdatedStudent?.id,
+                  PerMonthFee: hostal ? HostelPerMonthFee : 0,
+                  Session: UpdatedStudent?.Session,
+                  SrNumber: UpdatedStudent?.SrNumber,
+                  paidStatus: hostelstatus,
+                },
+                {
+                  where: {
+                    id: item?.id,
+                    MonthName: item?.MonthName,
+                    Session: item?.Session,
+                    SrNumber: UpdatedStudent?.SrNumber,
+                    ClientCode: req.user?.ClientCode,
+                  },
+                }
+              );
+            });
+
+            let promises2 = alltransportfee?.map(async (item) => {
+              await SchoolTransportFeeStatus.update(
+                {
+                  ClientCode: req.user?.ClientCode,
+                  studentId: UpdatedStudent?.id,
+                  PerMonthFee: Transport ? TransportPerMonthFee : 0,
+                  Session: UpdatedStudent?.Session,
+                  SrNumber: UpdatedStudent?.SrNumber,
+                  paidStatus: transportstatus,
+                },
+                {
+                  where: {
+                    id: item?.id,
+                    MonthName: item?.MonthName,
+                    Session: item?.Session,
+                    SrNumber: UpdatedStudent?.SrNumber,
+                    ClientCode: req.user?.ClientCode,
+                  },
+                }
+              );
+            });
+
+            if (
+              (await Promise.all(promises1)) &&
+              (await Promise.all(promises2))
+            ) {
+
+              if (Transport === false) {
+                let oldbus = await VehicleDetails.findOne({
+                  where: {
+                    BusNumber: BusNumber,
+                    ClientCode: req.user?.ClientCode,
+                  },
+                });
+
+                let status = await VehicleDetails.update(
+                  {
+                    NoOfSheets: Number(oldbus?.NoOfSheets) + 1,
+                  },
+                  {
+                    where: {
+                      id: oldbus?.id,
+                      ClientCode: req.user?.ClientCode,
+                    },
+                  }
+                );
+
+                // if (status) {
+                //   return respHandler.success(res, {
+                //     status: true,
+                //     msg: "Student Updated successfully!!",
+                //     data: UpdatedStudent,
+                //   });
+                // }
+              } else {
+                return respHandler.success(res, {
+                  status: true,
+                  msg: "Student Updated successfully!!",
+                  data: UpdatedStudent,
+                });
+              }
+            }
+          }
+        }
       }
     }
   } catch (err) {
@@ -1161,7 +1322,7 @@ const getReceipt = async (req, res) => {
     }
 
     if (rollnumber) {
-      whereClause.RollNo = { [Op.regexp]: `^${Number(rollnumber)}.*` }
+      whereClause.RollNo = { [Op.regexp]: `^${Number(rollnumber)}.*` };
     }
     if (studentname) {
       whereClause.studentName = { [Op.regexp]: `^${studentname}.*` };

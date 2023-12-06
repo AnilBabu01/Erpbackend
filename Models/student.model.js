@@ -290,6 +290,14 @@ const Student = sequelize.define("student", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  FromRoute: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  ToRoute: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 Student.hasOne(Coachingfeestatus, { primaryKey: "id" });
 Coachingfeestatus.belongsTo(Student, { foreignKey: "studentId" });

@@ -467,8 +467,19 @@ const DeleteRoute = async (req, res) => {
 
 const CreateVehicleDetails = async (req, res) => {
   try {
-    const { Vahicletype, BusNumber, FualType, Color, GPSDeviceURL, routeId } =
-      req.body;
+    const {
+      Vahicletype,
+      BusNumber,
+      FualType,
+      Color,
+      GPSDeviceURL,
+      routeId,
+      NoOfSheets,
+      DriverId1,
+      DriverId2,
+      HelferId1,
+      HelferId2,
+    } = req.body;
 
     let vehicledetails = await VehicleDetails.findOne({
       where: {
@@ -482,8 +493,8 @@ const CreateVehicleDetails = async (req, res) => {
       ) {
         return respHandler.error(res, {
           status: false,
-          msg: "AllReady Exist!!",
-          error: ["AllReady Exsist !!"],
+          msg: "AlReady Exist!!",
+          error: ["AlReady Exsist !!"],
         });
       }
     }
@@ -495,6 +506,11 @@ const CreateVehicleDetails = async (req, res) => {
       FualType: FualType,
       Color: Color,
       GPSDeviceURL: GPSDeviceURL,
+      NoOfSheets: NoOfSheets,
+      DriverId1: DriverId1,
+      DriverId2: DriverId2,
+      HelferId1: HelferId1,
+      HelferId2: HelferId2,
       ClientCode: req.user.ClientCode,
     });
     if (vehicletypes) {
@@ -529,6 +545,11 @@ const UpdateVehicleDetails = async (req, res) => {
       Color,
       GPSDeviceURL,
       id,
+      NoOfSheets,
+      DriverId1,
+      DriverId2,
+      HelferId1,
+      HelferId2,
     } = req.body;
 
     let status = await VehicleDetails.update(
@@ -539,6 +560,11 @@ const UpdateVehicleDetails = async (req, res) => {
         FualType: FualType,
         Color: Color,
         GPSDeviceURL: GPSDeviceURL,
+        NoOfSheets: NoOfSheets,
+        DriverId1: DriverId1,
+        DriverId2: DriverId2,
+        HelferId1: HelferId1,
+        HelferId2: HelferId2,
       },
       {
         where: {
@@ -785,6 +811,324 @@ const GetVehicleList = async (req, res) => {
   }
 };
 
+const GetBusListByRouteID = async (req, res) => {
+  try {
+    const { routeid } = req.body;
+
+    let result = [];
+
+    let vehicledetails = await VehicleDetails.findAll({
+      where: {
+        ClientCode: req.user.ClientCode,
+        routeId: routeid,
+      },
+    });
+
+    if (vehicledetails) {
+      const promises = vehicledetails?.map(async (item) => {
+        let routeDetails = await VehicleRoute.findOne({
+          where: {
+            id: item?.routeId,
+            ClientCode: req.user.ClientCode,
+          },
+        });
+        let StopNames = await VehicleStop.findAll({
+          where: {
+            RouteId: item?.routeId,
+            ClientCode: req.user.ClientCode,
+          },
+        });
+        if (routeDetails || StopNames) {
+          result.push({
+            bus: item,
+            routeDetails: routeDetails,
+            StopNames: StopNames,
+          });
+        }
+        return StopNames;
+      });
+
+      if (await Promise.all(promises)) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch Bus Successfully!!",
+          data: result,
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GiveBusToStudent = async (req, res) => {
+  try {
+    const { studentid, busdetails, fromroute, toroute } = req.body;
+
+    let isStudent = await Student.findOne({
+      where: {
+        ClientCode: req.user.ClientCode,
+        id: studentid,
+      },
+    });
+
+    if (isStudent) {
+      if (isStudent?.BusNumber === "") {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Already Assigned Bus!!",
+          error: [""],
+        });
+      }
+      let status = await Student.update(
+        {
+          BusNumber: busdetails?.BusNumber,
+          FromRoute: fromroute,
+          ToRoute: toroute,
+        },
+        {
+          where: {
+            id: isStudent?.id,
+            ClientCode: req.user?.ClientCode,
+          },
+        }
+      );
+      if (status) {
+        let Busdetails = await VehicleDetails.findOne({
+          where: {
+            id: busdetails?.id,
+          },
+        });
+        if (Busdetails) {
+          let status = await VehicleDetails.update(
+            {
+              NoOfSheets: Number(Busdetails?.NoOfSheets) - 1,
+            },
+            {
+              where: {
+                id: Busdetails?.id,
+                ClientCode: req.user?.ClientCode,
+              },
+            }
+          );
+          if (status) {
+            return respHandler.success(res, {
+              status: true,
+              msg: "Bus Assign Successfully!!",
+              data: "",
+            });
+          }
+        } else {
+          return respHandler.error(res, {
+            status: false,
+            msg: "Bus Not Found!!",
+            error: [""],
+          });
+        }
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Student Not Found!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const ChangeBus = async (req, res) => {
+  try {
+    const { studentid, busdetails, cfromroute, ctoroute, oldbusId, removeBus } =
+      req.body;
+
+    let isStudent = await Student.findOne({
+      where: {
+        ClientCode: req.user.ClientCode,
+        id: studentid,
+      },
+    });
+
+    if (isStudent) {
+      if (removeBus) {
+        let Busdetails = await VehicleDetails.findOne({
+          where: {
+            BusNumber: oldbusId,
+            ClientCode: req.user?.ClientCode,
+          },
+        });
+
+        if (Busdetails) {
+          let status = await VehicleDetails.update(
+            {
+              NoOfSheets: Number(Busdetails?.NoOfSheets) + 1,
+            },
+            {
+              where: {
+                id: Busdetails?.id,
+                ClientCode: req.user?.ClientCode,
+              },
+            }
+          );
+          if (status) {
+            let status = await Student.update(
+              {
+                BusNumber: "",
+                FromRoute: "",
+                ToRoute: "",
+              },
+              {
+                where: {
+                  id: isStudent?.id,
+                  ClientCode: req.user?.ClientCode,
+                },
+              }
+            );
+            if (status) {
+              return respHandler.success(res, {
+                status: true,
+                msg: "Bus Remove Successfully!!",
+                data: "",
+              });
+            }
+          }
+        }
+      } else {
+        let status = await Student.update(
+          {
+            BusNumber: busdetails?.BusNumber,
+            FromRoute: cfromroute,
+            ToRoute: ctoroute,
+          },
+          {
+            where: {
+              id: isStudent?.id,
+              ClientCode: req.user?.ClientCode,
+            },
+          }
+        );
+        if (status) {
+          if (oldbusId) {
+            let oldbus = await VehicleDetails.findOne({
+              where: {
+                BusNumber: oldbusId,
+                ClientCode: req.user?.ClientCode,
+              },
+            });
+
+            if (oldbus) {
+              let status = await VehicleDetails.update(
+                {
+                  NoOfSheets: Number(oldbus?.NoOfSheets) + 1,
+                },
+                {
+                  where: { id: oldbus?.id, ClientCode: req.user?.ClientCode },
+                }
+              );
+
+              if (status) {
+                let Busdetails = await VehicleDetails.findOne({
+                  where: {
+                    id: busdetails?.id,
+                    ClientCode: req.user?.ClientCode,
+                  },
+                });
+
+                if (Busdetails) {
+                  let status = await VehicleDetails.update(
+                    {
+                      NoOfSheets: Number(Busdetails?.NoOfSheets) - 1,
+                    },
+                    {
+                      where: {
+                        id: Busdetails?.id,
+                        ClientCode: req.user?.ClientCode,
+                      },
+                    }
+                  );
+                  if (status) {
+                    return respHandler.success(res, {
+                      status: true,
+                      msg: "Bus Changed Successfully!!",
+                      data: "",
+                    });
+                  }
+                } else {
+                  return respHandler.error(res, {
+                    status: false,
+                    msg: "Bus Not Found!!",
+                    error: [""],
+                  });
+                }
+              }
+            }
+          } else {
+            let Busdetails = await VehicleDetails.findOne({
+              where: {
+                id: busdetails?.id,
+                ClientCode: req.user?.ClientCode,
+              },
+            });
+
+            if (Busdetails) {
+              let status = await VehicleDetails.update(
+                {
+                  NoOfSheets: Number(Busdetails?.NoOfSheets) - 1,
+                },
+                {
+                  where: {
+                    id: Busdetails?.id,
+                    ClientCode: req.user?.ClientCode,
+                  },
+                }
+              );
+              if (status) {
+                return respHandler.success(res, {
+                  status: true,
+                  msg: "Bus Changed Successfully!!",
+                  data: "",
+                });
+              }
+            } else {
+              return respHandler.error(res, {
+                status: false,
+                msg: "Bus Not Found!!",
+                error: [""],
+              });
+            }
+          }
+        }
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Student Not Found!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   CreateVehicleType,
   UpdateVehicleType,
@@ -800,4 +1144,7 @@ module.exports = {
   DeleteVehicleDetails,
   GetVehicleList,
   GetTransportFee,
+  GetBusListByRouteID,
+  GiveBusToStudent,
+  ChangeBus,
 };
