@@ -131,7 +131,7 @@ const GetPayMonthList = async (req, res) => {
 
 const PaySalary = async (req, res) => {
   try {
-    const { empid, paidAmount, allDetails } = req.body;
+    const { empid, paidAmount, allDetails, sessionname } = req.body;
     let employee = await Employee.findOne({
       where: {
         id: empid,
@@ -145,6 +145,8 @@ const PaySalary = async (req, res) => {
         EmpId: employee?.id,
         OrEmpId: employee?.empId,
         name: employee?.name,
+        department: employee?.department,
+        employeeof: employee?.employeeof,
         email: employee?.email,
         MonthName: allDetails?.MonthName,
         Year: allDetails?.Year,
@@ -164,6 +166,7 @@ const PaySalary = async (req, res) => {
         AllowLeave: employee?.AllowLeave,
         PaidAmount: paidAmount,
         SalaryPaid: true,
+        Session: sessionname,
       });
 
       if (EmpMonthSalary) {
@@ -191,9 +194,12 @@ const PaySalary = async (req, res) => {
 
 const GetEmpSalaryList = async (req, res) => {
   try {
-    const { empid, empname } = req.query;
+    const { empid, empname, sessionname, fromdate, todate } = req.query;
+    console.log("console data is ",req.query)
     let whereClause = {};
     let result = [];
+    let from = new Date(fromdate);
+    let to = new Date(todate);
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
     }
@@ -201,9 +207,14 @@ const GetEmpSalaryList = async (req, res) => {
     if (empid) {
       whereClause.OrEmpId = { [Op.regexp]: `^${empid}.*` };
     }
-
+    if (fromdate && todate) {
+      whereClause.PaidDate = { [Op.between]: [from, to] };
+    }
     if (empname) {
       whereClause.name = { [Op.regexp]: `^${empname}.*` };
+    }
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
     }
     let roomCategory = await Empsalary.findAll({
       where: whereClause,

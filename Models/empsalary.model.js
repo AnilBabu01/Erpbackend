@@ -113,9 +113,13 @@ const EmployeeSalary = sequelize.define("employeesalary", {
     defaultValue: 0,
   },
   PaidDate: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: true,
     defaultValue: new Date(),
+  },
+  Session: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
 });
 

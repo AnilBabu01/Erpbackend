@@ -180,9 +180,9 @@ const DeleteExpensesType = async (req, res) => {
 const CreateExpenses = async (req, res) => {
   try {
     const { Expensestype, ExpensesAmount, Comment, Date } = req.body;
-    let newdate = new Date(Date);
-    let Expensestypes = await ExpensesType.create({
-      Date: newdate,
+
+    let Expensestypes = await Expenses.create({
+      Date: Date,
       Expensestype: Expensestype,
       ExpensesAmount: ExpensesAmount,
       Comment: Comment,
@@ -213,10 +213,10 @@ const CreateExpenses = async (req, res) => {
 const UpdateExpenses = async (req, res) => {
   try {
     const { Expensestype, ExpensesAmount, Comment, Date, id } = req.body;
-    let newdate = new Date(Date);
+
     let status = await Expenses.update(
       {
-        Date: newdate,
+        Date: Date,
         Expensestype: Expensestype,
         ExpensesAmount: ExpensesAmount,
         Comment: Comment,
@@ -259,15 +259,19 @@ const UpdateExpenses = async (req, res) => {
 
 const GetExpenses = async (req, res) => {
   try {
-    const { Expensestype, Date } = req.query;
+    const { fromdate, todate, expensestype } = req.query;
     let whereClause = {};
-
+    let from = new Date(fromdate);
+    let to = new Date(todate);
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
     }
 
-    if (Expensestype) {
-      whereClause.Expensestype = { [Op.regexp]: `^${Expensestype}.*` };
+    if (expensestype) {
+      whereClause.Expensestype = { [Op.regexp]: `^${expensestype}.*` };
+    }
+    if (fromdate && todate) {
+      whereClause.Date = { [Op.between]: [from, to] };
     }
     let roomCategory = await Expenses.findAll({
       where: whereClause,
@@ -490,11 +494,10 @@ const DeleteAssetType = async (req, res) => {
 const CreateAsset = async (req, res) => {
   try {
     const { AssetType, Date, AssetName, Comment, AssetAmount } = req.body;
-    let newdate = new DATE(Date);
 
     let Expensestypes = await Expensesasset.create({
       AssetType: AssetType,
-      Date: newdate,
+      Date: Date,
       AssetName: AssetName,
       AssetAmount: AssetAmount,
       Comment: Comment,
@@ -525,11 +528,11 @@ const CreateAsset = async (req, res) => {
 const UpdateAsset = async (req, res) => {
   try {
     const { AssetType, Date, AssetName, Comment, AssetAmount, id } = req.body;
-    let newdate = new DATE(Date);
+
     let status = await Expensesasset.update(
       {
         AssetType: AssetType,
-        Date: newdate,
+        Date: Date,
         AssetName: AssetName,
         AssetAmount: AssetAmount,
         Comment: Comment,
@@ -572,15 +575,18 @@ const UpdateAsset = async (req, res) => {
 
 const GeAsset = async (req, res) => {
   try {
-    const { AssetType } = req.query;
+    const { fromdate, todate, assettypename } = req.query;
     let whereClause = {};
-
+    let from = new Date(fromdate);
+    let to = new Date(todate);
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
     }
-
-    if (AssetType) {
-      whereClause.Expensestype = { [Op.regexp]: `^${AssetType}.*` };
+    if (fromdate && todate) {
+      whereClause.Date = { [Op.between]: [from, to] };
+    }
+    if (assettypename) {
+      whereClause.AssetType = { [Op.regexp]: `^${assettypename}.*` };
     }
     let roomCategory = await Expensesasset.findAll({
       where: whereClause,

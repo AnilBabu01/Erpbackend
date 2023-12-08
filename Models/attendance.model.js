@@ -83,7 +83,7 @@ const AttendanceStudent = sequelize.define("studentattendance", {
     allowNull: true,
   },
   attendancedate: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: true,
   },
   MonthName: {

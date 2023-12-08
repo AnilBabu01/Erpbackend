@@ -48,7 +48,7 @@ const ReceiptData = sequelize.define("receiptdata", {
   //   allowNull: false,
   // },
   PaidDate: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: false,
   },
   RollNo: {
@@ -80,6 +80,10 @@ const ReceiptData = sequelize.define("receiptdata", {
     allowNull: true,
   },
   Section: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  PayOption: {
     type: DataTypes.STRING,
     allowNull: true,
   },

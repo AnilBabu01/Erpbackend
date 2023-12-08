@@ -82,7 +82,7 @@ const AttendanceEmployee = sequelize.define("employeeattendance", {
     allowNull: true,
   },
   attendancedate: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: true,
   },
 });

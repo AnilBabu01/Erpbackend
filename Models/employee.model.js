@@ -464,6 +464,10 @@ const Employee = sequelize.define("employee", {
     type: DataTypes.STRING,
     defaultValue: false,
   },
+  Session: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 // Employee.hasMany(parent, { foreignKey: "userId" });

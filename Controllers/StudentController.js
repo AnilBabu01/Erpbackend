@@ -1050,7 +1050,6 @@ const UpdateStudent = async (req, res) => {
               (await Promise.all(promises1)) &&
               (await Promise.all(promises2))
             ) {
-
               if (Transport === false) {
                 let oldbus = await VehicleDetails.findOne({
                   where: {
@@ -1144,7 +1143,15 @@ getClientCount = async (req) => {
 
 const addfee = async (req, res) => {
   try {
-    const { id, paymonths, studentData, feetype, discount } = req.body;
+    const {
+      id,
+      paymonths,
+      studentData,
+      feetype,
+      discount,
+      PayOption,
+      paymentdate,
+    } = req.body;
     if (discount === true) {
       let status = await Student.update(
         {
@@ -1239,7 +1246,7 @@ const addfee = async (req, res) => {
               typeoforganization: req?.user?.institutename,
               ReceiptNo: receipno,
               Feetype: feetype,
-              PaidDate: moment(new Date()).format("YYYY/MM/DD"),
+              PaidDate: paymentdate,
               PaidAmount:
                 feetype === "Registration"
                   ? studentData?.regisgrationfee
@@ -1255,6 +1262,7 @@ const addfee = async (req, res) => {
               Session: studentData?.Session,
               Course: studentData?.courseorclass,
               Section: studentData?.Section,
+              PayOption: PayOption,
             });
             if (result) {
               let student = await Student.findOne({
@@ -1306,15 +1314,17 @@ const getReceipt = async (req, res) => {
       sessionname,
       sectionname,
       sno,
+      todate,
     } = req.query;
-    let Dates = new Date(fromdate);
+
     let whereClause = {};
-    console.log("paramers", req.query);
+    let from = new Date(fromdate);
+    let to = new Date(todate);
     if (req.user) {
       whereClause.ClientCode = req.user?.ClientCode;
     }
-    if (fromdate) {
-      whereClause.PaidDate = { Dates };
+    if (fromdate&&todate) {
+      whereClause.PaidDate = { [Op.between]: [from, to] };
     }
 
     if (name) {
@@ -1339,7 +1349,7 @@ const getReceipt = async (req, res) => {
 
     let receipts = await ReceiptData.findAll({
       where: whereClause,
-      // order: [["id", "DESC"]],
+      order: [["PaidDate", "DESC"]],
     });
     if (receipts) {
       return respHandler.success(res, {
@@ -1405,7 +1415,8 @@ const getStudentFee = async (req, res) => {
 ///Add school academy Fee
 const addSchoolFee = async (req, res) => {
   try {
-    const { id, acadminArray, studentData, feetype } = req.body;
+    const { id, acadminArray, studentData, feetype, PayOption, paymentdate } =
+      req.body;
 
     let prefix;
 
@@ -1466,7 +1477,7 @@ const addSchoolFee = async (req, res) => {
                 ClientCode: req?.user?.ClientCode,
                 ReceiptNo: receipno,
                 Feetype: feetype,
-                PaidDate: moment(Date()).format("YYYY/MM/DD"),
+                PaidDate: paymentdate,
                 PaidAmount:
                   feetype === "Registration"
                     ? studentData?.regisgrationfee
@@ -1481,6 +1492,7 @@ const addSchoolFee = async (req, res) => {
                 fathersid: studentData?.parentId,
                 studentid: studentData?.id,
                 batchname: studentData?.batch,
+                PayOption: PayOption,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1514,7 +1526,7 @@ const addSchoolFee = async (req, res) => {
 ///Add school academy Fee
 const addHostelFee = async (req, res) => {
   try {
-    const { id, acadminArray, studentData, feetype } = req.body;
+    const { id, acadminArray, studentData, feetype, paymentdate,PayOption } = req.body;
 
     let prefix;
 
@@ -1575,7 +1587,7 @@ const addHostelFee = async (req, res) => {
                 ClientCode: req?.user?.ClientCode,
                 ReceiptNo: receipno,
                 Feetype: feetype,
-                PaidDate: moment(new Date()).format("YYYY/MM/DD"),
+                PaidDate: paymentdate,
                 PaidAmount:
                   feetype === "Registration"
                     ? studentData?.regisgrationfee
@@ -1590,6 +1602,7 @@ const addHostelFee = async (req, res) => {
                 SNO: studentData?.SrNumber,
                 Session: studentData?.Session,
                 Section: studentData?.Section,
+                PayOption: PayOption,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1623,7 +1636,7 @@ const addHostelFee = async (req, res) => {
 ///Add school academy Fee
 const addTransportFee = async (req, res) => {
   try {
-    const { id, acadminArray, studentData, feetype } = req.body;
+    const { id, acadminArray, studentData, feetype,PayOption,paymentdate } = req.body;
 
     let prefix;
 
@@ -1684,7 +1697,7 @@ const addTransportFee = async (req, res) => {
                 ClientCode: req?.user?.ClientCode,
                 ReceiptNo: receipno,
                 Feetype: feetype,
-                PaidDate: moment(new Date()).format("YYYY/MM/DD"),
+                PaidDate: paymentdate,
                 PaidAmount:
                   feetype === "Registration"
                     ? studentData?.regisgrationfee
@@ -1699,6 +1712,7 @@ const addTransportFee = async (req, res) => {
                 SNO: studentData?.SrNumber,
                 Session: studentData?.Session,
                 Section: studentData?.Section,
+                PayOption: PayOption,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1889,7 +1903,7 @@ const ChangeSession = async (req, res) => {
 ///Add school academy Fee
 const PaySchoolAnualRegister = async (req, res) => {
   try {
-    const { id, feetype, annualfee } = req.body;
+    const { id, feetype, annualfee, PayOption, paymentdate } = req.body;
 
     let prefix;
 
@@ -1967,7 +1981,7 @@ const PaySchoolAnualRegister = async (req, res) => {
                   : annualfee === "Annual"
                   ? annualfee
                   : "",
-              PaidDate: moment(new Date()).format("YYYY/MM/DD"),
+              PaidDate: paymentdate,
               PaidAmount:
                 feetype === "Registration" && annualfee === "Annual"
                   ? Number(studentone?.regisgrationfee) +
@@ -1987,6 +2001,7 @@ const PaySchoolAnualRegister = async (req, res) => {
               fathersid: studentone?.parentId,
               studentid: studentone?.id,
               batchname: studentone?.batch,
+              PayOption: PayOption,
             });
             if (result) {
               return respHandler.success(res, {
@@ -2258,7 +2273,8 @@ const DeleteOtherFee = async (req, res) => {
 ///Add school academy Fee
 const addOtherFee = async (req, res) => {
   try {
-    const { id, acadminArray, studentData, feetype } = req.body;
+    const { id, acadminArray, studentData, feetype, PayOption, paymentdate } =
+      req.body;
 
     let prefix;
 
@@ -2301,7 +2317,7 @@ const addOtherFee = async (req, res) => {
               ClientCode: req?.user?.ClientCode,
               ReceiptNo: receipno,
               Feetype: feetype,
-              PaidDate: new Date(),
+              PaidDate: paymentdate,
               PaidAmount: acadminArray?.reduce(
                 (n, { FeeAmount }) => parseFloat(n) + parseFloat(FeeAmount),
                 0
@@ -2316,6 +2332,7 @@ const addOtherFee = async (req, res) => {
               SNO: studentData?.SrNumber,
               Session: studentData?.Session,
               Section: studentData?.Section,
+              PayOption: PayOption,
             });
             if (result) {
               return respHandler.success(res, {
