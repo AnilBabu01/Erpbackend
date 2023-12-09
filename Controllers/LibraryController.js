@@ -53,6 +53,7 @@ const CreateBook = async (req, res) => {
       quantity: quantity,
       ClientCode: req.user.ClientCode,
       addDate: newdate,
+      Realquantity:quantity
     });
     if (books) {
       return respHandler.success(res, {
@@ -89,6 +90,7 @@ const UpdateBook = async (req, res) => {
         auther: auther,
         quantity: quantity,
         addDate: newdate,
+        Realquantity:quantity
       },
       {
         where: {

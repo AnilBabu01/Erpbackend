@@ -31,6 +31,10 @@ const Book = sequelize.define("book", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  Realquantity: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   addDate: {
     type: DataTypes.DATE,
     allowNull: true,

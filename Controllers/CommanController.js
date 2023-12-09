@@ -681,8 +681,16 @@ const UpdateEmployee = async (req, res) => {
 
 const Getallemployee = async (req, res) => {
   try {
-    const { name, fromdate, todate, status } = req.query;
-
+    const {
+      name,
+      fromdate,
+      todate,
+      status,
+      empId,
+      empdeparment,
+      empdesination,
+    } = req.query;
+   console.log(req.query);
     let whereClause = {};
     let from = new Date(fromdate);
     let to = new Date(todate);
@@ -703,6 +711,17 @@ const Getallemployee = async (req, res) => {
     }
     if (name) {
       whereClause.name = { [Op.regexp]: `^${name}.*` };
+    }
+
+    if (empId) {
+      whereClause.empId = { [Op.regexp]: `^${empId}.*` };
+    }
+    if (empdeparment) {
+      whereClause.department = { [Op.regexp]: `^${empdeparment}.*` };
+    }
+
+    if (empdesination) {
+      whereClause.employeeof = { [Op.regexp]: `^${empdesination}.*` };
     }
 
     let employees = await Employee.findAll({
