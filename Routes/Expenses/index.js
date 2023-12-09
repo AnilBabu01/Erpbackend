@@ -31,4 +31,10 @@ router
   .put(verifyToken, ExpensesController.UpdateExpenses)
   .delete(verifyToken, ExpensesController.DeleteExpenses);
 
+  router
+  .route("/getexpensesanalysis", verifyToken)
+  .post(verifyToken, ExpensesController.GetExpensesAnalysis)
+ 
+  
+
 module.exports = router;

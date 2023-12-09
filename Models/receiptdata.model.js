@@ -87,6 +87,10 @@ const ReceiptData = sequelize.define("receiptdata", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  monthno: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 });
 
 module.exports = ReceiptData;

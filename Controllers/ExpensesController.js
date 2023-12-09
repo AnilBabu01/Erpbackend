@@ -6,12 +6,14 @@ const {
   literal,
   DATE,
 } = require("sequelize");
+const sequelizes = require("../Helper/Connect");
 const { config } = require("dotenv");
 const respHandler = require("../Handlers");
 const ExpensesType = require("../Models/expensestype.model");
 const Expensesassestype = require("../Models/expensesassettype.model");
 const Expensesasset = require("../Models/expensesasset.model");
 const Expenses = require("../Models/expenses.model");
+const ReceiptData = require("../Models/receiptdata.model");
 const removefile = require("../Middleware/removefile");
 config();
 
@@ -179,14 +181,20 @@ const DeleteExpensesType = async (req, res) => {
 
 const CreateExpenses = async (req, res) => {
   try {
-    const { Expensestype, ExpensesAmount, Comment, Date } = req.body;
+    const { Expensestype, ExpensesAmount, Comment, Date, PayOption } = req.body;
+    let date = new Date();
+    let fullyear = date.getFullYear();
+    let lastyear = date.getFullYear() - 1;
 
+    let Session = `${lastyear}-${fullyear}`;
     let Expensestypes = await Expenses.create({
       Date: Date,
       Expensestype: Expensestype,
       ExpensesAmount: ExpensesAmount,
       Comment: Comment,
       ClientCode: req.user.ClientCode,
+      PayOption: PayOption,
+      Session: Session,
     });
     if (Expensestypes) {
       return respHandler.success(res, {
@@ -212,7 +220,8 @@ const CreateExpenses = async (req, res) => {
 
 const UpdateExpenses = async (req, res) => {
   try {
-    const { Expensestype, ExpensesAmount, Comment, Date, id } = req.body;
+    const { Expensestype, ExpensesAmount, Comment, Date, id, PayOption } =
+      req.body;
 
     let status = await Expenses.update(
       {
@@ -220,6 +229,7 @@ const UpdateExpenses = async (req, res) => {
         Expensestype: Expensestype,
         ExpensesAmount: ExpensesAmount,
         Comment: Comment,
+        PayOption: PayOption,
       },
       {
         where: {
@@ -259,16 +269,22 @@ const UpdateExpenses = async (req, res) => {
 
 const GetExpenses = async (req, res) => {
   try {
-    const { fromdate, todate, expensestype } = req.query;
+    const { fromdate, todate, expensestype, PayOption, sessionname } =
+      req.query;
     let whereClause = {};
     let from = new Date(fromdate);
     let to = new Date(todate);
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
     }
-
+    if (PayOption) {
+      whereClause.PayOption = { [Op.regexp]: `^${PayOption}.*` };
+    }
     if (expensestype) {
       whereClause.Expensestype = { [Op.regexp]: `^${expensestype}.*` };
+    }
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
     }
     if (fromdate && todate) {
       whereClause.Date = { [Op.between]: [from, to] };
@@ -644,6 +660,76 @@ const DeleteAsset = async (req, res) => {
     });
   }
 };
+
+const GetExpensesAnalysis = async (req, res) => {
+  try {
+    const { sessionname, month } = req.body;
+    console.log("data is", month);
+  
+    let allexpenses = await sequelizes.query(
+      `Select Expensestype,ExpensesAmount,PayOption,Comment, SUM(ExpensesAmount) AS total_paidamount FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND MONTH(Date) ='${month}'  AND Session ='${sessionname}' GROUP BY Expensestype ,PayOption;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    let allreceiptdata = await sequelizes.query(
+      `Select PaidDate, Course,PayOption, SUM(PaidAmount) AS total_paidamount FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}' AND MONTH(PaidDate) ='${month}'  AND Session ='${sessionname}' GROUP BY Course ,PayOption;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+    const firstDayOfMonth = new Date(
+      new Date().getFullYear(),
+      Number(month) - 1,
+      1
+    );
+    const lastDayOfMonth = new Date(new Date().getFullYear(), Number(month), 0);
+
+    // let allexpenses = await Expenses.findAll({
+    //   where: {
+    //     Date: {
+    //       [Op.between]: [firstDayOfMonth, lastDayOfMonth],
+    //     },
+    //     Session: sessionname,
+    //   },
+    // });
+
+    // let allreceiptdata = await ReceiptData.findAll({
+    //   // attributes: [
+    //   //   "Session",
+    //   //   "PaidAmount",
+    //   //   [sequelize.fn("SUM", sequelize.col("PaidAmount")), "PaidAmount"],
+    //   // ],
+    //   group: ["Session"],
+    // });
+
+    if (allexpenses && allreceiptdata) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch All Expenses Successfully!!",
+        data: [{ allreceiptdata: allreceiptdata, allexpenses: allexpenses }],
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   CreateExpensesType,
   GetExpensesType,
@@ -661,4 +747,5 @@ module.exports = {
   GeAsset,
   UpdateAsset,
   DeleteAsset,
+  GetExpensesAnalysis,
 };

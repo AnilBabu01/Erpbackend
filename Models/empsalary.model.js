@@ -121,6 +121,7 @@ const EmployeeSalary = sequelize.define("employeesalary", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+ 
 });
 
 module.exports = EmployeeSalary;

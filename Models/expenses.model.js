@@ -27,6 +27,19 @@ const Expenses = sequelize.define("expenses", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  PayOption: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  Session: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  MonthNO: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+   
+  },
 });
 
 module.exports = Expenses;
