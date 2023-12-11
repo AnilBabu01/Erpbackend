@@ -749,6 +749,7 @@ const getAllStudent = async (req, res) => {
       sessionname,
       sectionname,
       sno,
+      transport,
     } = req.query;
 
     let whereClause = {};
@@ -1263,6 +1264,7 @@ const addfee = async (req, res) => {
               Course: studentData?.courseorclass,
               Section: studentData?.Section,
               PayOption: PayOption,
+              monthno: new Date(paymentdate).getMonth(),
             });
             if (result) {
               let student = await Student.findOne({
@@ -1323,7 +1325,7 @@ const getReceipt = async (req, res) => {
     if (req.user) {
       whereClause.ClientCode = req.user?.ClientCode;
     }
-    if (fromdate&&todate) {
+    if (fromdate && todate) {
       whereClause.PaidDate = { [Op.between]: [from, to] };
     }
 
@@ -1493,6 +1495,7 @@ const addSchoolFee = async (req, res) => {
                 studentid: studentData?.id,
                 batchname: studentData?.batch,
                 PayOption: PayOption,
+                monthno: new Date(paymentdate).getMonth(),
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1526,7 +1529,8 @@ const addSchoolFee = async (req, res) => {
 ///Add school academy Fee
 const addHostelFee = async (req, res) => {
   try {
-    const { id, acadminArray, studentData, feetype, paymentdate,PayOption } = req.body;
+    const { id, acadminArray, studentData, feetype, paymentdate, PayOption } =
+      req.body;
 
     let prefix;
 
@@ -1603,6 +1607,7 @@ const addHostelFee = async (req, res) => {
                 Session: studentData?.Session,
                 Section: studentData?.Section,
                 PayOption: PayOption,
+                monthno: new Date(paymentdate).getMonth(),
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1636,7 +1641,8 @@ const addHostelFee = async (req, res) => {
 ///Add school academy Fee
 const addTransportFee = async (req, res) => {
   try {
-    const { id, acadminArray, studentData, feetype,PayOption,paymentdate } = req.body;
+    const { id, acadminArray, studentData, feetype, PayOption, paymentdate } =
+      req.body;
 
     let prefix;
 
@@ -1713,6 +1719,7 @@ const addTransportFee = async (req, res) => {
                 Session: studentData?.Session,
                 Section: studentData?.Section,
                 PayOption: PayOption,
+                monthno: new Date(paymentdate).getMonth(),
               });
               if (result) {
                 return respHandler.success(res, {
@@ -2002,6 +2009,7 @@ const PaySchoolAnualRegister = async (req, res) => {
               studentid: studentone?.id,
               batchname: studentone?.batch,
               PayOption: PayOption,
+              monthno: new Date(paymentdate).getMonth(),
             });
             if (result) {
               return respHandler.success(res, {
@@ -2061,6 +2069,7 @@ const CreateOtherFee = async (req, res) => {
           SNO: item?.SrNumber,
           Session: item?.Session,
           Section: item?.Section,
+          SrNumber: item?.SrNumber,
           OtherFeeName: OtherFeeName,
           FeeAmount: FeeAmount,
           DuesDate: DuesDate,
@@ -2333,6 +2342,7 @@ const addOtherFee = async (req, res) => {
               Session: studentData?.Session,
               Section: studentData?.Section,
               PayOption: PayOption,
+              monthno: new Date(paymentdate).getMonth(),
             });
             if (result) {
               return respHandler.success(res, {

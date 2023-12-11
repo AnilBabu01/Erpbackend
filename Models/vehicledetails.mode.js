@@ -56,6 +56,11 @@ const VehicleDetails = sequelize.define("vehicledetails", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  RealSheets: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue:0
+  },
 });
 
 module.exports = VehicleDetails;

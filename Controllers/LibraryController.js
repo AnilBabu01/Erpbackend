@@ -53,7 +53,7 @@ const CreateBook = async (req, res) => {
       quantity: quantity,
       ClientCode: req.user.ClientCode,
       addDate: newdate,
-      Realquantity:quantity
+      Realquantity: quantity,
     });
     if (books) {
       return respHandler.success(res, {
@@ -90,7 +90,7 @@ const UpdateBook = async (req, res) => {
         auther: auther,
         quantity: quantity,
         addDate: newdate,
-        Realquantity:quantity
+        Realquantity: quantity,
       },
       {
         where: {
@@ -150,11 +150,18 @@ const GetBook = async (req, res) => {
     let book = await Book.findAll({
       where: whereClause,
     });
-    if (book) {
+    let BookedBooks = await BookedBook.findAll({
+      where: {
+        studentid: studentid,
+        rollnumber: rollnumber,
+        issueStatus: 1,
+      },
+    });
+    if (book && BookedBooks) {
       return respHandler.success(res, {
         status: true,
         msg: "Fetch All Books successfully!!",
-        data: book,
+        data: { BookedBooks: BookedBooks, book: book },
       });
     } else {
       return respHandler.error(res, {
@@ -277,12 +284,13 @@ const BookIssue = async (req, res) => {
               ClientCode: req.user.ClientCode,
             },
           });
-
-          return respHandler.success(res, {
-            status: true,
-            msg: "Book Issue Successfully!!",
-            data: bookedBook,
-          });
+          if (bookedBook) {
+            return respHandler.success(res, {
+              status: true,
+              msg: "Book Issue Successfully!!",
+              data: bookedBook,
+            });
+          }
         }
       }
     } else {
@@ -396,9 +404,7 @@ const GetBookIssue = async (req, res) => {
     if (rollnumber) {
       whereClause.rollnumber = rollnumber;
     }
-    if (returnStatus) {
-      whereClause.returnStatus = returnStatus;
-    }
+    whereClause.returnStatus = 0;
 
     let bookedBook = await BookedBook.findAll({
       where: whereClause,

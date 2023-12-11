@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../Helper/Connect");
-const OtherFee = sequelize.define("otherfee", {
+const RoomCheckin = sequelize.define("roomcheckin", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -10,41 +10,39 @@ const OtherFee = sequelize.define("otherfee", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  studentName: {
+  hostelname: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  fathername: {
+  Category: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
-  batchname: {
+  Facility: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
   },
-
-  PaidDate: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-  PaidAmount: {
+  hostelId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
+    allowNull: true,
   },
-  Course: {
+  CategoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  FacilityId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  RoomNo: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  StudentName: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
-  fathersid: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  studentid: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  SNO: {
+  StudentClass: {
     type: DataTypes.STRING,
     allowNull: true,
   },
@@ -56,29 +54,31 @@ const OtherFee = sequelize.define("otherfee", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  OtherFeeName: {
+  Status: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true,
+    defaultValue: true,
+  },
+  SNO: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  FeeAmount: {
+  StudentId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    defaultValue: 0,
   },
-  DuesDate: {
-    type: DataTypes.DATE,
+  ParentId: {
+    type: DataTypes.INTEGER,
     allowNull: true,
-    defaultValue: null,
   },
-  PaidStatus: {
-    type: DataTypes.BOOLEAN,
+  CheckinDate: {
+    type: DataTypes.DATEONLY,
     allowNull: true,
-    defaultValue: 0,
   },
-  SrNumber: {
+  MobileNO: {
     type: DataTypes.STRING,
     allowNull: true,
   },
 });
 
-module.exports = OtherFee;
+module.exports = RoomCheckin;

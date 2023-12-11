@@ -48,6 +48,7 @@ const Expensestype = require('../Models/expensestype.model');
 const Expensesassesttype = require('../Models/expensesassettype.model');
 const Expensesasset = require('../Models/expensesasset.model');
 const Expenses = require("../Models/expenses.model");
+const RoomCheckin = require("../Models/roomcheckin.model");
 sequelize
   .sync({ alter: true })
   .then(() => {

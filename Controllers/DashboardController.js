@@ -69,7 +69,7 @@ const GetAllTotalData = async (req, res) => {
     });
 
     let allexpenses = await sequelizes.query(
-      `Select Expensestype,ExpensesAmount,PayOption,Comment, SUM(ExpensesAmount) AS total_paidamount FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND Session ='${sessionname}' GROUP BY Expensestype ,PayOption;`,
+      `Select Expensestype,PayOption,Comment, SUM(ExpensesAmount) AS total_paidamount FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND Expensestype  IN ('Expenses', 'Liability')  AND Session ='${sessionname}' GROUP BY Expensestype ,PayOption;`,
       {
         nest: true,
         type: QueryTypes.SELECT,

@@ -6,6 +6,7 @@ const Room = sequelize.define("roominhostel", {
     autoIncrement: true,
     primaryKey: true,
   },
+
   ClientCode: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -34,6 +35,19 @@ const Room = sequelize.define("roominhostel", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  hostelId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  CategoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  FacilityId:{
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  }
+  
 });
 
 module.exports = Room;

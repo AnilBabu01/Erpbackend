@@ -1,4 +1,12 @@
-const { sequelize, QueryTypes, Op, where, literal } = require("sequelize");
+const {
+  sequelize,
+  QueryTypes,
+  Op,
+  where,
+  literal,
+  DATE,
+} = require("sequelize");
+const sequelizes = require("../Helper/Connect");
 const { config } = require("dotenv");
 const respHandler = require("../Handlers");
 const RoomCategory = require("../Models/roomcategory.model");
@@ -7,6 +15,7 @@ const RoomHostel = require("../Models/roomhostel.model");
 const Room = require("../Models/room.model");
 const Employee = require("../Models/employee.model");
 const Student = require("../Models/student.model");
+const RoomCheckin = require("../Models/roomcheckin.model");
 const removefile = require("../Middleware/removefile");
 config();
 
@@ -535,14 +544,23 @@ const DeleteHostel = async (req, res) => {
 
 const CreateRoom = async (req, res) => {
   try {
-    const { HostelName, Category, Facility, FromRoom, ToRoom, PermonthFee } =
-      req.body;
+    const {
+      HostelName,
+      Category,
+      Facility,
+      FromRoom,
+      ToRoom,
+      PermonthFee,
+      hostelId,
+      CategoryId,
+      FacilityId,
+    } = req.body;
 
     let hostel = await Room.findOne({
       where: {
         HostelName: HostelName,
-        Category: Category,
-        Facility: Facility,
+        hostelId: hostelId,
+        CategoryId: CategoryId,
         FromRoom: FromRoom,
         ToRoom: ToRoom,
         PermonthFee: PermonthFee,
@@ -561,6 +579,9 @@ const CreateRoom = async (req, res) => {
       hostelname: HostelName,
       Category: Category,
       Facility: Facility,
+      hostelId: hostelId,
+      CategoryId: CategoryId,
+      FacilityId: FacilityId,
       FromRoom: FromRoom,
       ToRoom: ToRoom,
       PermonthFee: PermonthFee,
@@ -598,6 +619,9 @@ const UpdateRoom = async (req, res) => {
       ToRoom,
       PermonthFee,
       id,
+      hostelId,
+      CategoryId,
+      FacilityId,
     } = req.body;
 
     let status = await Room.update(
@@ -605,6 +629,9 @@ const UpdateRoom = async (req, res) => {
         hostelname: HostelName,
         Category: Category,
         Facility: Facility,
+        hostelId: hostelId,
+        CategoryId: CategoryId,
+        FacilityId: FacilityId,
         FromRoom: Number(FromRoom),
         ToRoom: Number(ToRoom),
         PermonthFee: Number(PermonthFee),
@@ -756,6 +783,442 @@ const GetHostelFee = async (req, res) => {
   }
 };
 
+const CheckAvailability = async (req, res) => {
+  try {
+    const { hostelname, Category } = req.body;
+
+    const [results] = await sequelizes.query(
+      `SELECT roominhostels.*, hostels.Hostelurl AS HostelIMG FROM roominhostels JOIN hostels ON roominhostels.hostelId = hostels.id WHERE roominhostels.hostelId LIKE '%${hostelname}%' AND roominhostels.CategoryId = '${Category}';`
+    );
+
+    let facilitiesCategory = results?.map((facility) => {
+      facility.FacilityId = JSON.parse(JSON.parse(facility.FacilityId));
+      facility.CategoryId = JSON.parse(JSON.parse(facility.CategoryId));
+      return facility;
+    });
+
+    await Promise.all(
+      facilitiesCategory.map(async (facility) => {
+        const categories = await RoomCategory.findAll({
+          where: {
+            id: facility.CategoryId,
+            ClientCode: req.user.ClientCode,
+          },
+        });
+
+        facility.category_name = categories.map(
+          (category) => category.roomCategory
+        );
+
+        const facilities = await Facility.findAll({
+          where: {
+            id: facility.FacilityId,
+            ClientCode: req.user.ClientCode,
+          },
+        });
+
+        facility.facility_name = facilities.map(
+          (facility) => facility.roomFacility
+        );
+
+        const hostel = await RoomHostel.findOne({
+          where: {
+            id: facility.hostelId,
+            ClientCode: req.user.ClientCode,
+          },
+        });
+        facility.hostel = hostel;
+      })
+    );
+
+    const roomRanges = facilitiesCategory.map((room) => ({
+      from: room.FromRoom,
+      to: room.ToRoom,
+      ...room,
+    }));
+
+    const allRoomNumbers = roomRanges.reduce((result, range) => {
+      const rangeNumbers = Array.from(
+        { length: range.to - range.from + 1 },
+        (_, i) => i + range.from
+      );
+      return [...result, ...rangeNumbers];
+    }, []);
+
+    const occupiedRooms = await RoomCheckin.findAll({
+      where: {
+        hostelId: hostelname,
+        Status: true,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    ///get room only
+    const occupiedRoomNumbers = occupiedRooms.map((room) => room.RoomNo);
+
+    const availableRooms = roomRanges.reduce((result, range) => {
+      const rangeNumbers = Array.from(
+        { length: range.to - range.from + 1 },
+        (_, i) => i + range.from
+      );
+
+      const availableNumbers = rangeNumbers.filter(
+        (number) => !occupiedRoomNumbers.includes(number)
+      );
+      console.log("availableroom", availableNumbers);
+
+      return [
+        ...result,
+        ...availableNumbers.map((number) => ({
+          ...range,
+          RoomNo: number,
+        })),
+      ];
+    }, []);
+
+    if (availableRooms) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Rooms successfully!!",
+        data: availableRooms,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const CheckinRoom = async (req, res) => {
+  try {
+    const { roomdetails, studentdetails } = req.body;
+
+    let ischeckin = await RoomCheckin.findOne({
+      where: {
+        Status: 1,
+        StudentName: studentdetails?.name,
+        SNO: studentdetails?.SrNumber,
+        Section: studentdetails?.Section,
+        Session: studentdetails?.Session,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (ischeckin) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "AlReady Room Checkin Exist!!",
+        error: ["AllReady Exsist !!"],
+      });
+    }
+
+    let checkin = await RoomCheckin.create({
+      CheckinDate: new Date(),
+      hostelname: roomdetails?.hostelname,
+      Category: roomdetails?.Category,
+      Facility: roomdetails?.Facility,
+      hostelId: roomdetails?.hostelId,
+      CategoryId: roomdetails?.CategoryId,
+      FacilityId: roomdetails?.FacilityId,
+      RoomNo: roomdetails?.RoomNo,
+      StudentId: studentdetails?.id,
+      ParentId: studentdetails?.parentId,
+      StudentClass: studentdetails?.courseorclass,
+      StudentName: studentdetails?.name,
+      SNO: studentdetails?.SrNumber,
+      Section: studentdetails?.Section,
+      Session: studentdetails?.Session,
+      MobileNO: studentdetails?.phoneno1,
+      ClientCode: req.user.ClientCode,
+    });
+    if (checkin) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Room Checkin Successfully!!",
+        data: checkin,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetCheckingRoom = async (req, res) => {
+  try {
+    const { StudentId } = req.body;
+
+    let Checkin = await RoomCheckin.findOne({
+      where: {
+        Status: 1,
+        StudentId: StudentId,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (Checkin) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Checkin Details Successfully!!",
+        data: Checkin,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateCheckinRoom = async (req, res) => {
+  try {
+    const { roomdetails, studentdetails, CheckinId } = req.body;
+
+    let ischeckin = await RoomCheckin.findOne({
+      where: {
+        Status: 1,
+        StudentName: studentdetails?.name,
+        SNO: studentdetails?.SrNumber,
+        Section: studentdetails?.Section,
+        Session: studentdetails?.Session,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (ischeckin) {
+      let result = await RoomCheckin.update(
+        {
+          CheckinDate: new Date(),
+          hostelname: roomdetails?.hostelname,
+          Category: roomdetails?.Category,
+          Facility: roomdetails?.Facility,
+          hostelId: roomdetails?.hostelId,
+          CategoryId: roomdetails?.CategoryId,
+          FacilityId: roomdetails?.FacilityId,
+          RoomNo: roomdetails?.RoomNo,
+          StudentId: studentdetails?.id,
+          ParentId: studentdetails?.parentId,
+          StudentClass: studentdetails?.courseorclass,
+          StudentName: studentdetails?.name,
+          SNO: studentdetails?.SrNumber,
+          Section: studentdetails?.Section,
+          Session: studentdetails?.Session,
+          MobileNO: studentdetails?.phoneno1,
+          ClientCode: req.user.ClientCode,
+        },
+        {
+          where: {
+            id: CheckinId,
+            ClientCode: req.user?.ClientCode,
+          },
+        }
+      );
+
+      if (result) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Room Shift Successfully!!",
+          data: [""],
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Room Shift Possible After Checkin!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetAllCheckin = async (req, res) => {
+  try {
+    const {
+      sessionname,
+      sectionname,
+      sno,
+      checkinstatus,
+      scoursename,
+      hostelname,
+    } = req.body;
+    let whereClause = {};
+    let newstatue = checkinstatus
+      ? checkinstatus === "true"
+        ? true
+        : false
+      : true;
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+    }
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+    }
+    if (sno) {
+      whereClause.SNO = { [Op.regexp]: `^${sno}.*` };
+    }
+    if (checkinstatus) {
+      whereClause.Status = newstatue;
+    }
+    if (scoursename) {
+      whereClause.StudentClass = scoursename;
+    }
+    if (sectionname) {
+      whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
+    }
+
+    if (hostelname) {
+      whereClause.hostelname = { [Op.regexp]: `^${hostelname}.*` };
+    }
+    let Checkins = await RoomCheckin.findAll({
+      where: whereClause,
+    });
+    if (Checkins) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Checkin Successfully!!",
+        data: Checkins,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const ReleaseRoom = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    let ischeckin = await RoomCheckin.findOne({
+      where: {
+        Status: 1,
+        id: id,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (ischeckin) {
+      let result = await RoomCheckin.update(
+        {
+          Status: 0,
+        },
+        {
+          where: {
+            id: id,
+            ClientCode: req.user?.ClientCode,
+          },
+        }
+      );
+
+      if (result) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Room Release Successfully!!",
+          data: [""],
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetOccupiedRoom = async (req, res) => {
+  try {
+    const { Category, hostelname, sessionname, fromdate, todate } = req.body;
+    let whereClause = {};
+    let from = new Date(fromdate);
+    let to = new Date(todate);
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+    }
+
+    if (fromdate && todate) {
+      whereClause.CheckinDate	 = { [Op.between]: [from, to] };
+    }
+
+    if (Category) {
+      whereClause.Category = { [Op.regexp]: `^${Category}.*` };
+    }
+
+    if (hostelname) {
+      whereClause.hostelname = { [Op.regexp]: `^${hostelname}.*` };
+    }
+
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+    }
+
+    let OccupiedRooms = await RoomCheckin.findAll({
+      where: whereClause,
+    });
+    if (OccupiedRooms) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch All Occupied Rooms Successfully!!",
+        data: OccupiedRooms,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   CreateCategory,
   UpdateCategory,
@@ -774,4 +1237,11 @@ module.exports = {
   GetRoom,
   DeleteRoom,
   GetHostelFee,
+  CheckAvailability,
+  CheckinRoom,
+  GetCheckingRoom,
+  UpdateCheckinRoom,
+  GetAllCheckin,
+  ReleaseRoom,
+  GetOccupiedRoom,
 };

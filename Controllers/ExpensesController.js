@@ -181,20 +181,22 @@ const DeleteExpensesType = async (req, res) => {
 
 const CreateExpenses = async (req, res) => {
   try {
-    const { Expensestype, ExpensesAmount, Comment, Date, PayOption } = req.body;
+    const { Expensestype, ExpensesAmount, Comment, addDate, PayOption } =
+      req.body;
     let date = new Date();
     let fullyear = date.getFullYear();
     let lastyear = date.getFullYear() - 1;
 
     let Session = `${lastyear}-${fullyear}`;
     let Expensestypes = await Expenses.create({
-      Date: Date,
+      Date: date,
       Expensestype: Expensestype,
       ExpensesAmount: ExpensesAmount,
       Comment: Comment,
       ClientCode: req.user.ClientCode,
       PayOption: PayOption,
       Session: Session,
+      MonthNO: date.getMonth()+1,
     });
     if (Expensestypes) {
       return respHandler.success(res, {
@@ -665,9 +667,18 @@ const GetExpensesAnalysis = async (req, res) => {
   try {
     const { sessionname, month } = req.body;
     console.log("data is", month);
-  
+
     let allexpenses = await sequelizes.query(
-      `Select Expensestype,ExpensesAmount,PayOption,Comment, SUM(ExpensesAmount) AS total_paidamount FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND MONTH(Date) ='${month}'  AND Session ='${sessionname}' GROUP BY Expensestype ,PayOption;`,
+      `Select Expensestype,PayOption,Comment, SUM(ExpensesAmount) AS total_paidamount FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND Expensestype IN ('Expenses', 'Liability') AND MONTH(Date) ='${month}'  AND Session ='${sessionname}' GROUP BY Expensestype ,PayOption;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    let allexpensesAsset = await sequelizes.query(
+      `Select Expensestype,PayOption,Comment, SUM(ExpensesAmount) AS total_paidamount FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND Expensestype IN ('Asset') AND MONTH(Date) ='${month}'  AND Session ='${sessionname}' GROUP BY Expensestype ,PayOption;`,
       {
         nest: true,
         type: QueryTypes.SELECT,
@@ -690,29 +701,12 @@ const GetExpensesAnalysis = async (req, res) => {
     );
     const lastDayOfMonth = new Date(new Date().getFullYear(), Number(month), 0);
 
-    // let allexpenses = await Expenses.findAll({
-    //   where: {
-    //     Date: {
-    //       [Op.between]: [firstDayOfMonth, lastDayOfMonth],
-    //     },
-    //     Session: sessionname,
-    //   },
-    // });
 
-    // let allreceiptdata = await ReceiptData.findAll({
-    //   // attributes: [
-    //   //   "Session",
-    //   //   "PaidAmount",
-    //   //   [sequelize.fn("SUM", sequelize.col("PaidAmount")), "PaidAmount"],
-    //   // ],
-    //   group: ["Session"],
-    // });
-
-    if (allexpenses && allreceiptdata) {
+    if (allexpenses && allreceiptdata&&allexpensesAsset) {
       return respHandler.success(res, {
         status: true,
         msg: "Fetch All Expenses Successfully!!",
-        data: [{ allreceiptdata: allreceiptdata, allexpenses: allexpenses }],
+        data: [{ allreceiptdata: allreceiptdata, allexpenses: allexpenses,allexpensesAsset:allexpensesAsset }],
       });
     } else {
       return respHandler.error(res, {

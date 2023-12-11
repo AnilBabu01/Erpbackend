@@ -9,9 +9,10 @@ const SchoolTransportFeeStatus = require("../Models/schooltransportfee.model");
 const OtherFee = require("../Models/otherfee.model");
 config();
 
+
 const getSchoolFee = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id ,SrNumber} = req.body;
 
     let whereClause = {};
 
@@ -22,7 +23,9 @@ const getSchoolFee = async (req, res) => {
     if (id) {
       whereClause.studentId = id;
     }
-
+    // if (SrNumber) {
+    //   whereClause.SrNumber = { [Op.regexp]: `^${SrNumber}.*` };
+    // }
     let schollfee = await SchoolFeeStatus.findAll({
       where: whereClause,
     });

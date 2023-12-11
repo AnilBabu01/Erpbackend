@@ -53,4 +53,33 @@ router
   .route("/gethostelfee", verifyToken)
   .post(verifyToken, HostelController.GetHostelFee);
 
+router
+  .route("/CheckAvailability", verifyToken)
+  .post(verifyToken, HostelController.CheckAvailability);
+
+router
+  .route("/CheckinRoom", verifyToken)
+  .post(verifyToken, HostelController.CheckinRoom);
+
+router
+  .route("/GetCheckingRoom", verifyToken)
+  .post(verifyToken, HostelController.GetCheckingRoom);
+
+router
+  .route("/UpdateCheckinRoom", verifyToken)
+  .put(verifyToken, HostelController.UpdateCheckinRoom);
+
+router
+  .route("/GetAllCheckin", verifyToken)
+  .post(verifyToken, HostelController.GetAllCheckin);
+
+router
+  .route("/ReleaseRoom", verifyToken)
+  .put(verifyToken, HostelController.ReleaseRoom);
+
+  router
+  .route("/GetOccupiedRoom", verifyToken)
+  .post(verifyToken, HostelController.GetOccupiedRoom);
+
+
 module.exports = router;
