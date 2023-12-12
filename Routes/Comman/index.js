@@ -218,4 +218,18 @@ router
   .put(verifyToken, CommanController.UpdateSection)
   .delete(verifyToken, CommanController.DeleteSection);
 
+router
+  .route("/subject", verifyToken)
+  .post(verifyToken, CommanController.CreateSubject)
+  .get(verifyToken, CommanController.GetSubject)
+  .put(verifyToken, CommanController.UpdateSubject)
+  .delete(verifyToken, CommanController.DeleteSubject);
+
+router
+  .route("/classsubject", verifyToken)
+  .post(verifyToken, CommanController.CreateClassSubject)
+  .get(verifyToken, CommanController.getClassSubject)
+  .put(verifyToken, CommanController.UpdateClassSubject)
+  .delete(verifyToken, CommanController.DeleteClassSubject);
+
 module.exports = router;

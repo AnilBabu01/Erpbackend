@@ -44,4 +44,8 @@ router
   .route("/changebus", verifyToken)
   .post(verifyToken, TransportController.ChangeBus);
 
+  router
+  .route("/GetVehicleStudent", verifyToken)
+  .post(verifyToken, TransportController.GetVehicleStudent);
+
 module.exports = router;

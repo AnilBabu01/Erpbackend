@@ -204,6 +204,7 @@ const CreateRoute = async (req, res) => {
           });
           return result;
         });
+        
         if (await Promise.all(promises)) {
           let vehicleroutes = await VehicleRoute.findOne({
             where: {
@@ -507,7 +508,7 @@ const CreateVehicleDetails = async (req, res) => {
       Color: Color,
       GPSDeviceURL: GPSDeviceURL,
       NoOfSheets: NoOfSheets,
-      RealSheets:NoOfSheets,
+      RealSheets: NoOfSheets,
       DriverId1: DriverId1,
       DriverId2: DriverId2,
       HelferId1: HelferId1,
@@ -562,7 +563,7 @@ const UpdateVehicleDetails = async (req, res) => {
         Color: Color,
         GPSDeviceURL: GPSDeviceURL,
         NoOfSheets: NoOfSheets,
-        RealSheets:NoOfSheets,
+        RealSheets: NoOfSheets,
         DriverId1: DriverId1,
         DriverId2: DriverId2,
         HelferId1: HelferId1,
@@ -1131,6 +1132,46 @@ const ChangeBus = async (req, res) => {
     });
   }
 };
+
+const GetVehicleStudent = async (req, res) => {
+  try {
+    const { busno, sessionname } = req.body;
+    let whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+    }
+    if (sessionname) {
+      whereClause.Session = sessionname;
+    }
+    if (busno) {
+      whereClause.BusNumber = busno;
+    }
+    let VehicleStudent = await Student.findAll({
+      where: whereClause,
+    });
+    if (VehicleStudent) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Student List Successfully!!",
+        data: VehicleStudent,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   CreateVehicleType,
   UpdateVehicleType,
@@ -1149,4 +1190,5 @@ module.exports = {
   GetBusListByRouteID,
   GiveBusToStudent,
   ChangeBus,
+  GetVehicleStudent,
 };

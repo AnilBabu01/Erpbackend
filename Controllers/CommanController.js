@@ -13,6 +13,8 @@ const Coursemonth = require("../Models/coursemonth.model");
 const Credentials = require("../Models/Credentials.model");
 const ReceiptPrefix = require("../Models/receiptprefix.model");
 const Session = require("../Models/session.model");
+const Subject = require("../Models/Subject.model");
+const ClassSubject = require("../Models/classubject.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -157,6 +159,7 @@ const RegisterEmployee = async (req, res) => {
         name: name,
         email: email,
         institutename: req.user.institutename,
+        userType: userType,
         organizationtype: req.user.userType,
         ClientCode: req.user.ClientCode,
         userId: req.user.id,
@@ -481,6 +484,7 @@ const UpdateEmployee = async (req, res) => {
       libraryWrite,
       libraryEdit,
       libraryDelete,
+      userType,
     } = req.body;
 
     let employees = await Employee.findOne({
@@ -610,6 +614,7 @@ const UpdateEmployee = async (req, res) => {
           libraryWrite: libraryWrite,
           libraryEdit: libraryEdit,
           libraryDelete: libraryDelete,
+          userType: userType,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req?.user?.profileurl,
@@ -690,7 +695,7 @@ const Getallemployee = async (req, res) => {
       empdeparment,
       empdesination,
     } = req.query;
-   console.log(req.query);
+    console.log(req.query);
     let whereClause = {};
     let from = new Date(fromdate);
     let to = new Date(todate);
@@ -1346,6 +1351,10 @@ const updateCredentials = async (req, res) => {
     Studentpassword,
     Employeepassword,
     Parentpassword,
+    Library,
+    Transport,
+    hostel,
+    FrontOffice,
   } = req.body;
 
   if (
@@ -1397,6 +1406,10 @@ const updateCredentials = async (req, res) => {
           city: city,
           state: state,
           pincode: pincode,
+          Library: Library,
+          Transport: Transport,
+          hostel: hostel,
+          FrontOffice: FrontOffice,
           userType: userType ? userType : user?.userType,
           logourl: req?.files?.logourl
             ? `images/${req?.files?.logourl[0]?.filename}`
@@ -2494,6 +2507,396 @@ const DeleteSession = async (req, res) => {
   }
 };
 
+const CreateSubject = async (req, res) => {
+  try {
+    const { dayname, subject, starttime, endtime, classId, empID } = req.body;
+    let isteacherAvailability = await Subject.findAll({
+      where: {
+        dayname: dayname,
+        empID: empID,
+        starttime: starttime,
+        endtime: endtime,
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (isteacherAvailability?.length > 0) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Already Assigned This Time Slot!!",
+        error: [""],
+      });
+    } else {
+      let issubject = await Subject.findOne({
+        where: {
+          dayname: dayname,
+          subject: subject,
+          starttime: starttime,
+          endtime: endtime,
+          classId: classId,
+          empID: empID,
+          ClientCode: req.user.ClientCode,
+        },
+      });
+      if (issubject) {
+        if (issubject?.subject?.toLowerCase() === subject.toLowerCase()) {
+          return respHandler.error(res, {
+            status: false,
+            msg: "AlReady Exist!!",
+            error: ["AllReady Exsist !!"],
+          });
+        }
+      }
+
+      let subjects = await Subject.create({
+        dayname: dayname,
+        subject: subject,
+        starttime: starttime,
+        endtime: endtime,
+        classId: classId,
+        empID: empID,
+        ClientCode: req.user.ClientCode,
+      });
+      if (subjects) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Subject Added successfully!!",
+          data: subjects,
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: [""],
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateSubject = async (req, res) => {
+  try {
+    const { dayname, subject, starttime, endtime, classId, empID, id } =
+      req.body;
+
+    let isteacherAvailability = await Subject.findAll({
+      where: {
+        dayname: dayname,
+        empID: empID,
+        starttime: starttime,
+        endtime: endtime,
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (isteacherAvailability?.length > 0) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Already Assigned This Time Slot!!",
+        error: [""],
+      });
+    } else {
+      let status = await Subject.update(
+        {
+          dayname: dayname,
+          subject: subject,
+          starttime: starttime,
+          endtime: endtime,
+          classId: classId,
+          empID: empID,
+        },
+        {
+          where: {
+            id: id,
+            ClientCode: req.user?.ClientCode,
+          },
+        }
+      );
+
+      if (status) {
+        let issubject = await Subject.findOne({
+          where: {
+            id: id,
+            ClientCode: req.user?.ClientCode,
+          },
+        });
+        return respHandler.success(res, {
+          status: true,
+          msg: "Subject Updated successfully!!",
+          data: issubject,
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: [err.message],
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetSubject = async (req, res) => {
+  try {
+    let result = [];
+    const { classId, empID,dayname } = req.query;
+    let whereClause = {};
+    console.log("data is data ", req.query);
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+    }
+    if (classId) {
+      whereClause.classId = classId;
+    }
+    if (empID) {
+      whereClause.empID = empID;
+    }
+    if(dayname)
+    {
+      whereClause.dayname = dayname;
+    }
+
+    let Allsubject = await Subject.findAll({
+      where: whereClause,
+      order: [["id", "ASC"]],
+    });
+
+    if (Allsubject) {
+      const promises = Allsubject?.map(async (item) => {
+        let classname = await Course.findOne({
+          where: {
+            id: item?.classId,
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+        let empname = await Employee.findOne({
+          where: {
+            id: item?.empID,
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+
+        if (classname && empname) {
+          result.push({
+            subject: item,
+            classname: classname,
+            empname: empname,
+          });
+        }
+        return 1;
+      });
+
+      if (await Promise.all(promises)) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch All Subject Successfully!!",
+          data: result,
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteSubject = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let issubject = await Subject.findOne({ where: { id: id } });
+    if (issubject) {
+      await Subject.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Subject Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const CreateClassSubject = async (req, res) => {
+  try {
+    const { Subject } = req.body;
+    let sectionv = await ClassSubject.findOne({
+      where: {
+        Subject: Subject,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (sectionv) {
+      if (sectionv?.Subject?.toLowerCase() === Subject.toLowerCase()) {
+        return respHandler.error(res, {
+          status: false,
+          msg: "AlReady Exists!!",
+          error: ["AlReady Exsist !!"],
+        });
+      }
+    }
+
+    let sections = await ClassSubject.create({
+      ClientCode: req.user?.ClientCode,
+      Subject: Subject,
+    });
+    if (sections) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Subject Created successfully!!",
+        data: [sections],
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateClassSubject = async (req, res) => {
+  try {
+    const { Subject, id } = req.body;
+
+    let status = await ClassSubject.update(
+      {
+        Subject: Subject,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      }
+    );
+    let studentclass = await ClassSubject.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (status) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Subject Updated successfully!!",
+        data: [studentclass],
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const getClassSubject = async (req, res) => {
+  try {
+    let organizations = await ClassSubject.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (organizations) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "All Subject successfully!!",
+        data: organizations,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteClassSubject = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let organization = await ClassSubject.findOne({ where: { id: id } });
+    if (organization) {
+      await ClassSubject.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Subject Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   Getprofile,
   updateprofile,
@@ -2543,4 +2946,12 @@ module.exports = {
   UpdateSession,
   getSession,
   DeleteSession,
+  CreateSubject,
+  UpdateSubject,
+  GetSubject,
+  DeleteSubject,
+  CreateClassSubject,
+  getClassSubject,
+  DeleteClassSubject,
+  UpdateClassSubject,
 };

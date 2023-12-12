@@ -4,6 +4,7 @@ const Student = require("../Models/student.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
+
 config();
 
 const Loging = async (req, res) => {
