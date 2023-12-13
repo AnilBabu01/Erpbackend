@@ -275,4 +275,8 @@ router
   )
   .delete(verifyToken, CommanController.DeleteSlider);
 
+router
+  .route("/GetStudentTimeTable", verifyToken)
+  .get(verifyToken, CommanController.GetStudentTimeTable);
+
 module.exports = router;

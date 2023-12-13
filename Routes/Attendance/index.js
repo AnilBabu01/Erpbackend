@@ -25,4 +25,16 @@ router
   .route("/getholidy", verifyToken)
   .post(verifyToken, AttendanceController.GetHolidays);
 
+router
+  .route("/GetStudentTodayAttendance", verifyToken)
+  .get(verifyToken, AttendanceController.GetStudentTodayAttendance);
+
+router
+  .route("/GetStudentAllMonthAttendance", verifyToken)
+  .get(verifyToken, AttendanceController.GetStudentAllMonthAttendance);
+
+router
+  .route("/GetStudentByDateAttendance", verifyToken)
+  .post(verifyToken, AttendanceController.GetStudentByDateAttendance);
+
 module.exports = router;

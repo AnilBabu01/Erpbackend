@@ -685,10 +685,14 @@ const Addstudent = async (req, res) => {
   }
 };
 
+
 const Loging = async (req, res) => {
   const { rollnumber, password } = req.body;
   if (rollnumber != "" || password != "") {
     try {
+
+      console.log("login data is ",req.body);
+      
       let whereClause = {};
       whereClause.SrNumber = { [Op.regexp]: `^${rollnumber}.*` };
       let user = await Student.findOne({ where: whereClause });

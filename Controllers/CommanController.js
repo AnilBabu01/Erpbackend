@@ -3298,6 +3298,7 @@ const CreateSlider = async (req, res) => {
   let { Dec } = req.body;
   try {
     let Sliderimg = await Slider.create({
+      ClientCode: req.user?.ClientCode,
       Dec: Dec,
       ImgUrl: req?.files?.ImgUrl
         ? `images/${req?.files?.ImgUrl[0]?.filename}`
@@ -3329,7 +3330,11 @@ const CreateSlider = async (req, res) => {
 
 const GetSlider = async (req, res) => {
   try {
-    let Allsliderimg = await Slider.findAll();
+    let Allsliderimg = await Slider.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+      },
+    });
     if (Allsliderimg) {
       return respHandler.success(res, {
         status: true,
@@ -3372,6 +3377,7 @@ const updateSlider = async (req, res) => {
         {
           where: {
             id: id,
+            ClientCode: req.user?.ClientCode,
           },
         }
       );
@@ -3431,6 +3437,71 @@ const DeleteSlider = async (req, res) => {
         msg: "Something Went Wrong!!",
         error: ["not found"],
       });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetStudentTimeTable = async (req, res) => {
+  try {
+    let result = [];
+    let isclass = await Course.findOne({
+      where: {
+        coursename: req.user?.courseorclass,
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (isclass) {
+      let emptimetable = await Subject.findAll({
+        where: {
+          classId: isclass?.id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      if (emptimetable) {
+        const promises = emptimetable?.map(async (item) => {
+          let classname = await Course.findOne({
+            where: {
+              id: item?.classId,
+              ClientCode: req?.user?.ClientCode,
+            },
+          });
+          let employee = await Employee.findOne({
+            where: {
+              id: item?.empID,
+              ClientCode: req?.user?.ClientCode,
+            },
+          });
+
+          if (classname && employee) {
+            result.push({
+              subject: item,
+              classname: classname,
+              employee: employee,
+            });
+          }
+          return 1;
+        });
+
+        if (await Promise.all(promises)) {
+          return respHandler.success(res, {
+            status: true,
+            msg: "Fetch Emp Time Table Successfully!!",
+            data: result,
+          });
+        }
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: [err.message],
+        });
+      }
     }
   } catch (err) {
     return respHandler.error(res, {
@@ -3511,4 +3582,5 @@ module.exports = {
   updateSlider,
   GetSlider,
   DeleteSlider,
+  GetStudentTimeTable,
 };

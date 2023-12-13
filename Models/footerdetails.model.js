@@ -38,12 +38,13 @@ const FooterDetails = sequelize.define("footerdetails", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+
   Email: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   Mapurl: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(10000),
     allowNull: false,
   },
 });

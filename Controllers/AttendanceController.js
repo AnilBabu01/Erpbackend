@@ -977,7 +977,6 @@ const GetHolidays = async (req, res) => {
   }
 };
 
-
 const Updateholiday = async (req, res) => {
   try {
     const { holidaydate, batchname, comment, status } = req.body;
@@ -1179,6 +1178,122 @@ const Deleteholiday = async (req, res) => {
   }
 };
 
+const GetStudentTodayAttendance = async (req, res) => {
+  try {
+    let newdate = new Date();
+    let fullyear = newdate.getFullYear();
+    let whereClause = {};
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+      whereClause.studentid = req.user.id;
+      whereClause.yeay = fullyear?.toString();
+      whereClause.attendancedate = newdate;
+    }
+
+    let checkattendance = await AttendanceStudent.findOne({
+      where: whereClause,
+    });
+
+    if (checkattendance) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Today Attendance Successfully!!",
+        data: checkattendance,
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetStudentAllMonthAttendance = async (req, res) => {
+  try {
+    let newdate = new Date();
+    let fullyear = newdate.getFullYear();
+    let whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+      whereClause.yeay = fullyear?.toString();
+      whereClause.studentid = req.user.id;
+    }
+
+    let checkattendance = await AttendanceStudent.findAll({
+      where: whereClause,
+      order: [["MonthNo", "ASC"]],
+    });
+
+    if (checkattendance) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch All Month Attendance Successfully!!",
+        data: checkattendance,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found!!",
+        error: [err.message],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetStudentByDateAttendance = async (req, res) => {
+  try {
+    const { fromdate, todate } = req.body;
+    let newdate = new Date();
+    let fullyear = newdate.getFullYear();
+    let whereClause = {};
+    let from = new Date(fromdate);
+    let to = new Date(todate);
+
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+      whereClause.yeay = fullyear?.toString();
+      whereClause.studentid = req.user.id;
+    }
+
+    if (fromdate && todate) {
+      whereClause.attendancedate = { [Op.between]: [from, to] };
+    }
+
+    let checkattendance = await AttendanceStudent.findAll({
+      where: whereClause,
+    });
+
+    if (checkattendance) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Attendance Successfully!!",
+        data: checkattendance,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found!!",
+        error: [err.message],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   DoneStudentAttendance,
   MarkStudentAttendance,
@@ -1187,4 +1302,7 @@ module.exports = {
   GetHolidays,
   Updateholiday,
   Deleteholiday,
+  GetStudentTodayAttendance,
+  GetStudentAllMonthAttendance,
+  GetStudentByDateAttendance,
 };
