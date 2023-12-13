@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../Helper/Connect");
-const Subject = sequelize.define("subject", {
+const FooterDetails = sequelize.define("footerdetails", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -10,34 +10,42 @@ const Subject = sequelize.define("subject", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  dayname: {
+  facilitycontent: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  subject: {
+  facebookurl: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  starttime: {
+  instagramurl: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  endtime: {
+  twiterurl: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  classId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  empID: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  section: {
+  linkldlurl: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
+  },
+  ChairmanContactNo: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  PrincipalContactNo: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  Email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  Mapurl: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
 });
 
-module.exports = Subject;
+module.exports = FooterDetails;

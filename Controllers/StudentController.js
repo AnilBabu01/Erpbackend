@@ -689,7 +689,9 @@ const Loging = async (req, res) => {
   const { rollnumber, password } = req.body;
   if (rollnumber != "" || password != "") {
     try {
-      let user = await Student.findOne({ where: { rollnumber: rollnumber } });
+      let whereClause = {};
+      whereClause.SrNumber = { [Op.regexp]: `^${rollnumber}.*` };
+      let user = await Student.findOne({ where: whereClause });
       if (!user) {
         return respHandler.error(res, {
           status: false,

@@ -51,6 +51,9 @@ const Expenses = require("../Models/expenses.model");
 const RoomCheckin = require("../Models/roomcheckin.model");
 const Subject = require("../Models/Subject.model");
 const ClassSubject = require("../Models/classubject.model");
+const FooterDetails = require("../Models/footerdetails.model");
+const Banner = require("../Models/note.model");
+const Slider = require("../Models/Slider.model");
 sequelize
   .sync({ alter: true })
   .then(() => {

@@ -15,6 +15,9 @@ const ReceiptPrefix = require("../Models/receiptprefix.model");
 const Session = require("../Models/session.model");
 const Subject = require("../Models/Subject.model");
 const ClassSubject = require("../Models/classubject.model");
+const FooterDetails = require("../Models/footerdetails.model");
+const Note = require("../Models/note.model");
+const Slider = require("../Models/Slider.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -2509,9 +2512,11 @@ const DeleteSession = async (req, res) => {
 
 const CreateSubject = async (req, res) => {
   try {
-    const { dayname, subject, starttime, endtime, classId, empID } = req.body;
+    const { dayname, subject, starttime, endtime, classId, empID, section } =
+      req.body;
     let isteacherAvailability = await Subject.findAll({
       where: {
+        section: section,
         dayname: dayname,
         empID: empID,
         starttime: starttime,
@@ -2528,6 +2533,7 @@ const CreateSubject = async (req, res) => {
     } else {
       let issubject = await Subject.findOne({
         where: {
+          section: section,
           dayname: dayname,
           subject: subject,
           starttime: starttime,
@@ -2548,6 +2554,7 @@ const CreateSubject = async (req, res) => {
       }
 
       let subjects = await Subject.create({
+        section: section,
         dayname: dayname,
         subject: subject,
         starttime: starttime,
@@ -2581,11 +2588,20 @@ const CreateSubject = async (req, res) => {
 
 const UpdateSubject = async (req, res) => {
   try {
-    const { dayname, subject, starttime, endtime, classId, empID, id } =
-      req.body;
+    const {
+      dayname,
+      subject,
+      starttime,
+      endtime,
+      classId,
+      empID,
+      id,
+      section,
+    } = req.body;
 
     let isteacherAvailability = await Subject.findAll({
       where: {
+        section: section,
         dayname: dayname,
         empID: empID,
         starttime: starttime,
@@ -2649,7 +2665,7 @@ const UpdateSubject = async (req, res) => {
 const GetSubject = async (req, res) => {
   try {
     let result = [];
-    const { classId, empID,dayname } = req.query;
+    const { classId, empID, dayname } = req.query;
     let whereClause = {};
     console.log("data is data ", req.query);
     if (req.user) {
@@ -2661,8 +2677,7 @@ const GetSubject = async (req, res) => {
     if (empID) {
       whereClause.empID = empID;
     }
-    if(dayname)
-    {
+    if (dayname) {
       whereClause.dayname = dayname;
     }
 
@@ -2897,6 +2912,535 @@ const DeleteClassSubject = async (req, res) => {
   }
 };
 
+const GetEmpTimeTable = async (req, res) => {
+  try {
+    let result = [];
+    let emptimetable = await Subject.findAll({
+      where: {
+        empID: req.user?.id,
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (emptimetable) {
+      const promises = emptimetable?.map(async (item) => {
+        let classname = await Course.findOne({
+          where: {
+            id: item?.classId,
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+
+        if (classname) {
+          result.push({
+            subject: item,
+            classname: classname,
+          });
+        }
+        return 1;
+      });
+
+      if (await Promise.all(promises)) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch Emp Time Table Successfully!!",
+          data: result,
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [err.message],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const CreateBanner = async (req, res) => {
+  try {
+    const { Notestext } = req.body;
+    let sectionv = await Note.findOne({
+      where: {
+        Notestext: Notestext,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (sectionv) {
+      if (sectionv?.Notestext?.toLowerCase() === Notestext.toLowerCase()) {
+        return respHandler.error(res, {
+          status: false,
+          msg: "AlReady Exists!!",
+          error: ["AlReady Exsist !!"],
+        });
+      }
+    }
+
+    let sections = await Note.create({
+      ClientCode: req.user?.ClientCode,
+      Notestext: Notestext,
+    });
+    if (sections) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Notes Created successfully!!",
+        data: sections,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [err.message],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateBanner = async (req, res) => {
+  try {
+    const { Notestext, id } = req.body;
+
+    let status = await Note.update(
+      {
+        Notestext: Notestext,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      }
+    );
+    let studentclass = await Note.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (status) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Notes Updated successfully!!",
+        data: [studentclass],
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const getBanner = async (req, res) => {
+  try {
+    let organizations = await Note.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (organizations) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "All Notes successfully!!",
+        data: organizations,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [err.message],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteBanner = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let organization = await Note.findOne({ where: { id: id } });
+    if (organization) {
+      await Note.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Note Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const CreateFooterDtails = async (req, res) => {
+  try {
+    const {
+      facilitycontent,
+      facebookurl,
+      instagramurl,
+      twiterurl,
+      linkldlurl,
+      ChairmanContactNo,
+      PrincipalContactNo,
+      Email,
+      Mapurl,
+    } = req.body;
+
+    let coursemonths = await FooterDetails.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (coursemonths.length > 0) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Already Added Footer Details!!",
+        error: [""],
+      });
+    }
+
+    let sections = await FooterDetails.create({
+      facilitycontent: facilitycontent,
+      facebookurl: facebookurl,
+      instagramurl: instagramurl,
+      twiterurl: twiterurl,
+      linkldlurl: linkldlurl,
+      ChairmanContactNo: ChairmanContactNo,
+      PrincipalContactNo: PrincipalContactNo,
+      Email: Email,
+      Mapurl: Mapurl,
+      ClientCode: req.user?.ClientCode,
+    });
+    if (sections) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Footer Details Added successfully!!",
+        data: sections,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [err.message],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateFooterDtails = async (req, res) => {
+  try {
+    const {
+      facilitycontent,
+      facebookurl,
+      instagramurl,
+      twiterurl,
+      linkldlurl,
+      ChairmanContactNo,
+      PrincipalContactNo,
+      Email,
+      Mapurl,
+      id,
+    } = req.body;
+
+    let status = await FooterDetails.update(
+      {
+        facilitycontent: facilitycontent,
+        facebookurl: facebookurl,
+        instagramurl: instagramurl,
+        twiterurl: twiterurl,
+        linkldlurl: linkldlurl,
+        ChairmanContactNo: ChairmanContactNo,
+        PrincipalContactNo: PrincipalContactNo,
+        Email: Email,
+        Mapurl: Mapurl,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      }
+    );
+    let studentclass = await FooterDetails.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (status) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Footer Details Updated successfully!!",
+        data: [studentclass],
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [err.message],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const getFooterDtails = async (req, res) => {
+  try {
+    let organizations = await FooterDetails.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (organizations) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Footer Details Successfully!!",
+        data: organizations,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [err.message],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteFooterDtails = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let organization = await FooterDetails.findOne({ where: { id: id } });
+    if (organization) {
+      await FooterDetails.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Footer Details Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const CreateSlider = async (req, res) => {
+  let { Dec } = req.body;
+  try {
+    let Sliderimg = await Slider.create({
+      Dec: Dec,
+      ImgUrl: req?.files?.ImgUrl
+        ? `images/${req?.files?.ImgUrl[0]?.filename}`
+        : "",
+    });
+
+    if (Sliderimg) {
+      return respHandler.success(res, {
+        status: true,
+        data: Sliderimg,
+        msg: "Slider Added Successfully!!",
+      });
+    } else {
+      // removefile(`public/upload/${req?.files?.ImgUrl[0]?.filename}`);
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetSlider = async (req, res) => {
+  try {
+    let Allsliderimg = await Slider.findAll();
+    if (Allsliderimg) {
+      return respHandler.success(res, {
+        status: true,
+        data: Allsliderimg,
+        msg: "Fetch All Slider Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found!!",
+        error: "",
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const updateSlider = async (req, res) => {
+  let { id, Dec, ImgUrl } = req.body;
+
+  try {
+    let isSlider = await Slider.findOne({
+      where: {
+        id: id,
+      },
+    });
+    if (removefile(`public/upload/${isSlider?.ImgUrl?.substring(7)}`)) {
+      let status = await Slider.update(
+        {
+          Dec: Dec,
+          ImgUrl: req?.files?.ImgUrl
+            ? `images/${req?.files?.ImgUrl[0]?.filename}`
+            : req?.user?.ImgUrl,
+        },
+        {
+          where: {
+            id: id,
+          },
+        }
+      );
+
+      if (status) {
+        let sliders = await Slider.findOne({
+          where: {
+            id: id,
+          },
+        });
+        if (sliders) {
+          return respHandler.success(res, {
+            status: true,
+            data: sliders,
+            msg: "Slider Updated Successfully!!",
+          });
+        }
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteSlider = async (req, res) => {
+  try {
+    let { id } = req.body;
+    let isdlider = await Slider.findOne({ id: id });
+
+    if (isdlider) {
+      removefile(`public/upload/${isdlider?.ImgUrl.substring(7)}`);
+      let status = await Slider.destroy({
+        where: {
+          id: isdlider.id,
+        },
+      });
+      if (status) {
+        return respHandler.success(res, {
+          status: true,
+          data: [],
+          msg: "Slider Deleted Successfully!!",
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: ["not found"],
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   Getprofile,
   updateprofile,
@@ -2954,4 +3498,17 @@ module.exports = {
   getClassSubject,
   DeleteClassSubject,
   UpdateClassSubject,
+  GetEmpTimeTable,
+  CreateBanner,
+  UpdateBanner,
+  DeleteBanner,
+  getBanner,
+  CreateFooterDtails,
+  UpdateFooterDtails,
+  DeleteFooterDtails,
+  getFooterDtails,
+  CreateSlider,
+  updateSlider,
+  GetSlider,
+  DeleteSlider,
 };

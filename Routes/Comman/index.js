@@ -232,4 +232,47 @@ router
   .put(verifyToken, CommanController.UpdateClassSubject)
   .delete(verifyToken, CommanController.DeleteClassSubject);
 
+router
+  .route("/GetEmpTimeTable", verifyToken)
+  .get(verifyToken, CommanController.GetEmpTimeTable);
+
+router
+  .route("/footer", verifyToken)
+  .post(verifyToken, CommanController.CreateFooterDtails)
+  .get(verifyToken, CommanController.getFooterDtails)
+  .put(verifyToken, CommanController.UpdateFooterDtails)
+  .delete(verifyToken, CommanController.DeleteFooterDtails);
+
+router
+  .route("/notes", verifyToken)
+  .post(verifyToken, CommanController.CreateBanner)
+  .get(verifyToken, CommanController.getBanner)
+  .put(verifyToken, CommanController.UpdateBanner)
+  .delete(verifyToken, CommanController.DeleteBanner);
+
+router
+  .route("/slider", verifyToken)
+  .post(
+    verifyToken,
+    upload.fields([
+      {
+        name: "ImgUrl",
+        maxCount: 1,
+      },
+    ]),
+    CommanController.CreateSlider
+  )
+  .get(verifyToken, CommanController.GetSlider)
+  .put(
+    verifyToken,
+    upload.fields([
+      {
+        name: "ImgUrl",
+        maxCount: 1,
+      },
+    ]),
+    CommanController.updateSlider
+  )
+  .delete(verifyToken, CommanController.DeleteSlider);
+
 module.exports = router;

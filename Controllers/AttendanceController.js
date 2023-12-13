@@ -8,6 +8,7 @@ const Batch = require("../Models/batch.model");
 const respHandler = require("../Handlers");
 const { monthdays } = require("../Helper/Constant");
 config();
+
 function getDayName(date) {
   const days = [
     "Sunday",
@@ -21,6 +22,7 @@ function getDayName(date) {
   const dayIndex = new Date(date).getDay();
   return days[dayIndex];
 }
+
 var monthNames = [
   "January",
   "February",
