@@ -58,6 +58,18 @@ const BookedBook = sequelize.define("bookedbook", {
     allowNull: true,
     defaultValue: false,
   },
+  Session: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  Section: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  SrNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = BookedBook;

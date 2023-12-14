@@ -1270,6 +1270,10 @@ const GetStudentByDateAttendance = async (req, res) => {
 
     let checkattendance = await AttendanceStudent.findAll({
       where: whereClause,
+      order: [
+        ["MonthNo", "ASC"],
+        ["attendancedate", "ASC"],
+      ],
     });
 
     if (checkattendance) {

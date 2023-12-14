@@ -265,6 +265,9 @@ const BookIssue = async (req, res) => {
             courseorclass: courseorclass,
             studentid: studentid,
             rollnumber: rollnumber,
+            Session: student?.Session,
+            Section: student?.Section,
+            SrNumber: student?.SrNumber,
             BookId: item?.BookId,
             BookTitle: item?.BookTitle,
             auther: item?.auther,
@@ -431,6 +434,41 @@ const GetBookIssue = async (req, res) => {
   }
 };
 
+const GetStudentBook = async (req, res) => {
+  try {
+    let BookedBooks = await BookedBook.findAll({
+      where: {
+        studentid: req?.user?.id,
+        rollnumber: req?.user?.rollnumber,
+        issueStatus: 1,
+        ClientCode: req?.user?.ClientCode,
+        Session: req?.user?.Session,
+        Section: req?.user?.Section,
+        SrNumber: req?.user?.SrNumber,
+      },
+    });
+    if (BookedBooks) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch All Booked List Successfully!!",
+        data: BookedBooks,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   CreateBook,
   UpdateBook,
@@ -439,4 +477,5 @@ module.exports = {
   BookIssue,
   UpdateBookIssue,
   GetBookIssue,
+  GetStudentBook,
 };

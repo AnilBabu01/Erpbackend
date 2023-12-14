@@ -85,4 +85,16 @@ router
   .put(verifyToken, StudentController.UpdateOtherFee)
   .delete(verifyToken, StudentController.DeleteOtherFee);
 
+router.get(
+  "/getStudentFee",
+  verifyToken,
+  SchoolStudentController.getStudentFee
+);
+
+router.get(
+  "/GetStudentFeeLedger",
+  verifyToken,
+  SchoolStudentController.GetStudentFeeLedger
+);
+
 module.exports = router;

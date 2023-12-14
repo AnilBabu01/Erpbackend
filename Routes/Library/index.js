@@ -16,4 +16,8 @@ router
   .get(verifyToken, LibraryController.GetBookIssue)
   .put(verifyToken, LibraryController.UpdateBookIssue);
 
+router
+  .route("/GetStudentBook", verifyToken)
+  .get(verifyToken, LibraryController.GetStudentBook);
+
 module.exports = router;

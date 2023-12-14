@@ -204,7 +204,7 @@ const CreateRoute = async (req, res) => {
           });
           return result;
         });
-        
+
         if (await Promise.all(promises)) {
           let vehicleroutes = await VehicleRoute.findOne({
             where: {
@@ -1172,6 +1172,99 @@ const GetVehicleStudent = async (req, res) => {
   }
 };
 
+const GetStudentBus = async (req, res) => {
+  try {
+    let result = [];
+
+    let vehicledetails = await VehicleDetails.findOne({
+      where: {
+        BusNumber: req?.user?.BusNumber,
+        ClientCode: req?.user?.ClientCode,
+      },
+    });
+
+    if (vehicledetails) {
+      let vehicleroutes = await VehicleRoute.findOne({
+        where: {
+          id: vehicledetails?.routeId,
+          ClientCode: req?.user?.ClientCode,
+        },
+      });
+      if (vehicleroutes) {
+        let stops = await VehicleStop.findAll({
+          RouteId: vehicleroutes?.routeId,
+          ClientCode: req?.user?.ClientCode,
+        });
+
+        let Driver1 = await Employee.findOne({
+          where: {
+            id: vehicledetails?.DriverId1,
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+
+        let Driver2 = await Employee.findOne({
+          where: {
+            id: vehicledetails?.DriverId2,
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+
+        let Helfer1 = await Employee.findOne({
+          where: {
+            id: vehicledetails?.HelferId1,
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+
+        let Helfer2 = await Employee.findOne({
+          where: {
+            id: vehicledetails?.HelferId2,
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+
+        if (
+          vehicleroutes &&
+          Driver1 &&
+          Driver1 &&
+          Helfer1 &&
+          Helfer2 &&
+          stops
+        ) {
+          result.push({
+            vehicledetails: vehicledetails,
+            vehicleroute: vehicleroutes,
+            stops: stops,
+            Driver1: Driver1,
+            Driver2: Driver2,
+            Helfer1: Helfer1,
+            Helfer2: Helfer2,
+          });
+
+          return respHandler.success(res, {
+            status: true,
+            msg: "Fetch Bus Details successfully!!",
+            data: result,
+          });
+        }
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Don't Assigned Bus Yet!!",
+        error: [],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   CreateVehicleType,
   UpdateVehicleType,
@@ -1191,4 +1284,5 @@ module.exports = {
   GiveBusToStudent,
   ChangeBus,
   GetVehicleStudent,
+  GetStudentBus,
 };

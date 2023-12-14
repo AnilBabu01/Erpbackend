@@ -43,9 +43,13 @@ router
 router
   .route("/changebus", verifyToken)
   .post(verifyToken, TransportController.ChangeBus);
-
+  
   router
   .route("/GetVehicleStudent", verifyToken)
   .post(verifyToken, TransportController.GetVehicleStudent);
+
+  router
+  .route("/GetStudentBus", verifyToken)
+  .get(verifyToken, TransportController.GetStudentBus);
 
 module.exports = router;
