@@ -589,12 +589,12 @@ const CheckTestTime = async (req, res) => {
 
 const GetStudentResult = async (req, res) => {
   try {
-    const { date, title } = req.body;
+    const { date, title, StudentId } = req.body;
     let whereClause = {};
 
     if (req.user) {
       whereClause.ClientCode = req?.user?.ClientCode;
-      whereClause.studentId = req?.user?.id;
+      whereClause.studentId = StudentId ? Number(StudentId) : req?.user?.id;
     }
 
     if (date) {

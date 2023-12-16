@@ -18,6 +18,7 @@ const ClassSubject = require("../Models/classubject.model");
 const FooterDetails = require("../Models/footerdetails.model");
 const Note = require("../Models/note.model");
 const Slider = require("../Models/Slider.model");
+const Student = require("../Models/student.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -3512,6 +3513,36 @@ const GetStudentTimeTable = async (req, res) => {
   }
 };
 
+const GetParentStudentList = async (req, res) => {
+  try {
+    let studentlist = await Student.findAll({
+      where: {
+        parentId: req.user?.id,
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (studentlist) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch All Student Successfully!!",
+        data: studentlist,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   Getprofile,
   updateprofile,
@@ -3583,4 +3614,5 @@ module.exports = {
   GetSlider,
   DeleteSlider,
   GetStudentTimeTable,
+  GetParentStudentList,
 };

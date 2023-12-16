@@ -1180,7 +1180,7 @@ const GetOccupiedRoom = async (req, res) => {
     }
 
     if (fromdate && todate) {
-      whereClause.CheckinDate	 = { [Op.between]: [from, to] };
+      whereClause.CheckinDate = { [Op.between]: [from, to] };
     }
 
     if (Category) {
@@ -1219,6 +1219,73 @@ const GetOccupiedRoom = async (req, res) => {
     });
   }
 };
+
+const GetStudentCheckin = async (req, res) => {
+  try {
+    const { studentid } = req.body;
+
+    let isstudent = await Student.findOne({
+      where: {
+        id: Number(studentid),
+      },
+    });
+
+    if (isstudent) {
+      let Checkin = await RoomCheckin.findOne({
+        where: {
+          Status: 1,
+          StudentId: isstudent?.id,
+          ClientCode: req.user.ClientCode,
+          Session: isstudent?.Session,
+          Section: isstudent?.Section,
+        },
+      });
+      if (Checkin) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch Checkin Details Successfully!!",
+          data: Checkin,
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Not Found!!",
+          error: [""],
+        });
+      }
+    } else {
+      let Checkin = await RoomCheckin.findOne({
+        where: {
+          Status: 1,
+          StudentId: req.user.id,
+          ClientCode: req.user.ClientCode,
+          Session: req.user.Session,
+          Section: req.user.Section,
+        },
+      });
+      if (Checkin) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch Checkin Details Successfully!!",
+          data: Checkin,
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Not Found!!",
+          error: [""],
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   CreateCategory,
   UpdateCategory,
@@ -1244,4 +1311,5 @@ module.exports = {
   GetAllCheckin,
   ReleaseRoom,
   GetOccupiedRoom,
+  GetStudentCheckin,
 };

@@ -1180,12 +1180,13 @@ const Deleteholiday = async (req, res) => {
 
 const GetStudentTodayAttendance = async (req, res) => {
   try {
+    const { studentid } = req.body;
     let newdate = new Date();
     let fullyear = newdate.getFullYear();
     let whereClause = {};
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
-      whereClause.studentid = req.user.id;
+      whereClause.studentid = studentid ? studentid : req.user.id;
       whereClause.yeay = fullyear?.toString();
       whereClause.attendancedate = newdate;
     }
@@ -1200,6 +1201,12 @@ const GetStudentTodayAttendance = async (req, res) => {
         msg: "Fetch Today Attendance Successfully!!",
         data: checkattendance,
       });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
     }
   } catch (err) {
     return respHandler.error(res, {
@@ -1212,6 +1219,7 @@ const GetStudentTodayAttendance = async (req, res) => {
 
 const GetStudentAllMonthAttendance = async (req, res) => {
   try {
+    const { studentid } = req.body;
     let newdate = new Date();
     let fullyear = newdate.getFullYear();
     let whereClause = {};
@@ -1219,7 +1227,7 @@ const GetStudentAllMonthAttendance = async (req, res) => {
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
       whereClause.yeay = fullyear?.toString();
-      whereClause.studentid = req.user.id;
+      whereClause.studentid = studentid ? studentid : req.user.id;
     }
 
     let checkattendance = await AttendanceStudent.findAll({
@@ -1251,7 +1259,7 @@ const GetStudentAllMonthAttendance = async (req, res) => {
 
 const GetStudentByDateAttendance = async (req, res) => {
   try {
-    const { fromdate, todate } = req.body;
+    const { fromdate, todate, studentid } = req.body;
     let newdate = new Date();
     let fullyear = newdate.getFullYear();
     let whereClause = {};
@@ -1261,7 +1269,7 @@ const GetStudentByDateAttendance = async (req, res) => {
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
       whereClause.yeay = fullyear?.toString();
-      whereClause.studentid = req.user.id;
+      whereClause.studentid = studentid ? studentid : req.user.id;
     }
 
     if (fromdate && todate) {

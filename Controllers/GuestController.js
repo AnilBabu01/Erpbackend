@@ -30,7 +30,7 @@ const Guestlogin = async (req, res) => {
         if (token) {
           return respHandler.success(res, {
             status: true,
-            data: [{ token: token, user: createdUser }],
+            data: [{ token: token, User: createdUser }],
             msg: "You Have Login As Guest Successfully!!",
           });
         }
@@ -52,7 +52,7 @@ const Guestlogin = async (req, res) => {
         if (token) {
           return respHandler.success(res, {
             status: true,
-            data: [{ token: token, user: createdUser }],
+            data: [{ token: token, User: createdUser }],
             msg: "You Have Login As Guest Successfully!!",
           });
         }

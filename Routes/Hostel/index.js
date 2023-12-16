@@ -81,5 +81,9 @@ router
   .route("/GetOccupiedRoom", verifyToken)
   .post(verifyToken, HostelController.GetOccupiedRoom);
 
+  router
+  .route("/GetStudentCheckin", verifyToken)
+  .post(verifyToken, HostelController.GetStudentCheckin);
+
 
 module.exports = router;

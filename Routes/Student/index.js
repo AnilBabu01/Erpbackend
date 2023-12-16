@@ -85,13 +85,13 @@ router
   .put(verifyToken, StudentController.UpdateOtherFee)
   .delete(verifyToken, StudentController.DeleteOtherFee);
 
-router.get(
+router.post(
   "/getStudentFee",
   verifyToken,
   SchoolStudentController.getStudentFee
 );
 
-router.get(
+router.post(
   "/GetStudentFeeLedger",
   verifyToken,
   SchoolStudentController.GetStudentFeeLedger

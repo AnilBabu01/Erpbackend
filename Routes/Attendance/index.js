@@ -27,11 +27,11 @@ router
 
 router
   .route("/GetStudentTodayAttendance", verifyToken)
-  .get(verifyToken, AttendanceController.GetStudentTodayAttendance);
+  .post(verifyToken, AttendanceController.GetStudentTodayAttendance);
 
 router
   .route("/GetStudentAllMonthAttendance", verifyToken)
-  .get(verifyToken, AttendanceController.GetStudentAllMonthAttendance);
+  .post(verifyToken, AttendanceController.GetStudentAllMonthAttendance);
 
 router
   .route("/GetStudentByDateAttendance", verifyToken)

@@ -279,4 +279,9 @@ router
   .route("/GetStudentTimeTable", verifyToken)
   .get(verifyToken, CommanController.GetStudentTimeTable);
 
+  
+router
+.route("/GetParentStudentList", verifyToken)
+.get(verifyToken, CommanController.GetParentStudentList);
+
 module.exports = router;
