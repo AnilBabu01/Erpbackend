@@ -39,7 +39,7 @@ const getotponPhone = async (req, res) => {
           );
           if (status) {
             let mess = `Thankyou for registering in abtechzone \n Your OTP is: ${val}`;
-            const MsgUrl = `https://www.fast2sms.com/dev/bulkV2?authorization=CgS6KLa6FZIWC4rGhHqjXUuBqaxaPbHxxgM8NItmRKFtJx1ncwGkmM1NqPEV&route=v3&sender_id=Cghpet&message=${mess}&language=english&flash=0&numbers=${phone}`;
+            const MsgUrl = `https://www.fast2sms.com/dev/bulkV2?authorization=tOBBX8p5nFDWFVixS2vJQu01EV0JWoESZ79JE3DSD87pdI4yrXuLmfCVRIxb &route=v3&sender_id=Cghpet&message=${mess}&language=english&flash=0&numbers=${phone}`;
             axios
               .get(MsgUrl)
               .then(function (response) {
@@ -68,7 +68,7 @@ const getotponPhone = async (req, res) => {
 
         if (optsave) {
           let mess = `\n Thankyou for registering in abtechzone \n Your OTP is: ${val}`;
-          const MsgUrl = `https://www.fast2sms.com/dev/bulkV2?authorization=CgS6KLa6FZIWC4rGhHqjXUuBqaxaPbHxxgM8NItmRKFtJx1ncwGkmM1NqPEV&route=v3&sender_id=Cghpet&message=${mess}&language=english&flash=0&numbers=${phone}`;
+          const MsgUrl = `https://www.fast2sms.com/dev/bulkV2?authorization= tOBBX8p5nFDWFVixS2vJQu01EV0JWoESZ79JE3DSD87pdI4yrXuLmfCVRIxb&route=v3&sender_id=Cghpet&message=${mess}&language=english&flash=0&numbers=${phone}`;
           axios
             .get(MsgUrl)
             .then(function (response) {
@@ -117,7 +117,7 @@ const getotponEmail = async (req, res) => {
           let status = await Client.update(
             {
               emailOtp: val,
-              emailOtpStatus:false
+              emailOtpStatus: false,
             },
             {
               where: {
@@ -211,7 +211,7 @@ const getotponEmail = async (req, res) => {
           {
             emailOtp: val,
             email: email,
-            emailOtpStatus:false
+            emailOtpStatus: false,
           },
           {
             where: {

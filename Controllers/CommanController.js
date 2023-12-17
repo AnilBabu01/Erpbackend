@@ -3518,7 +3518,7 @@ const GetParentStudentList = async (req, res) => {
     let studentlist = await Student.findAll({
       where: {
         parentId: req.user?.id,
-        ClientCode: req.user?.ClientCode,
+        ClientCode: req.user?.ClientCode
       },
     });
     if (studentlist) {

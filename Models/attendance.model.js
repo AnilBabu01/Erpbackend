@@ -101,6 +101,7 @@ const AttendanceStudent = sequelize.define("studentattendance", {
   Section: {
     type: DataTypes.STRING,
     allowNull: true,
+    defaultValue:"NONE"
   },
 });
 

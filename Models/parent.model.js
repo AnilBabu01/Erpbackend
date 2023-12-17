@@ -11,10 +11,6 @@ const Parent = sequelize.define("parent", {
     allowNull: false,
     defaultValue: "parent",
   },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
   ClientCode: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -23,19 +19,11 @@ const Parent = sequelize.define("parent", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  institutename: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
   phoneno1: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  phoneno2: {
+  whatsaapNo: {
     type: DataTypes.STRING,
     allowNull: true,
   },
@@ -55,10 +43,6 @@ const Parent = sequelize.define("parent", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  logourl: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
   profileurl: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -66,19 +50,7 @@ const Parent = sequelize.define("parent", {
   password: {
     type: DataTypes.TEXT,
   },
-  fathersName: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  MathersName: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-
-  fathersPhoneNo: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
+ 
 });
 
 module.exports = Parent;

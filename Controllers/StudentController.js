@@ -111,6 +111,9 @@ const Addstudent = async (req, res) => {
       hostelname,
       Category,
       Facility,
+      FromRoute,
+      ToRoute,
+      BusNumber,
     } = req.body;
 
     const genSalt = 10;
@@ -118,10 +121,9 @@ const Addstudent = async (req, res) => {
 
     let parent = await Parent.findOne({
       where: {
-        fathersPhoneNo: fathersPhoneNo,
-        fathersName: fathersName,
+        phoneno1: fathersPhoneNo,
+        name: fathersName,
         ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
       },
     });
 
@@ -219,6 +221,9 @@ const Addstudent = async (req, res) => {
           phoneno2: phoneno2,
           address: address,
           parentId: parent.id,
+          fathersPhoneNo: parent?.phoneno1,
+          fathersName: parent?.name,
+          MathersName: MathersName,
           city: city,
           state: state,
           pincode: pincode,
@@ -233,9 +238,6 @@ const Addstudent = async (req, res) => {
           regisgrationfee: regisgrationfee,
           permonthfee: permonthfee,
           admissionDate: admissionDate,
-          fathersPhoneNo: fathersPhoneNo,
-          fathersName: fathersName,
-          MathersName: MathersName,
           rollnumber: rollnumber,
           StudentStatus: StudentStatus,
           markSheetname: markSheetname,
@@ -245,6 +247,9 @@ const Addstudent = async (req, res) => {
           Transport: Transport,
           Library: Library,
           hostal: hostal,
+          FromRoute: "",
+          ToRoute: "",
+          BusNumber: "",
           HostelPerMonthFee: HostelPerMonthFee,
           TotalHostelFee: TotalHostelFee,
           TransportPerMonthFee: TransportPerMonthFee,
@@ -436,22 +441,15 @@ const Addstudent = async (req, res) => {
       const genSalt = 10;
       const hash1 = await bcrypt.hash(req?.user?.Parentpassword, genSalt);
       let newParent = {
-        name: name,
-        email: email,
+        name: fathersName,
         ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
-        logourl: req?.user?.logourl,
-        phoneno1: phoneno1,
-        phoneno2: phoneno2,
+        phoneno1: fathersPhoneNo,
         address: address,
         city: city,
         state: state,
         pincode: pincode,
         password: hash1,
-        fathersPhoneNo: req.body.fathersPhoneNo,
-        fathersName: fathersName,
-        MathersName: MathersName,
-        profileurl: "",
+        whatsaapNo: whatsappNo,
       };
 
       let createdParent = await Parent.create(newParent);
@@ -475,8 +473,8 @@ const Addstudent = async (req, res) => {
           pincode: pincode,
           password: hash,
           parentId: createdParent.id,
-          fathersPhoneNo: req.body.fathersPhoneNo,
-          fathersName: fathersName,
+          fathersPhoneNo: createdParent?.phoneno1,
+          fathersName: createdParent?.name,
           MathersName: MathersName,
           rollnumber: rollnumber,
           regisgrationfee: regisgrationfee,
@@ -504,6 +502,9 @@ const Addstudent = async (req, res) => {
           Category: Category,
           Facility: Facility,
           SrNumber: SrNumber,
+          FromRoute: "",
+          ToRoute: "",
+          BusNumber: "",
           whatsappNo: whatsappNo,
           HostelPerMonthFee: HostelPerMonthFee,
           TotalHostelFee: TotalHostelFee,
@@ -650,12 +651,6 @@ const Addstudent = async (req, res) => {
               (await Promise.all(promises2)) &&
               (await Promise.all(promises3))
             ) {
-              let fee = SchoolFeeStatus.findAll({
-                where: {
-                  ClientCode: req.user?.ClientCode,
-                  studentId: CreatedStudent?.id,
-                },
-              });
               var token = jwt.sign(
                 {
                   id: CreatedStudent.id,
@@ -667,7 +662,7 @@ const Addstudent = async (req, res) => {
               if (token) {
                 return respHandler.success(res, {
                   status: true,
-                  data: [{ token: token, user: CreatedStudent, fee: fee }],
+                  data: [{ token: token, user: CreatedStudent }],
                   msg: "Student Added Successfully!!",
                 });
               }
@@ -685,14 +680,12 @@ const Addstudent = async (req, res) => {
   }
 };
 
-
 const Loging = async (req, res) => {
   const { rollnumber, password } = req.body;
   if (rollnumber != "" || password != "") {
     try {
+      console.log("login data is ", req.body);
 
-      console.log("login data is ",req.body);
-      
       let whereClause = {};
       whereClause.SrNumber = { [Op.regexp]: `^${rollnumber}.*` };
       let user = await Student.findOne({ where: whereClause });
@@ -1760,6 +1753,58 @@ const ChangeSession = async (req, res) => {
   try {
     const { studentlist, session, section, classname } = req.body;
     let newsate = new Date();
+    let isallreadyChnagesSession = await Student.findAll({
+      where: {
+        Session: session,
+        Section: section,
+        courseorclass: classname,
+      },
+    });
+    if (isallreadyChnagesSession?.length > 0) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Already changed session!!",
+        error: [""],
+      });
+    }
+
+    if (studentlist[0]?.courseorclass === classname) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Same class is not allow!!",
+        error: [""],
+      });
+    }
+
+    if (studentlist[0]?.Session === session) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Same session is not allow!!",
+        error: [""],
+      });
+    }
+
+    if (session === "") {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Session is required!!",
+        error: [""],
+      });
+    }
+    if (section === "") {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Section is required!!",
+        error: [""],
+      });
+    }
+    if (classname === "") {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Class is required!!",
+        error: [""],
+      });
+    }
     const promises = studentlist?.map(async (item) => {
       let result = await Student.create({
         name: item?.name,
@@ -1777,6 +1822,7 @@ const ChangeSession = async (req, res) => {
         fathersName: item?.fathersName,
         MathersName: item?.MathersName,
         rollnumber: item?.rollnumber,
+        typeoforganization: item?.typeoforganization,
         StudentStatus: item?.StudentStatus,
         Status: item?.Status,
         StudentCategory: item?.StudentCategory,
@@ -1801,8 +1847,8 @@ const ChangeSession = async (req, res) => {
         TransportTotalHostelFee: item?.TransportTotalHostelFee,
         AnnualFee: item?.AnnualFee,
         Session: session,
-        SrNumber: item?.SrNumber,
         Section: section,
+        SrNumber: item?.SrNumber,
         hostelname: item?.hostelname,
         Category: item?.Category,
         Facility: item?.Facility,
@@ -1813,6 +1859,10 @@ const ChangeSession = async (req, res) => {
         othersdoc: item?.othersdoc,
         BirthDocument: item?.BirthDocument,
         pendingfee: item?.studentTotalFee,
+        institutename: item?.institutename,
+        FromRoute: "",
+        ToRoute: "",
+        BusNumber: "",
         HostelPendingFee: item?.TotalHostelFee,
         TransportPendingFee: item?.TransportTotalHostelFee,
       });
@@ -1843,6 +1893,8 @@ const ChangeSession = async (req, res) => {
               MonthName: MonthanameArray[index + 1],
               Year: lastWord,
               PerMonthFee: items?.permonthfee,
+              Session: item?.Session,
+              SrNumber: item?.SrNumber,
             });
             firstWord = "";
             lastWord = "";
@@ -1861,6 +1913,8 @@ const ChangeSession = async (req, res) => {
               MonthName: MonthanameArray[index + 1],
               Year: lastWord,
               PerMonthFee: items?.HostelPerMonthFee,
+              Session: item?.Session,
+              SrNumber: item?.SrNumber,
             });
             firstWord = "";
             lastWord = "";
@@ -1879,6 +1933,8 @@ const ChangeSession = async (req, res) => {
               MonthName: MonthanameArray[index + 1],
               Year: lastWord,
               PerMonthFee: items?.TransportPerMonthFee,
+              Session: item?.Session,
+              SrNumber: item?.SrNumber,
             });
             firstWord = "";
             lastWord = "";
