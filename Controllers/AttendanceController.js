@@ -38,224 +38,14 @@ var monthNames = [
   "December",
 ];
 
-// const MarkStudentAttendance = async (req, res) => {
-//   try {
-//     const { Attendancedate, batch, classname } = req.body;
-//     let newdate = new Date(Attendancedate);
-//     const dayName = getDayName(Attendancedate);
-//     var monthName = monthNames[newdate?.getMonth()];
-//     if (dayName === "Sunday") {
-//       let checkattendance = await AttendanceStudent.findAll({
-//         where: {
-//           batch: batch ? batch : classname,
-//           attendancedate: newdate,
-//           ClientCode: req.user?.ClientCode,
-//           attendaceStatusIntext: "Holiday",
-//           MonthName: monthName,
-//           yeay: newdate?.getFullYear(),
-//           MonthNo: newdate?.getMonth() + 1,
-//         },
-//       });
-
-//       if (checkattendance?.length > 0) {
-//         return respHandler.success(res, {
-//           status: true,
-//           msg: "Today Is Sunday!!",
-//           data: [],
-//         });
-//       } else {
-//         let allstudent;
-//         if (classname) {
-//           allstudent = await Student.findAll({
-//             where: {
-//               ClientCode: req.user?.ClientCode,
-//               courseorclass: { [Op.regexp]: `^${classname}.*` },
-//             },
-//           });
-//         } else {
-//           allstudent = await Student.findAll({
-//             where: {
-//               ClientCode: req.user?.ClientCode,
-//               batch: { [Op.regexp]: `^${batch}.*` },
-//             },
-//           });
-//         }
-
-//         const promises = allstudent?.map(async (item) => {
-//           let result = await AttendanceStudent.create({
-//             name: item?.name,
-//             email: item?.email,
-//             ClientCode: req.user?.ClientCode,
-//             institutename: req.user?.institutename,
-//             userId: req?.user?.id,
-//             address: item?.address,
-//             parentId: item?.parentId,
-//             studentid: item?.id,
-//             courseorclass: item?.courseorclass,
-//             batch: classname ? item?.courseorclass : item?.batch,
-//             rollnumber: item?.rollnumber,
-//             fathersPhoneNo: item?.fathersPhoneNo,
-//             fathersName: item?.fathersName,
-//             MathersName: item?.MathersName,
-//             rollnumber: item?.rollnumber,
-//             attendancedate: newdate,
-//             attendaceStatusIntext: "Holiday",
-//             Comment: "Today Is Sunday",
-//             monthNumber: newdate?.getMonth() + 1,
-//             holidaytype: "manual",
-//             MonthName: monthName,
-//             yeay: newdate?.getFullYear(),
-//             MonthNo: newdate?.getMonth() + 1,
-//           });
-
-//           return result;
-//         });
-
-//         if (await Promise.all(promises)) {
-//           let checkattendance = await AttendanceStudent.findAll({
-//             where: {
-//               batch: batch ? batch : classname,
-//               attendancedate: newdate,
-//               ClientCode: req.user?.ClientCode,
-//               MonthName: monthName,
-//               attendaceStatusIntext: "Absent",
-//               yeay: newdate?.getFullYear(),
-//               MonthNo: newdate?.getMonth() + 1,
-//             },
-//           });
-
-//           return respHandler.success(res, {
-//             status: true,
-//             msg: "Today Is Sunday!!",
-//             data: checkattendance,
-//           });
-//         }
-//       }
-//     } else {
-//       let checkattendance = await AttendanceStudent.findAll({
-//         where: {
-//           batch: batch ? batch : classname,
-//           attendancedate: newdate,
-//           ClientCode: req.user?.ClientCode,
-//           // attendaceStatusIntext: "Absent",
-//           MonthName: monthName,
-//           yeay: newdate?.getFullYear(),
-//           MonthNo: newdate?.getMonth() + 1,
-//         },
-//       });
-
-//       if (checkattendance[0]?.attendaceStatusIntext === "Holiday") {
-//         return respHandler.error(res, {
-//           status: false,
-//           msg: "Today Is Holiday!!",
-//           data: [],
-//         });
-//       }
-//       if (checkattendance?.length > 0) {
-//         return respHandler.success(res, {
-//           status: true,
-//           msg: "Fetch Attendance successfully!!",
-//           data: checkattendance,
-//         });
-//       } else {
-//         let students;
-//         if (classname) {
-//           students = await Student.findAll({
-//             where: {
-//               ClientCode: req.user?.ClientCode,
-//               courseorclass: classname,
-//               [Op.or]: [
-//                 { Status: "Unknown" },
-//                 { Status: "Left In Middle" },
-//                 { Status: "On Leave" },
-//                 { Status: "Active" },
-//               ],
-//             },
-//             order: [["rollnumber", "ASC"]],
-//           });
-//         } else {
-//           students = await Student.findAll({
-//             where: {
-//               ClientCode: req.user?.ClientCode,
-//               batch: batch,
-//               [Op.or]: [
-//                 { Status: "Unknown" },
-//                 { Status: "Left In Middle" },
-//                 { Status: "On Leave" },
-//                 { Status: "Active" },
-//               ],
-//             },
-//             order: [["rollnumber", "ASC"]],
-//           });
-//         }
-
-//         console.log("student List", students);
-
-//         const promises = students?.map(async (item) => {
-//           let result = await AttendanceStudent.create({
-//             name: item?.name,
-//             email: item?.email,
-//             ClientCode: req.user?.ClientCode,
-//             institutename: req.user?.institutename,
-//             userId: req?.user?.id,
-//             address: item?.address,
-//             parentId: item?.parentId,
-//             studentid: item?.id,
-//             courseorclass: item?.courseorclass,
-//             batch: classname ? item?.courseorclass : item?.batch,
-//             rollnumber: item?.rollnumber,
-//             fathersPhoneNo: item?.fathersPhoneNo,
-//             fathersName: item?.fathersName,
-//             MathersName: item?.MathersName,
-//             rollnumber: item?.rollnumber,
-//             MonthName: monthName,
-//             yeay: newdate?.getFullYear(),
-//             MonthNo: newdate?.getMonth() + 1,
-//             attendancedate: newdate,
-//             attendaceStatusIntext:
-//               item?.Status === "Active" ? "Absent" : item?.Status,
-//             monthNumber: newdate?.getMonth() + 1,
-//           });
-
-//           return result;
-//         });
-
-//         if (await Promise.all(promises)) {
-//           let checkattendance = await AttendanceStudent.findAll({
-//             where: {
-//               batch: batch ? batch : classname,
-//               attendancedate: newdate,
-//               ClientCode: req.user?.ClientCode,
-//               institutename: req.user?.institutename,
-//               attendaceStatusIntext: "Absent",
-//               MonthName: monthName,
-//               yeay: newdate?.getFullYear(),
-//               MonthNo: newdate?.getMonth() + 1,
-//             },
-//           });
-
-//           return respHandler.success(res, {
-//             status: true,
-//             msg: "All Absent Mark successfully!!",
-//             data: checkattendance,
-//           });
-//         }
-//       }
-//     }
-//   } catch (err) {
-//     return respHandler.error(res, {
-//       status: false,
-//       msg: "Something Went Wrong!!",
-//       error: [err.message],
-//     });
-//   }
-// };
-
 const MarkStudentAttendance = async (req, res) => {
   try {
-    const { Attendancedate, batch, classname } = req.body;
+    const { Attendancedate, batch, classname, sectionname } = req.body;
     let newdate = new Date(Attendancedate);
     var monthName = monthNames[newdate?.getMonth()];
+    let fullyear = newdate.getFullYear();
+    let lastyear = newdate.getFullYear() - 1;
+    let session = `${lastyear}-${fullyear}`;
     let days = monthdays[newdate?.getMonth() + 1];
 
     let students;
@@ -265,6 +55,8 @@ const MarkStudentAttendance = async (req, res) => {
         where: {
           ClientCode: req.user?.ClientCode,
           courseorclass: classname,
+          Section: sectionname,
+          Session: session,
           [Op.or]: [
             { Status: "Unknown" },
             { Status: "Left In Middle" },
@@ -305,6 +97,7 @@ const MarkStudentAttendance = async (req, res) => {
               attendancedate: newdate,
               ClientCode: req.user?.ClientCode,
               MonthName: monthName,
+              Section: sectionname,
               yeay: newdate?.getFullYear(),
               MonthNo: newdate?.getMonth() + 1,
             },
@@ -334,6 +127,7 @@ const MarkStudentAttendance = async (req, res) => {
           let isupdatd = await AttendanceStudent.update(
             {
               // attendaceStatus: item?.attendaceStatus,
+              Section: sectionname,
               attendaceStatusIntext: "Holiday",
               Comment: "Today Is Sunday",
             },
@@ -403,6 +197,7 @@ const MarkStudentAttendance = async (req, res) => {
                 address: item?.address,
                 parentId: item?.parentId,
                 studentid: item?.id,
+                Section: sectionname,
                 courseorclass: item?.courseorclass,
                 batch: classname ? item?.courseorclass : item?.batch,
                 rollnumber: item?.rollnumber,

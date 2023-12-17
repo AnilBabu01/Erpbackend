@@ -98,6 +98,10 @@ const AttendanceStudent = sequelize.define("studentattendance", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  Section: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = AttendanceStudent;
