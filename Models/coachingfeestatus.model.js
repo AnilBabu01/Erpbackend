@@ -16,7 +16,7 @@ const Coachingfeestatus = sequelize.define("coachingfeestatus", {
   },
   institutename: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   Jan: {
     type: DataTypes.STRING,

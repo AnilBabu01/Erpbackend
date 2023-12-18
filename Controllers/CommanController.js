@@ -3515,10 +3515,15 @@ const GetStudentTimeTable = async (req, res) => {
 
 const GetParentStudentList = async (req, res) => {
   try {
+    let date = new Date();
+    let fullyear = date.getFullYear();
+    let lastyear = date.getFullYear() - 1;
+    let sessionname = `${lastyear}-${fullyear}`;
     let studentlist = await Student.findAll({
       where: {
         parentId: req.user?.id,
-        ClientCode: req.user?.ClientCode
+        ClientCode: req.user?.ClientCode,
+        Session:sessionname
       },
     });
     if (studentlist) {

@@ -45,20 +45,30 @@ const GetAllTotalData = async (req, res) => {
     let from = new Date(newdate);
     let to = new Date(newdate);
     whereClause.PaidDate = { [Op.between]: [from, to] };
+    whereClause.Session = sessionname;
 
     let allTodayreceiptdata = await ReceiptData.findAll({
       where: whereClause,
       order: [["PaidDate", "DESC"]],
     });
-    let TotalStudent = await Student.count({
+
+    let TotalStudent = await Student.findAll({
+      attributes: ["name"],
       where: {
         ClientCode: req?.user?.ClientCode,
+        [Op.or]: [
+          { Status: "Unknown" },
+          { Status: "On Leave" },
+          { Status: "Active" },
+        ],
       },
+      group: ["SrNumber"],
     });
 
-    let TotalEmployee = await Employees.count({
+    let TotalEmployee = await Employees.findAll({
       where: {
         ClientCode: req?.user?.ClientCode,
+        [Op.or]: [{ status: "Active" }, { status: "On Leave" }],
       },
     });
 
@@ -151,9 +161,9 @@ const GetAllTotalData = async (req, res) => {
         status: true,
         msg: "Fetch Dashborad Total data Successfully!!",
         data: {
-          TotalEmployee: TotalEmployee,
+          TotalEmployee: TotalEmployee?.length,
           TotalParents: TotalParents,
-          TotalStudent: TotalStudent,
+          TotalStudent: TotalStudent?.length,
           AllEmployeeAttendance: AllEmployeeAttendance,
           AllStudentAttendance: AllStudentAttendance,
           allexpenses: allexpenses,

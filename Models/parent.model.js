@@ -50,7 +50,10 @@ const Parent = sequelize.define("parent", {
   password: {
     type: DataTypes.TEXT,
   },
- 
+  whatsaapNo: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = Parent;

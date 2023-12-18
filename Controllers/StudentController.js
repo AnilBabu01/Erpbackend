@@ -785,10 +785,18 @@ const getAllStudent = async (req, res) => {
       whereClause.StudentCategory = { [Op.regexp]: `^${categoryname}.*` };
     }
     if (sessionname) {
-      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+      if (req.user?.userType === "institute") {
+        whereClause.Session = "";
+      } else {
+        whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+      }
     }
     if (sectionname) {
-      whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
+      if (req.user?.userType === "institute") {
+        whereClause.Section = "";
+      } else {
+        whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
+      }
     }
     if (library) {
       whereClause.Library = library;
@@ -1263,7 +1271,7 @@ const addfee = async (req, res) => {
               Course: studentData?.courseorclass,
               Section: studentData?.Section,
               PayOption: PayOption,
-              monthno: new Date(paymentdate).getMonth(),
+              monthno: new Date(paymentdate).getMonth() + 1,
             });
             if (result) {
               let student = await Student.findOne({
@@ -1327,6 +1335,9 @@ const getReceipt = async (req, res) => {
     if (fromdate && todate) {
       whereClause.PaidDate = { [Op.between]: [from, to] };
     }
+    if (fromdate) {
+      whereClause.PaidDate = fromdate;
+    }
 
     if (name) {
       whereClause.Course = { [Op.regexp]: `^${name}.*` };
@@ -1345,7 +1356,11 @@ const getReceipt = async (req, res) => {
       whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
     }
     if (sessionname) {
-      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+      if (req.user?.userType === "institute") {
+        whereClause.Session = "";
+      } else {
+        whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+      }
     }
 
     let receipts = await ReceiptData.findAll({
@@ -1494,7 +1509,7 @@ const addSchoolFee = async (req, res) => {
                 studentid: studentData?.id,
                 batchname: studentData?.batch,
                 PayOption: PayOption,
-                monthno: new Date(paymentdate).getMonth(),
+                monthno: new Date(paymentdate).getMonth() + 1,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1606,7 +1621,7 @@ const addHostelFee = async (req, res) => {
                 Session: studentData?.Session,
                 Section: studentData?.Section,
                 PayOption: PayOption,
-                monthno: new Date(paymentdate).getMonth(),
+                monthno: new Date(paymentdate).getMonth() + 1,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1718,7 +1733,7 @@ const addTransportFee = async (req, res) => {
                 Session: studentData?.Session,
                 Section: studentData?.Section,
                 PayOption: PayOption,
-                monthno: new Date(paymentdate).getMonth(),
+                monthno: new Date(paymentdate).getMonth() + 1,
               });
               if (result) {
                 return respHandler.success(res, {
@@ -1893,8 +1908,8 @@ const ChangeSession = async (req, res) => {
               MonthName: MonthanameArray[index + 1],
               Year: lastWord,
               PerMonthFee: items?.permonthfee,
-              Session: item?.Session,
-              SrNumber: item?.SrNumber,
+              Session: items?.Session,
+              SrNumber: items?.SrNumber,
             });
             firstWord = "";
             lastWord = "";
@@ -1913,8 +1928,8 @@ const ChangeSession = async (req, res) => {
               MonthName: MonthanameArray[index + 1],
               Year: lastWord,
               PerMonthFee: items?.HostelPerMonthFee,
-              Session: item?.Session,
-              SrNumber: item?.SrNumber,
+              Session: items?.Session,
+              SrNumber: items?.SrNumber,
             });
             firstWord = "";
             lastWord = "";
@@ -1933,8 +1948,8 @@ const ChangeSession = async (req, res) => {
               MonthName: MonthanameArray[index + 1],
               Year: lastWord,
               PerMonthFee: items?.TransportPerMonthFee,
-              Session: item?.Session,
-              SrNumber: item?.SrNumber,
+              Session: items?.Session,
+              SrNumber: items?.SrNumber,
             });
             firstWord = "";
             lastWord = "";
@@ -2071,7 +2086,7 @@ const PaySchoolAnualRegister = async (req, res) => {
               studentid: studentone?.id,
               batchname: studentone?.batch,
               PayOption: PayOption,
-              monthno: new Date(paymentdate).getMonth(),
+              monthno: new Date(paymentdate).getMonth() + 1,
             });
             if (result) {
               return respHandler.success(res, {
@@ -2404,7 +2419,7 @@ const addOtherFee = async (req, res) => {
               Session: studentData?.Session,
               Section: studentData?.Section,
               PayOption: PayOption,
-              monthno: new Date(paymentdate).getMonth(),
+              monthno: new Date(paymentdate).getMonth() + 1,
             });
             if (result) {
               return respHandler.success(res, {
