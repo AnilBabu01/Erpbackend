@@ -124,24 +124,47 @@ const MarkStudentAttendance = async (req, res) => {
             data: [],
           });
         } else {
-          let isupdatd = await AttendanceStudent.update(
-            {
-              // attendaceStatus: item?.attendaceStatus,
-              Section: sectionname,
-              attendaceStatusIntext: "Holiday",
-              Comment: "Today Is Sunday",
-            },
-            {
-              where: {
-                courseorclass: classname,
-                attendancedate: newdate,
-                ClientCode: req.user?.ClientCode,
-                MonthName: monthName,
-                yeay: newdate?.getFullYear(),
-                MonthNo: newdate?.getMonth() + 1,
+          let isupdatd;
+          if (classname) {
+            isupdatd = await AttendanceStudent.update(
+              {
+                // attendaceStatus: item?.attendaceStatus,
+                Section: sectionname,
+                attendaceStatusIntext: "Holiday",
+                Comment: "Today Is Sunday",
               },
-            }
-          );
+              {
+                where: {
+                  courseorclass: classname,
+                  attendancedate: newdate,
+                  ClientCode: req.user?.ClientCode,
+                  MonthName: monthName,
+                  yeay: newdate?.getFullYear(),
+                  MonthNo: newdate?.getMonth() + 1,
+                },
+              }
+            );
+          }
+          if (batch) {
+            isupdatd = await AttendanceStudent.update(
+              {
+                // attendaceStatus: item?.attendaceStatus,
+                Section: sectionname,
+                attendaceStatusIntext: "Holiday",
+                Comment: "Today Is Sunday",
+              },
+              {
+                where: {
+                  batch: batch,
+                  attendancedate: newdate,
+                  ClientCode: req.user?.ClientCode,
+                  MonthName: monthName,
+                  yeay: newdate?.getFullYear(),
+                  MonthNo: newdate?.getMonth() + 1,
+                },
+              }
+            );
+          }
 
           if (isupdatd) {
             return respHandler.success(res, {
