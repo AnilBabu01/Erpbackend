@@ -32,10 +32,14 @@ router
 router
   .route("/GetStudentAllMonthAttendance", verifyToken)
   .post(verifyToken, AttendanceController.GetStudentAllMonthAttendance);
-
+  
 router
   .route("/GetStudentByDateAttendance", verifyToken)
   .post(verifyToken, AttendanceController.GetStudentByDateAttendance);
+
+  router
+  .route("/AddCoachingHoliday", verifyToken)
+  .post(verifyToken, AttendanceController.AddCoachingHoliday);
 
 
 module.exports = router;

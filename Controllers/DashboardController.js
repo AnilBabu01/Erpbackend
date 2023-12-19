@@ -16,6 +16,7 @@ const Parents = require("../Models/parent.model");
 const StudentAttendance = require("../Models/attendance.model");
 const EmployeeAttendance = require("../Models/employeeattendance.model");
 const ReceiptData = require("../Models/receiptdata.model");
+const Batch = require("../Models/batch.model");
 const sequelizes = require("../Helper/Connect");
 config();
 var monthNames = [
@@ -32,6 +33,7 @@ var monthNames = [
   "November",
   "December",
 ];
+
 const GetAllTotalData = async (req, res) => {
   try {
     let newdate = new Date();
@@ -278,8 +280,185 @@ const GetExpensesChart = async (req, res) => {
     });
   }
 };
+
+const GetCoachingAllTotalData = async (req, res) => {
+  try {
+    let newdate = new Date();
+    var monthName = monthNames[newdate?.getMonth()];
+    let date = new Date();
+    let fullyear = date.getFullYear();
+    let lastyear = date.getFullYear() - 1;
+    let sessionname = `${lastyear}-${fullyear}`;
+
+    let whereClause = {};
+    let from = new Date(newdate);
+    let to = new Date(newdate);
+    whereClause.PaidDate = { [Op.between]: [from, to] };
+    // whereClause.Session = sessionname;
+
+    let allTodayreceiptdata = await ReceiptData.findAll({
+      where: whereClause,
+      order: [["PaidDate", "DESC"]],
+    });
+
+    // let allTodayreceiptdata = await sequelizes.query(
+    //   `Select PaidDate, Course,PayOption, SUM(PaidAmount) AS total_paidamount FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}' AND PaidAmount='${from}'  GROUP BY PaidDate;`,
+    //   {
+    //     nest: true,
+    //     type: QueryTypes.SELECT,
+    //     raw: true,
+    //   }
+    // );
+
+    let TotalStudent = await Student.findAll({
+      attributes: ["name"],
+      where: {
+        ClientCode: req?.user?.ClientCode,
+        [Op.or]: [
+          { Status: "Unknown" },
+          { Status: "On Leave" },
+          { Status: "Active" },
+        ],
+      },
+      group: ["SrNumber"],
+    });
+
+    let TotalBatch = await Batch.findAll({
+      where: {
+        ClientCode: req?.user?.ClientCode,
+      },
+    });
+
+    let TotalEmployee = await Employees.findAll({
+      where: {
+        ClientCode: req?.user?.ClientCode,
+        [Op.or]: [{ status: "Active" }, { status: "On Leave" }],
+      },
+    });
+
+    let TotalParents = await Parents.count({
+      where: {
+        ClientCode: req?.user?.ClientCode,
+      },
+    });
+
+    let allexpenses = await sequelizes.query(
+      `Select Expensestype,PayOption,Comment, SUM(ExpensesAmount) AS total_paidamount FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND Expensestype  IN ('Expenses', 'Liability')   GROUP BY Expensestype ,PayOption;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    let allreceiptdata = await sequelizes.query(
+      `Select PaidDate, Course,PayOption, SUM(PaidAmount) AS total_paidamount FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}'  GROUP BY Course ,PayOption;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    let allStudentPending = await sequelizes.query(
+      `Select SUM(HostelPendingFee) AS HostelPendingFee ,SUM(TransportPendingFee) AS TransportPendingFee,SUM(pendingfee) AS pendingfee FROM students WHERE ClientCode= '${req.user?.ClientCode}' GROUP BY courseorclass;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    let AllStudentAttendance = await StudentAttendance.findAll({
+      where: {
+        ClientCode: req?.user?.ClientCode,
+        attendancedate: newdate,
+        MonthName: monthName,
+        yeay: newdate?.getFullYear(),
+        MonthNo: newdate?.getMonth() + 1,
+      },
+    });
+
+    let AllEmployeeAttendance = await EmployeeAttendance.findAll({
+      where: {
+        ClientCode: req?.user?.ClientCode,
+        attendancedate: newdate,
+        MonthName: monthName,
+        yeay: newdate?.getFullYear(),
+        MonthNo: newdate?.getMonth() + 1,
+      },
+    });
+
+    let ReceiptChartdata = await sequelizes.query(
+      `Select monthno,SUM(PaidAmount) AS total  FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}' GROUP BY monthno ORDER BY
+      monthno;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    let ExpensesChartdata = await sequelizes.query(
+      `Select MonthNO,SUM(ExpensesAmount) AS total  FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND Session ='${sessionname}' GROUP BY MonthNO ORDER BY MonthNO;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    if (
+      TotalEmployee &&
+      TotalParents &&
+      TotalStudent &&
+      AllEmployeeAttendance &&
+      AllStudentAttendance &&
+      allexpenses &&
+      allreceiptdata &&
+      allStudentPending &&
+      allTodayreceiptdata &&
+      ReceiptChartdata &&
+      ExpensesChartdata &&
+      TotalBatch
+    ) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Dashborad Total data Successfully!!",
+        data: {
+          TotalBatch: TotalBatch?.length,
+          TotalEmployee: TotalEmployee?.length,
+          TotalParents: TotalParents,
+          TotalStudent: TotalStudent?.length,
+          AllEmployeeAttendance: AllEmployeeAttendance,
+          AllStudentAttendance: AllStudentAttendance,
+          allexpenses: allexpenses,
+          allreceiptdata: allreceiptdata,
+          allStudentPending: allStudentPending,
+          allTodayreceiptdata: allTodayreceiptdata,
+          ReceiptChartdata: ReceiptChartdata,
+          ExpensesChartdata: ExpensesChartdata,
+        },
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   GetAllTotalData,
   GetFeePaidChart,
   GetExpensesChart,
+  GetCoachingAllTotalData,
 };

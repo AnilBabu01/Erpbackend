@@ -23,6 +23,10 @@ router.post(
   DashboardController.GetExpensesChart
 );
 
-
+router.post(
+  "/GetCoachingAllTotalData",
+  verifyToken,
+  DashboardController.GetCoachingAllTotalData
+);
 
 module.exports = router;

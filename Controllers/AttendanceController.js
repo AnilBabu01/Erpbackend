@@ -775,7 +775,7 @@ const AddHoliday = async (req, res) => {
     if (batchname) {
       checkattendance = await AttendanceStudent.findAll({
         where: {
-          batch: batchname,
+          // batch: batchname,
           attendancedate: newdate,
           ClientCode: req.user?.ClientCode,
           institutename: req.user?.institutename,
@@ -826,6 +826,55 @@ const AddHoliday = async (req, res) => {
           data: checkattendance,
         });
       }
+    }
+  }
+};
+
+const AddCoachingHoliday = async (req, res) => {
+  const { holidaydate, comment, } = req.body;
+  let newdate = new Date(holidaydate);
+  var monthName = monthNames[newdate?.getMonth()];
+
+  let checkattendance = await AttendanceStudent.findAll({
+    where: {
+      // batch: batchname,
+      attendancedate: newdate,
+      ClientCode: req.user?.ClientCode,
+      institutename: req.user?.institutename,
+      MonthName: monthName,
+      yeay: newdate?.getFullYear(),
+      MonthNo: newdate?.getMonth() + 1,
+    },
+  });
+
+  if (checkattendance) {
+    const promises = checkattendance?.map(async (date, indexdate) => {
+      let isupdatd = await AttendanceStudent.update(
+        {
+          // attendaceStatus: item?.attendaceStatus,
+          attendaceStatusIntext: "Holiday",
+          Comment: comment,
+        },
+        {
+          where: {
+            attendancedate: newdate,
+            ClientCode: req.user?.ClientCode,
+            MonthName: monthName,
+            yeay: newdate?.getFullYear(),
+            MonthNo: newdate?.getMonth() + 1,
+          },
+        }
+      );
+
+      return isupdatd;
+    });
+
+    if (await Promise.all(promises)) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Holiday Marked Successfully!!",
+        data: checkattendance,
+      });
     }
   }
 };
@@ -1201,4 +1250,5 @@ module.exports = {
   GetStudentAllMonthAttendance,
   GetStudentByDateAttendance,
   MarkCoachingStudentAttendance,
+  AddCoachingHoliday
 };
