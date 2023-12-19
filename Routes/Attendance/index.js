@@ -37,4 +37,5 @@ router
   .route("/GetStudentByDateAttendance", verifyToken)
   .post(verifyToken, AttendanceController.GetStudentByDateAttendance);
 
+
 module.exports = router;

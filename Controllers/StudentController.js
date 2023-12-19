@@ -1335,8 +1335,11 @@ const getReceipt = async (req, res) => {
     if (fromdate && todate) {
       whereClause.PaidDate = { [Op.between]: [from, to] };
     }
-    if (fromdate) {
-      whereClause.PaidDate = fromdate;
+
+    if (req.user?.userType === "institute") {
+      if (fromdate) {
+        whereClause.PaidDate = fromdate;
+      }
     }
 
     if (name) {
