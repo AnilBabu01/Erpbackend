@@ -4,6 +4,7 @@ const sequelizes = require("../Helper/Connect");
 const { config } = require("dotenv");
 const Employee = require("../Models/employee.model");
 const Empsalary = require("../Models/empsalary.model");
+const employeeattendances = require("../Models/employeeattendance.model")
 const respHandler = require("../Handlers");
 const { monthdays } = require("../Helper/Constant");
 config();
@@ -55,6 +56,7 @@ function getMonthNamesWithYear(startDate, endDate) {
 
   return monthNamesWithYear;
 }
+
 const GetPayMonthList = async (req, res) => {
   try {
     const { empid } = req.body;
@@ -77,19 +79,32 @@ const GetPayMonthList = async (req, res) => {
         var year = words.length > 1 ? words[1] : null;
 
         let days = monthdays[index + 1];
-        let checkattendance = await sequelizes.query(
-          `Select * FROM employeeattendances WHERE ClientCode= '${
-            req.user?.ClientCode
-          }' AND MonthNo ='${
-            index + 1
-          }' AND empId = '${empid}'  AND yeay ='${year}' AND MonthName ='${monthName}'
-            ;`,
-          {
-            nest: true,
-            type: QueryTypes.SELECT,
-            raw: true,
-          }
-        );
+
+        // let checkattendance = await sequelizes.query(
+        //   `Select * FROM employeeattendances WHERE ClientCode= '${
+        //     req.user?.ClientCode
+        //   }' AND MonthNo ='${
+        //     index + 1
+        //   }' AND empId = '${empid}'  AND yeay ='${year}' AND MonthName ='${monthName}'
+        //     ;`,
+        //   {
+        //     nest: true,
+        //     type: QueryTypes.SELECT,
+        //     raw: true,
+        //   }
+        // );
+
+        let checkattendance = await employeeattendances.findAll({
+          where: {
+            // batch: batchname,
+            empId: empid,
+            ClientCode: req.user?.ClientCode,
+            MonthName: monthName,
+            yeay: year,
+            MonthNo: Number(MonthNo) + 1,
+          },
+        });
+
         let isSalary = await Empsalary.findOne({
           where: {
             EmpId: employee?.id,
@@ -195,7 +210,7 @@ const PaySalary = async (req, res) => {
 const GetEmpSalaryList = async (req, res) => {
   try {
     const { empid, empname, sessionname, fromdate, todate } = req.query;
-    console.log("console data is ",req.query)
+    console.log("console data is ", req.query);
     let whereClause = {};
     let result = [];
     let from = new Date(fromdate);
