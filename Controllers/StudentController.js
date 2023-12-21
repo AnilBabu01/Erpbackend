@@ -12,6 +12,8 @@ const ReceiptPrefix = require("../Models/receiptprefix.model");
 const Fee = require("../Models/fee.model");
 const OtherFee = require("../Models/otherfee.model");
 const VehicleDetails = require("../Models/vehicledetails.mode");
+const AttendanceStudent = require("../Models/attendance.model");
+const { monthdays } = require("../Helper/Constant");
 const { Coachingfeemon } = require("../Helper/Constant");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
@@ -21,6 +23,21 @@ config();
 
 const SECRET = process.env.SECRET;
 //admin
+
+var monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 const MonthanameArray = {
   1: "April",
   2: "May",
@@ -68,6 +85,12 @@ function printMonthAndYear() {
 
 const Addstudent = async (req, res) => {
   try {
+    let newdate = new Date();
+    var monthName = monthNames[newdate?.getMonth()];
+    let fullyear = newdate.getFullYear();
+    let lastyear = newdate.getFullYear() - 1;
+    let session = `${lastyear}-${fullyear}`;
+    let days = monthdays[newdate?.getMonth() + 1];
     const {
       name,
       userType,
@@ -300,11 +323,43 @@ const Addstudent = async (req, res) => {
           );
 
           if (token) {
-            return respHandler.success(res, {
-              status: true,
-              data: [{ token: token, user: CreatedStudent, fee: fee }],
-              msg: "Student Added Successfully!!",
+            const promises = days?.map(async (date) => {
+              let result = await AttendanceStudent.create({
+                name: CreatedStudent?.name,
+                email: CreatedStudent?.email,
+                ClientCode: req.user?.ClientCode,
+                // institutename: req.user?.institutename,
+                // userId: req?.user?.id,
+                address: CreatedStudent?.address,
+                parentId: CreatedStudent?.parentId,
+                studentid: CreatedStudent?.id,
+                courseorclass: CreatedStudent?.courseorclass,
+                batch: CreatedStudent?.batch,
+                rollnumber: CreatedStudent?.rollnumber,
+                fathersPhoneNo: CreatedStudent?.fathersPhoneNo,
+                fathersName: CreatedStudent?.fathersName,
+                MathersName: CreatedStudent?.MathersName,
+                rollnumber: CreatedStudent?.rollnumber,
+                MonthName: monthName,
+                yeay: newdate?.getFullYear(),
+                MonthNo: newdate?.getMonth() + 1,
+                attendancedate: `${newdate?.getFullYear()}-${
+                  newdate?.getMonth() + 1
+                }-${date}`,
+                attendaceStatusIntext: "Absent",
+
+                monthNumber: newdate?.getMonth() + 1,
+              });
+
+              return result;
             });
+            if (await Promise.all(promises)) {
+              return respHandler.success(res, {
+                status: true,
+                data: [{ token: token, user: CreatedStudent, fee: fee }],
+                msg: "Student Added Successfully!!",
+              });
+            }
           }
         }
         if (req.user?.userType === "school") {
@@ -422,11 +477,42 @@ const Addstudent = async (req, res) => {
               );
 
               if (token) {
-                return respHandler.success(res, {
-                  status: true,
-                  data: [{ token: token, user: CreatedStudent, fee: fee }],
-                  msg: "Student Added Successfully!!",
+                const promises = days?.map(async (date) => {
+                  let result = await AttendanceStudent.create({
+                    name: CreatedStudent?.name,
+                    email: CreatedStudent?.email,
+                    ClientCode: req.user?.ClientCode,
+                    address: CreatedStudent?.address,
+                    parentId: CreatedStudent?.parentId,
+                    studentid: CreatedStudent?.id,
+                    Section: Session,
+                    courseorclass: CreatedStudent?.courseorclass,
+                    batch: CreatedStudent?.courseorclass,
+                    rollnumber: CreatedStudent?.rollnumber,
+                    fathersPhoneNo: CreatedStudent?.fathersPhoneNo,
+                    fathersName: CreatedStudent?.fathersName,
+                    MathersName: CreatedStudent?.MathersName,
+                    rollnumber: CreatedStudent?.rollnumber,
+                    MonthName: monthName,
+                    yeay: newdate?.getFullYear(),
+                    MonthNo: newdate?.getMonth() + 1,
+                    attendancedate: `${newdate?.getFullYear()}-${
+                      newdate?.getMonth() + 1
+                    }-${date}`,
+                    attendaceStatusIntext: "Absent",
+
+                    monthNumber: newdate?.getMonth() + 1,
+                  });
+
+                  return result;
                 });
+                if (await Promise.all(promises)) {
+                  return respHandler.success(res, {
+                    status: true,
+                    data: [{ token: token, user: CreatedStudent, fee: fee }],
+                    msg: "Student Added Successfully!!",
+                  });
+                }
               }
             }
           }
@@ -547,11 +633,43 @@ const Addstudent = async (req, res) => {
           );
 
           if (token) {
-            return respHandler.success(res, {
-              status: true,
-              data: [{ token: token, user: CreatedStudent, fee: fee }],
-              msg: "Student Added Successfully!!",
+            const promises = days?.map(async (date) => {
+              let result = await AttendanceStudent.create({
+                name: CreatedStudent?.name,
+                email: CreatedStudent?.email,
+                ClientCode: req.user?.ClientCode,
+                // institutename: req.user?.institutename,
+                // userId: req?.user?.id,
+                address: CreatedStudent?.address,
+                parentId: CreatedStudent?.parentId,
+                studentid: CreatedStudent?.id,
+                courseorclass: CreatedStudent?.courseorclass,
+                batch: CreatedStudent?.batch,
+                rollnumber: CreatedStudent?.rollnumber,
+                fathersPhoneNo: CreatedStudent?.fathersPhoneNo,
+                fathersName: CreatedStudent?.fathersName,
+                MathersName: CreatedStudent?.MathersName,
+                rollnumber: CreatedStudent?.rollnumber,
+                MonthName: monthName,
+                yeay: newdate?.getFullYear(),
+                MonthNo: newdate?.getMonth() + 1,
+                attendancedate: `${newdate?.getFullYear()}-${
+                  newdate?.getMonth() + 1
+                }-${date}`,
+                attendaceStatusIntext: "Absent",
+
+                monthNumber: newdate?.getMonth() + 1,
+              });
+
+              return result;
             });
+            if (await Promise.all(promises)) {
+              return respHandler.success(res, {
+                status: true,
+                data: [{ token: token, user: CreatedStudent, fee: fee }],
+                msg: "Student Added Successfully!!",
+              });
+            }
           }
         }
         if (req.user?.userType === "school") {
@@ -660,11 +778,42 @@ const Addstudent = async (req, res) => {
               );
 
               if (token) {
-                return respHandler.success(res, {
-                  status: true,
-                  data: [{ token: token, user: CreatedStudent }],
-                  msg: "Student Added Successfully!!",
+                const promises = days?.map(async (date) => {
+                  let result = await AttendanceStudent.create({
+                    name: CreatedStudent?.name,
+                    email: CreatedStudent?.email,
+                    ClientCode: req.user?.ClientCode,
+                    address: CreatedStudent?.address,
+                    parentId: CreatedStudent?.parentId,
+                    studentid: CreatedStudent?.id,
+                    Section: Section,
+                    courseorclass: CreatedStudent?.courseorclass,
+                    batch: CreatedStudent?.courseorclass,
+                    rollnumber: CreatedStudent?.rollnumber,
+                    fathersPhoneNo: CreatedStudent?.fathersPhoneNo,
+                    fathersName: CreatedStudent?.fathersName,
+                    MathersName: CreatedStudent?.MathersName,
+                    rollnumber: CreatedStudent?.rollnumber,
+                    MonthName: monthName,
+                    yeay: newdate?.getFullYear(),
+                    MonthNo: newdate?.getMonth() + 1,
+                    attendancedate: `${newdate?.getFullYear()}-${
+                      newdate?.getMonth() + 1
+                    }-${date}`,
+                    attendaceStatusIntext: "Absent",
+
+                    monthNumber: newdate?.getMonth() + 1,
+                  });
+
+                  return result;
                 });
+                if (await Promise.all(promises)) {
+                  return respHandler.success(res, {
+                    status: true,
+                    data: [{ token: token, user: CreatedStudent, fee: fee }],
+                    msg: "Student Added Successfully!!",
+                  });
+                }
               }
             }
           }
@@ -838,6 +987,12 @@ const getAllStudent = async (req, res) => {
 
 const UpdateStudent = async (req, res) => {
   try {
+    let newdate = new Date();
+    var monthName = monthNames[newdate?.getMonth()];
+    let fullyear = newdate.getFullYear();
+    let lastyear = newdate.getFullYear() - 1;
+    let session = `${lastyear}-${fullyear}`;
+    let days = monthdays[newdate?.getMonth() + 1];
     const {
       name,
       email,
@@ -1077,20 +1232,65 @@ const UpdateStudent = async (req, res) => {
                     },
                   }
                 );
-
-                // if (status) {
-                //   return respHandler.success(res, {
-                //     status: true,
-                //     msg: "Student Updated successfully!!",
-                //     data: UpdatedStudent,
-                //   });
-                // }
               } else {
-                return respHandler.success(res, {
-                  status: true,
-                  msg: "Student Updated successfully!!",
-                  data: UpdatedStudent,
+                let isattendance = await AttendanceStudent.findOne({
+                  where: {
+                    studentid: UpdatedStudent?.id,
+                    attendancedate: newdate,
+                  },
                 });
+                if (isattendance) {
+                  return respHandler.success(res, {
+                    status: true,
+                    msg: "Student Updated successfully!!",
+                    data: UpdatedStudent,
+                  });
+                } else {
+                  if (Status === "Active") {
+                    const promises = days?.map(async (date) => {
+                      let result = await AttendanceStudent.create({
+                        name: UpdatedStudent?.name,
+                        email: UpdatedStudent?.email,
+                        ClientCode: req.user?.ClientCode,
+                        address: UpdatedStudent?.address,
+                        parentId: UpdatedStudent?.parentId,
+                        studentid: UpdatedStudent?.id,
+                        Section: UpdatedStudent?.Section,
+                        courseorclass: UpdatedStudent?.courseorclass,
+                        batch: UpdatedStudent?.courseorclass,
+                        rollnumber: UpdatedStudent?.rollnumber,
+                        fathersPhoneNo: UpdatedStudent?.fathersPhoneNo,
+                        fathersName: UpdatedStudent?.fathersName,
+                        MathersName: UpdatedStudent?.MathersName,
+                        rollnumber: UpdatedStudent?.rollnumber,
+                        MonthName: monthName,
+                        yeay: newdate?.getFullYear(),
+                        MonthNo: newdate?.getMonth() + 1,
+                        attendancedate: `${newdate?.getFullYear()}-${
+                          newdate?.getMonth() + 1
+                        }-${date}`,
+                        attendaceStatusIntext: "Absent",
+
+                        monthNumber: newdate?.getMonth() + 1,
+                      });
+
+                      return result;
+                    });
+                    if (await Promise.all(promises)) {
+                      return respHandler.success(res, {
+                        status: true,
+                        msg: "Student Updated successfully add attendance!!",
+                        data: UpdatedStudent,
+                      });
+                    }
+                  } else {
+                    return respHandler.success(res, {
+                      status: true,
+                      msg: "Student Updated successfully!!",
+                      data: UpdatedStudent,
+                    });
+                  }
+                }
               }
             }
           }

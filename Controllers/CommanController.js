@@ -1,6 +1,7 @@
 const { sequelize, QueryTypes, Op, where, literal } = require("sequelize");
 const { config } = require("dotenv");
 var bcrypt = require("bcrypt");
+var jwt = require("jsonwebtoken");
 const Employee = require("../Models/employee.model");
 const Section = require("../Models/section.model");
 const StudentCategory = require("../Models/studentcategory.model");
@@ -19,11 +20,10 @@ const FooterDetails = require("../Models/footerdetails.model");
 const Note = require("../Models/note.model");
 const Slider = require("../Models/Slider.model");
 const Student = require("../Models/student.model");
-var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
 config();
-
+const genSalt = 10;
 const SECRET = process.env.SECRET;
 
 const RegisterEmployee = async (req, res) => {
@@ -3523,7 +3523,7 @@ const GetParentStudentList = async (req, res) => {
       where: {
         parentId: req.user?.id,
         ClientCode: req.user?.ClientCode,
-        Session:sessionname
+        Session: sessionname,
       },
     });
     if (studentlist) {
@@ -3538,6 +3538,92 @@ const GetParentStudentList = async (req, res) => {
         msg: "Something Went Wrong!!",
         error: [""],
       });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const Changepassword = async (req, res) => {
+  try {
+    const { oldpassword, newpassword, confirmnewpassword } = req.body;
+    if (oldpassword==='') {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Old password is required!!",
+        error: [""],
+      });
+    }
+    if (newpassword==='') {
+      return respHandler.error(res, {
+        status: false,
+        msg: "new password is required!!",
+        error: [""],
+      });
+    }
+    if (confirmnewpassword==='') {
+      return respHandler.error(res, {
+        status: false,
+        msg: "confirm new password is required!!",
+        error: [""],
+      });
+    }
+    if (newpassword != confirmnewpassword) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "new and confirm password not matched!!",
+        error: [""],
+      });
+    }
+    let user = await Client.findOne({
+      where: {
+        email: req?.user?.email,
+        ClientCode: req?.user?.ClientCode,
+      },
+    });
+    if (!user) {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Credentials Is Incorrect!!",
+      });
+    } else {
+      const working = await bcrypt.compare(oldpassword, user.password);
+      if (working) {
+        const hash = await bcrypt.hash(newpassword, genSalt);
+        let status = await Client.update(
+          {
+            password: hash,
+          },
+          {
+            where: {
+              id: user?.id,
+              ClientCode: user?.ClientCode,
+            },
+          }
+        );
+        if (status) {
+          return respHandler.success(res, {
+            status: true,
+            data: [user],
+            msg: "Password Changed Successfully!!",
+          });
+        } else {
+          return respHandler.error(res, {
+            status: false,
+            msg: "Something Went Wrong!!",
+            error: [""],
+          });
+        }
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Old Password Is Incorrect",
+        });
+      }
     }
   } catch (err) {
     return respHandler.error(res, {
@@ -3620,4 +3706,5 @@ module.exports = {
   DeleteSlider,
   GetStudentTimeTable,
   GetParentStudentList,
+  Changepassword,
 };

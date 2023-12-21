@@ -1,9 +1,9 @@
 const { config } = require("dotenv");
 var bcrypt = require("bcrypt");
+var jwt = require("jsonwebtoken");
 const Client = require("../Models/client.model");
 const Studentclass = require("../Models/studentclass.model");
 const Credentials = require("../Models/Credentials.model");
-var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
 config();

@@ -7,10 +7,10 @@ const AttendanceStudent = sequelize.define("studentattendance", {
     autoIncrement: true,
     primaryKey: true,
   },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
+  // userId: {
+  //   type: DataTypes.INTEGER,
+  //   allowNull: false,
+  // },
   ClientCode: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -59,10 +59,10 @@ const AttendanceStudent = sequelize.define("studentattendance", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  institutename: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
+  // institutename: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
   attendaceStatus: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
