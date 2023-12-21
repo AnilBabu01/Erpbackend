@@ -459,7 +459,7 @@ const GetCoachingAllTotalData = async (req, res) => {
 const getyearlist = async (req, res) => {
   try {
     let yearlist = await sequelizes.query(
-      `Select  DISTINCT YEAR(PaidDate) AS year_list FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}';`,
+      `Select  DISTINCT YEAR(PaidDate) AS year FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}';`,
       {
         nest: true,
         type: QueryTypes.SELECT,
@@ -489,10 +489,131 @@ const getyearlist = async (req, res) => {
   }
 };
 
+const getexpensesyearlist = async (req, res) => {
+  try {
+    let yearlist = await sequelizes.query(
+      `Select  DISTINCT YEAR(Date) AS year FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' GROUP BY monthno;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    if (yearlist) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Year List Successfully!!",
+        data: yearlist,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found!!",
+        error: "",
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetCoachingFeePaidChart = async (req, res) => {
+  try {
+    const { sessionname } = req.body;
+    let year;
+    let date = new Date();
+    let fullyear = date.getFullYear();
+    if (sessionname) {
+      year = sessionname;
+    } else {
+      year = fullyear;
+    }
+
+    let ReceiptChartdata = await sequelizes.query(
+      `Select monthno,SUM(PaidAmount) AS total  FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}' AND YEAR(PaidDate) = '${year}' GROUP BY monthno;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    if (ReceiptChartdata) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Line Chart Data Successfully!!",
+        data: ReceiptChartdata,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+const GetCoachingExpensesChart = async (req, res) => {
+  try {
+    const { sessionname } = req.body;
+    let year;
+    let date = new Date();
+    let fullyear = date.getFullYear();
+    if (sessionname) {
+      year = sessionname;
+    } else {
+      year = fullyear;
+    }
+
+    let ReceiptChartdata = await sequelizes.query(
+      `Select MonthNO,SUM(ExpensesAmount) AS total  FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND YEAR(Date) = '${year}' GROUP BY MonthNO;`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    if (ReceiptChartdata) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Line Chart Data Successfully!!",
+        data: ReceiptChartdata,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   GetAllTotalData,
   GetFeePaidChart,
   GetExpensesChart,
   GetCoachingAllTotalData,
   getyearlist,
+  getexpensesyearlist,
+  GetCoachingExpensesChart,
+  GetCoachingFeePaidChart,
 };

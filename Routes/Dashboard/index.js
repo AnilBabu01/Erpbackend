@@ -31,4 +31,22 @@ router.post(
 
 router.get("/getyearlist", verifyToken, DashboardController.getyearlist);
 
+router.get(
+  "/getexpensesyearlist",
+  verifyToken,
+  DashboardController.getexpensesyearlist
+);
+
+router.post(
+  "/GetCoachingExpensesChart",
+  verifyToken,
+  DashboardController.GetCoachingExpensesChart
+);
+
+router.post(
+  "/GetCoachingFeePaidChart",
+  verifyToken,
+  DashboardController.GetCoachingFeePaidChart
+);
+
 module.exports = router;
