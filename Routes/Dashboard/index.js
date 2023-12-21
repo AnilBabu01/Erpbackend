@@ -29,4 +29,6 @@ router.post(
   DashboardController.GetCoachingAllTotalData
 );
 
+router.get("/getyearlist", verifyToken, DashboardController.getyearlist);
+
 module.exports = router;

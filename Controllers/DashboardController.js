@@ -456,9 +456,43 @@ const GetCoachingAllTotalData = async (req, res) => {
   }
 };
 
+const getyearlist = async (req, res) => {
+  try {
+    let yearlist = await sequelizes.query(
+      `Select  DISTINCT YEAR(PaidDate) AS year_list FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}';`,
+      {
+        nest: true,
+        type: QueryTypes.SELECT,
+        raw: true,
+      }
+    );
+
+    if (yearlist) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Year List Successfully!!",
+        data: yearlist,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found!!",
+        error: "",
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   GetAllTotalData,
   GetFeePaidChart,
   GetExpensesChart,
   GetCoachingAllTotalData,
+  getyearlist,
 };
