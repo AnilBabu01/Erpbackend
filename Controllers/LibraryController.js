@@ -150,25 +150,41 @@ const GetBook = async (req, res) => {
     let book = await Book.findAll({
       where: whereClause,
     });
-    let BookedBooks = await BookedBook.findAll({
-      where: {
-        studentid: studentid,
-        rollnumber: rollnumber,
-        issueStatus: 1,
-      },
-    });
-    if (book && BookedBooks) {
-      return respHandler.success(res, {
-        status: true,
-        msg: "Fetch All Books successfully!!",
-        data: { BookedBooks: BookedBooks, book: book },
+    if (studentid) {
+      let BookedBooks = await BookedBook.findAll({
+        where: {
+          studentid: studentid,
+          rollnumber: rollnumber,
+          issueStatus: 1,
+        },
       });
+      if (book && BookedBooks) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch All Books successfully!!",
+          data: { BookedBooks: BookedBooks, book: book },
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: [""],
+        });
+      }
     } else {
-      return respHandler.error(res, {
-        status: false,
-        msg: "Something Went Wrong!!",
-        error: [""],
-      });
+      if (book) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch All Books successfully!!",
+          data: book,
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: [""],
+        });
+      }
     }
   } catch (err) {
     return respHandler.error(res, {

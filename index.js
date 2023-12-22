@@ -23,6 +23,7 @@ const Transport = require("./Routes/Transport");
 const Hostel = require("./Routes/Hostel");
 const Expenses = require("./Routes/Expenses");
 const Dashboard = require("./Routes/Dashboard");
+const Backup = require("./Routes/Backup");
 
 // to run migrations run command - --------  npm run migrate ---------------------
 
@@ -58,6 +59,7 @@ app.use("/api/transport", Transport);
 app.use("/api/hostel", Hostel);
 app.use("/api/expenses", Expenses);
 app.use("/api/dashboard", Dashboard);
+app.use("/api/backup", Backup);
 app.use("*", (req, res) => {
   return res.status(404).json({
     status: false,

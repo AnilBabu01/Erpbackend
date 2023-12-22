@@ -543,7 +543,6 @@ const DoneStudentAttendance = async (req, res) => {
     let allatttendance = await AttendanceStudent.findAll({
       where: {
         ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
         batch: data[0]?.batch,
         attendancedate: new Date(data[0]?.Attendancedate),
       },

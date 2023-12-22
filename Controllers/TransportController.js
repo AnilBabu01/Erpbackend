@@ -371,6 +371,7 @@ const GetRoute = async (req, res) => {
     if (stopName) {
       whereClause.FromRoute = { [Op.regexp]: `^${stopName}.*` };
     }
+    
     let vehicleroutes = await VehicleRoute.findAll({
       where: {
         ClientCode: req?.user?.ClientCode,
