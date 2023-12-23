@@ -75,6 +75,15 @@ const GetAllbackdataData = async (req, res) => {
     let enquirys = [];
     if (frontoffice === true) {
       enquirys = await Enquiry.findAll({
+        attributes: [
+          ["StudentName", "StudentName"],
+          ["StudentNumber", "StudentName"],
+          ["StudentEmail", "StudentEmail"],
+          ["Address", "Address"],
+          ["Course", "Course"],
+          ["Comment", "Comment"],
+          [literal("DATE_FORMAT(EnquiryDate, '%d/%m/%Y')"), "EnquiryDate"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
@@ -84,12 +93,32 @@ const GetAllbackdataData = async (req, res) => {
     let issuedbooklist = [];
     if (Library === true) {
       bookslist = await Book.findAll({
+        attributes: [
+          ["BookId", "BookId"],
+          ["BookTitle", "BookTitle"],
+          ["auther", "Auther"],
+          ["quantity", "Quantity"],
+          ["Realquantity", "Books In Library"],
+          ["courseorclass", "Class"],
+          [literal("DATE_FORMAT(addDate, '%d/%m/%Y')"), "Add Date"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
       });
 
       issuedbooklist = await BookedBook.findAll({
+        attributes: [
+          ["Session", "Session"],
+          ["Section", "Section"],
+          ["SrNumber", "SrNumber"],
+          ["rollnumber", "rollnumber"],
+          ["courseorclass", "class"],
+          ["BookId", "BookId"],
+          ["BookTitle", "BookTitle"],
+          ["auther", "auther"],
+          [literal("DATE_FORMAT(IssueDate, '%d/%m/%Y')"), "Book Issue Date"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
           issueStatus: 1,
@@ -106,6 +135,21 @@ const GetAllbackdataData = async (req, res) => {
     let studentAttendance = [];
     if (student === true) {
       studentlist = await Student?.findAll({
+        attributes: [
+          ["Session", "Session"],
+          ["Section", "Section"],
+          ["SrNumber", "SrNumber"],
+          ["rollnumber", "rollnumber"],
+          ["courseorclass", "class"],
+          ["name", "name"],
+          ["email", "email"],
+          ["phoneno1", "phoneno1"],
+          ["fathersName", "fathersName"],
+          ["fathersPhoneNo", "fathersPhoneNo"],
+          ["StudentCategory", "StudentCategory"],
+          ["Status", "Status"],
+          [literal("DATE_FORMAT(admissionDate, '%d/%m/%Y')"), "admissionDate"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
@@ -118,6 +162,23 @@ const GetAllbackdataData = async (req, res) => {
       });
 
       studentAttendance = await StudentAttendance?.findAll({
+        attributes: [
+          [
+            literal("DATE_FORMAT(attendancedate, '%d/%m/%Y')"),
+            "attendancedate",
+          ],
+          ["name", "name"],
+          ["Section", "Section"],
+          // ["SrNumber", "SrNumber"],
+          ["rollnumber", "rollnumber"],
+          ["courseorclass", "class"],
+          ["name", "name"],
+          ["email", "email"],
+          ["MonthName", "MonthName"],
+          ["attendaceStatusIntext", "Attendance Status"],
+          ["holidaytype", "holiday type"],
+          ["Comment", "Comment"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
@@ -127,6 +188,7 @@ const GetAllbackdataData = async (req, res) => {
           ["MonthNo", "ASC"],
           ["Section", "ASC"],
           ["courseorclass", "ASC"],
+          ["rollnumber", "ASC"],
         ],
       });
     }
@@ -135,6 +197,39 @@ const GetAllbackdataData = async (req, res) => {
     let employeeAttendance = [];
     if (employee === true) {
       employeelist = await Employees?.findAll({
+        attributes: [
+          [literal("DATE_FORMAT(joiningdate, '%d/%m/%Y')"), "joiningdate"],
+          [literal("DATE_FORMAT(resigndate	, '%d/%m/%Y')"), "resigndate	"],
+          ["name", "name"],
+          ["email", "email"],
+          ["phoneno2", "phoneno2"],
+          ["phoneno2", "phoneno2"],
+          ["city", "city"],
+          ["state", "state"],
+          ["pincode", "pincode"],
+          ["department", "department"],
+          ["employeeof", "Designation"],
+          ["basicsalary", "basicsalary"],
+          ["Allowance1", "Allowance1"],
+          ["AllowanceAmount1", "AllowanceAmount1"],
+          ["Allowance2", "Allowance2"],
+          ["AllowanceAmount2", "AllowanceAmount2"],
+          ["Allowance3", "Allowance3"],
+          ["AllowanceAmount3", "AllowanceAmount3"],
+          ["Deduction1", "Deduction1"],
+          ["DeductionAmount1", "DeductionAmount1"],
+          ["Deduction2", "Deduction2"],
+          ["DeductionAmount2", "DeductionAmount2"],
+          ["TotalSalary", "TotalSalary"],
+          ["AllowLeave", "AllowLeave"],
+          ["FathersName", "FathersName"],
+          ["AccountHolder", "AccountHolder"],
+          ["AccountNumber", "AccountNumber"],
+          ["BankName", "BankName"],
+          ["Branch", "Branch"],
+          ["IfscCode", "IfscCode"],
+          ["status", "status"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
@@ -142,6 +237,17 @@ const GetAllbackdataData = async (req, res) => {
       });
 
       employeeAttendance = await EmployeeAttendance?.findAll({
+        attributes: [
+          [
+            literal("DATE_FORMAT(attendancedate, '%d/%m/%Y')"),
+            "attendancedate",
+          ],
+          ["name", "name"],
+
+          ["attendaceStatusIntext", "Attendance Status"],
+          ["holidaytype", "holiday type"],
+          ["Comment", "Comment"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
@@ -202,6 +308,20 @@ const GetAllbackdataData = async (req, res) => {
       });
 
       allreceiptdata = await ReceiptData.findAll({
+        attributes: [
+          ["Session", "Session"],
+          ["Section", "Section"],
+          ["SNO", "SrNumber"],
+          ["RollNo", "rollnumber"],
+          ["studentName", "studentName"],
+          ["fathername", "fathername"],
+          ["PaidAmount", "PaidAmount"],
+          ["ReceiptNo", "ReceiptNo"],
+          ["Feetype", "Feetype"],
+          ["Course", "Class"],
+          ["PayOption", "Payment Mode"],
+          [literal("DATE_FORMAT(PaidDate, '%d/%m/%Y')"), "PaidDate"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
@@ -217,16 +337,39 @@ const GetAllbackdataData = async (req, res) => {
     let expenseslist = [];
     if (expenses === true) {
       expenseslist = await Expenses?.findAll({
+        attributes: [
+          [literal("DATE_FORMAT(Date, '%d/%m/%Y')"), "Date"],
+          ["Session", "Session"],
+          ["Expensestype", "Expensestype"],
+          ["ExpensesAmount", "ExpensesAmount"],
+          ["PayOption", "Pay Mode"],
+          ["Comment", "Comment"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
-        },   
-        order: [["Date", "ASC"],["Session", "ASC"]],
+        },
+        order: [
+          ["Date", "ASC"],
+          ["Session", "ASC"],
+        ],
       });
     }
 
     let buslist = [];
     if (transport === true) {
       buslist = await VehicleDetails?.findAll({
+        attributes: [
+          ["BusNumber", "BusNumber"],
+          ["Vahicletype", "Vahicletype"],
+          ["FualType", "FualType"],
+          ["DriverId1", "DriverId1"],
+          ["DriverId2", "DriverId2"],
+          ["HelferId1", "HelferId1"],
+          ["HelferId2", "HelferId2"],
+          ["NoOfSheets", "Total Sheets"],
+          ["RealSheets", "Available Sheets"],
+          ["GPSDeviceURL", "GPSDeviceURL"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
@@ -238,18 +381,43 @@ const GetAllbackdataData = async (req, res) => {
     let checkinlist = [];
     if (hostel === true) {
       hostelist = await RoomHostel.findAll({
+        attributes: [
+          ["HostelName", "HostelName"],
+          ["DescripTion", "DescripTion"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
       });
 
       roomlist = await Room.findAll({
+        attributes: [
+          ["hostelname", "hostelname"],
+          ["Category", "Category"],
+          ["Facility", "Facility"],
+          ["FromRoom", "FromRoom"],
+          ["ToRoom", "ToRoom"],
+          ["PermonthFee", "Per month Fee"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
       });
 
       checkinlist = await RoomCheckin.findAll({
+        attributes: [
+          ["hostelname", "hostelname"],
+          ["Category", "Category"],
+          ["Facility", "Facility"],
+          ["RoomNo", "RoomNo"],
+          ["StudentName", "StudentName"],
+          ["StudentClass", "StudentClass"],
+          ["Session", "Session"],
+          ["Section", "Section"],
+          ["SNO", "Sr Number"],
+          ["MobileNO", "MobileNO"],
+          [literal("DATE_FORMAT(CheckinDate, '%d/%m/%Y')"), "CheckinDate"],
+        ],
         where: {
           ClientCode: req.user?.ClientCode,
         },
