@@ -631,6 +631,68 @@ const GetStudentResult = async (req, res) => {
   }
 };
 
+const GetAllResult = async (req, res) => {
+  try {
+    const { date, classname, batch } = req.body;
+    let whereClause = {};
+    let result = [];
+    if (req.user) {
+      whereClause.ClientCode = req?.user?.ClientCode;
+    }
+
+    if (date) {
+      whereClause.testdate = new Date(date);
+    }
+
+    if (classname) {
+      whereClause.course = { [Op.regexp]: `^${classname}.*` };
+    }
+    if (batch) {
+      whereClause.batch = { [Op.regexp]: `^${batch}.*` };
+    }
+
+    let alltest = await Result.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: Ansquestion,
+        },
+      ],
+      order: [["id", "DESC"]],
+    });
+
+    if (alltest) {
+      const promises = alltest?.map(async (item) => {
+        let studentdel = await Student.findOne({
+          where: {
+            id: item?.studentId,
+          },
+        });
+
+        if (studentdel) {
+          result.push({
+            data: item,
+            studentdel: studentdel,
+          });
+        }
+      });
+      if (await Promise.all(promises)) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fetch All Result successfully!!",
+          data: result,
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   AddTest,
   GetAllTest,
@@ -640,4 +702,5 @@ module.exports = {
   AddTestResult,
   CheckTestTime,
   GetStudentResult,
+  GetAllResult,
 };

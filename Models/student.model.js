@@ -298,6 +298,10 @@ const Student = sequelize.define("student", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  DateOfBirth: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+  },
 });
 Student.hasOne(Coachingfeestatus, { primaryKey: "id" });
 Coachingfeestatus.belongsTo(Student, { foreignKey: "studentId" });

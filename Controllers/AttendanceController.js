@@ -524,9 +524,7 @@ const DoneStudentAttendance = async (req, res) => {
         {
           attendaceStatus: item?.attendaceStatus,
           attendaceStatusIntext:
-            item?.attendaceStatus === true
-              ? "Present"
-              : item?.attendaceStatusIntext,
+            item?.attendaceStatus === true ? "Present" : "Absent",
         },
         {
           where: {
@@ -777,8 +775,7 @@ const AddHoliday = async (req, res) => {
           // batch: batchname,
           attendancedate: newdate,
           ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-          MonthName: monthName,
+           MonthName: monthName,
           yeay: newdate?.getFullYear(),
           MonthNo: newdate?.getMonth() + 1,
         },
@@ -788,7 +785,6 @@ const AddHoliday = async (req, res) => {
         where: {
           attendancedate: newdate,
           ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
           MonthName: monthName,
           yeay: newdate?.getFullYear(),
           MonthNo: newdate?.getMonth() + 1,
@@ -830,7 +826,7 @@ const AddHoliday = async (req, res) => {
 };
 
 const AddCoachingHoliday = async (req, res) => {
-  const { holidaydate, comment, } = req.body;
+  const { holidaydate, comment } = req.body;
   let newdate = new Date(holidaydate);
   var monthName = monthNames[newdate?.getMonth()];
 
@@ -839,7 +835,6 @@ const AddCoachingHoliday = async (req, res) => {
       // batch: batchname,
       attendancedate: newdate,
       ClientCode: req.user?.ClientCode,
-      institutename: req.user?.institutename,
       MonthName: monthName,
       yeay: newdate?.getFullYear(),
       MonthNo: newdate?.getMonth() + 1,
@@ -886,7 +881,6 @@ const GetHolidays = async (req, res) => {
       where: {
         monthNumber: month,
         ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
         attendaceStatusIntext: "Holiday",
       },
       group: ["attendancedate"],
@@ -997,7 +991,6 @@ const Updateholiday = async (req, res) => {
         where: {
           attendancedate: newdate,
           ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
           MonthName: monthName,
           yeay: newdate?.getFullYear(),
           MonthNo: newdate?.getMonth() + 1,
@@ -1087,7 +1080,6 @@ const Deleteholiday = async (req, res) => {
       where: {
         monthNumber: month,
         ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
         attendaceStatusIntext: "Holiday",
       },
       group: ["attendancedate"],
@@ -1249,5 +1241,5 @@ module.exports = {
   GetStudentAllMonthAttendance,
   GetStudentByDateAttendance,
   MarkCoachingStudentAttendance,
-  AddCoachingHoliday
+  AddCoachingHoliday,
 };

@@ -137,6 +137,7 @@ const Addstudent = async (req, res) => {
       FromRoute,
       ToRoute,
       BusNumber,
+      DateOfBirth
     } = req.body;
 
     const genSalt = 10;
@@ -287,6 +288,7 @@ const Addstudent = async (req, res) => {
           hostelname: hostelname,
           Category: Category,
           Facility: Facility,
+          DateOfBirth:DateOfBirth,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -598,6 +600,7 @@ const Addstudent = async (req, res) => {
           TransportTotalHostelFee: TransportTotalHostelFee,
           HostelPendingFee: TotalHostelFee,
           TransportPendingFee: TransportTotalHostelFee,
+          DateOfBirth:DateOfBirth,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -1040,6 +1043,7 @@ const UpdateStudent = async (req, res) => {
       FromRoute,
       ToRoute,
       BusNumber,
+      DateOfBirth
     } = req.body;
 
     let student = await Student.findOne({
@@ -1116,6 +1120,7 @@ const UpdateStudent = async (req, res) => {
           FromRoute: FromRoute,
           ToRoute: ToRoute,
           BusNumber: BusNumber,
+          DateOfBirth:DateOfBirth,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req.body.profileurl,

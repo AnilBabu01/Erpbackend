@@ -20,6 +20,9 @@ const FooterDetails = require("../Models/footerdetails.model");
 const Note = require("../Models/note.model");
 const Slider = require("../Models/Slider.model");
 const Student = require("../Models/student.model");
+const Creadentials = require("../Models/Credentials.model");
+const MailSms = require("../Models/Emailsms.model");
+const nodemailer = require("nodemailer");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
 config();
@@ -3551,21 +3554,21 @@ const GetParentStudentList = async (req, res) => {
 const Changepassword = async (req, res) => {
   try {
     const { oldpassword, newpassword, confirmnewpassword } = req.body;
-    if (oldpassword==='') {
+    if (oldpassword === "") {
       return respHandler.error(res, {
         status: false,
         msg: "Old password is required!!",
         error: [""],
       });
     }
-    if (newpassword==='') {
+    if (newpassword === "") {
       return respHandler.error(res, {
         status: false,
         msg: "new password is required!!",
         error: [""],
       });
     }
-    if (confirmnewpassword==='') {
+    if (confirmnewpassword === "") {
       return respHandler.error(res, {
         status: false,
         msg: "confirm new password is required!!",
@@ -3624,6 +3627,148 @@ const Changepassword = async (req, res) => {
           msg: "Old Password Is Incorrect",
         });
       }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const SendemailToStudent = async (req, res) => {
+  try {
+    const { session, classname, section, subject, Message } = req.body;
+    const whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req?.user?.ClientCode;
+    }
+
+    if (session) {
+      whereClause.Session = { [Op.regexp]: `^${session}.*` };
+    }
+
+    if (classname) {
+      whereClause.courseorclass = { [Op.regexp]: `^${classname}.*` };
+    }
+
+    if (section) {
+      whereClause.Section = { [Op.regexp]: `^${section}.*` };
+    }
+
+    let allstudent = await Student.findAll({
+      attributes: ["email"],
+      where: whereClause,
+    });
+    if (allstudent) {
+      let creadentials = await Creadentials.findOne({
+        where: {
+          ClientCode: req?.user?.ClientCode,
+        },
+      });
+      if (creadentials) {
+        const arrayOfStrings = allstudent.map((obj) => `${obj.email}`);
+
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          host: "smtp.gmail.com",
+          auth: {
+            user: creadentials?.Sendemail,
+            pass: creadentials?.SendemailPassword,
+          },
+        });
+
+        const message = {
+          from: creadentials?.Sendemail,
+          to: arrayOfStrings,
+          subject: subject,
+          html: Message,
+        };
+
+        let status = await transporter.sendMail(message);
+        if (status) {
+          let sms = await MailSms.create({
+            ClientCode: req.user.ClientCode,
+            Session: session,
+            Section: section,
+            courseorclass: classname,
+            Subject: subject,
+            Sms: Message,
+            date: new Date(),
+          });
+          if (sms) {
+            return respHandler.success(res, {
+              status: true,
+              data: sms,
+              msg: "Mail Sent Successfully!!",
+            });
+          } else {
+            return respHandler.error(res, {
+              status: false,
+              msg: "Mail Sent Successfully But Data Is Not Saving!!",
+              error: [],
+            });
+          }
+        }
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Please Add Creadentials!!",
+          error: [""],
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetSentemailToStudent = async (req, res) => {
+  try {
+    const { session, classname, section, date } = req.body;
+    const whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req?.user?.ClientCode;
+    }
+
+    if (date) {
+      whereClause.date = new Date(date);
+    }
+
+    if (session) {
+      whereClause.Session = { [Op.regexp]: `^${session}.*` };
+    }
+
+    if (classname) {
+      whereClause.courseorclass = { [Op.regexp]: `^${classname}.*` };
+    }
+
+    if (section) {
+      whereClause.Section = { [Op.regexp]: `^${section}.*` };
+    }
+
+    let AllEmailSms = await MailSms.findAll({
+      where: whereClause,
+    });
+    if (AllEmailSms) {
+      return respHandler.success(res, {
+        status: true,
+        data: AllEmailSms,
+        msg: "Get All Mail Sent Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "No Data!!",
+        error: [""],
+      });
     }
   } catch (err) {
     return respHandler.error(res, {
@@ -3707,4 +3852,6 @@ module.exports = {
   GetStudentTimeTable,
   GetParentStudentList,
   Changepassword,
+  SendemailToStudent,
+  GetSentemailToStudent,
 };

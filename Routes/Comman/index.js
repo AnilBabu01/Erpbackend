@@ -287,4 +287,12 @@ router
   .route("/Changepassword", verifyToken)
   .post(verifyToken, CommanController.Changepassword);
 
+router
+  .route("/SendemailToStudent", verifyToken)
+  .post(verifyToken, CommanController.SendemailToStudent);
+
+router
+  .route("/GetSentemailToStudent", verifyToken)
+  .post(verifyToken, CommanController.GetSentemailToStudent);
+
 module.exports = router;
