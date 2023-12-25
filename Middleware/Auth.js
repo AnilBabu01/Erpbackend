@@ -13,12 +13,12 @@ const SECRET_KEY = process.env.SECRET;
 const verifyToken = async (req, res, next) => {
   console.log(req.headers["authorization"]);
 
-  console.log("data is tokem from delete method",)
+  console.log("data is tokem from delete method");
   const token =
     req.body.token ||
     req.query.token ||
     req.headers["x-access-token"] ||
-    req.headers["authorization"]
+    req.headers["authorization"];
 
   if (!token) {
     return respHandler.error(res, {
@@ -42,16 +42,34 @@ const verifyToken = async (req, res, next) => {
         user = await Guest.findByPk(decoded.id, {
           attributes: { exclude: ["updatedAt", "password"] },
         });
+        return respHandler.error(res, {
+          status: false,
+          msg: "Please Buy Plans",
+          error: [],
+          statuscode: 401,
+        });
       }
 
       if (decoded.userType === "college") {
         user = await Guest.findByPk(decoded.id, {
           attributes: { exclude: ["updatedAt", "password"] },
         });
+        return respHandler.error(res, {
+          status: false,
+          msg: "Please Buy Plans",
+          error: [],
+          statuscode: 401,
+        });
       }
       if (decoded.userType === "institute") {
         user = await Guest.findByPk(decoded.id, {
           attributes: { exclude: ["updatedAt", "password"] },
+        });
+        return respHandler.error(res, {
+          status: false,
+          msg: "Please Buy Plans",
+          error: [],
+          statuscode: 401,
         });
       }
     } else {

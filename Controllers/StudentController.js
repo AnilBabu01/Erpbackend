@@ -2656,6 +2656,47 @@ const addOtherFee = async (req, res) => {
     });
   }
 };
+
+
+///amdin or employee can get all studbnt list
+const GetStudentCoachingfee = async (req, res) => {
+  try {
+    let whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req.user?.ClientCode;
+      whereClause.id = req?.user?.id;
+    }
+
+    let students = await Student.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: Coachingfeestatus,
+        },
+      ],
+      order: [["id", "DESC"]],
+    });
+    if (students) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Student Fee successfully!!",
+        data: students,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   Addstudent,
   getAllStudent,
@@ -2676,4 +2717,5 @@ module.exports = {
   UpdateOtherFee,
   DeleteOtherFee,
   addOtherFee,
+  GetStudentCoachingfee
 };

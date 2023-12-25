@@ -97,4 +97,10 @@ router.post(
   SchoolStudentController.GetStudentFeeLedger
 );
 
+router.post(
+  "/GetStudentCoachingfee",
+  verifyToken,
+  StudentController.GetStudentCoachingfee
+);
+
 module.exports = router;

@@ -295,4 +295,8 @@ router
   .route("/GetSentemailToStudent", verifyToken)
   .post(verifyToken, CommanController.GetSentemailToStudent);
 
+router
+  .route("/GetParentStudentListCoacging", verifyToken)
+  .get(verifyToken, CommanController.GetParentStudentListCoacging);
+
 module.exports = router;

@@ -758,17 +758,25 @@ const Getallemployee = async (req, res) => {
 const Getprofile = async (req, res) => {
   try {
     if (req?.user) {
-      let credentailsdata = await Credentials.findOne({
-        where: {
-          ClientCode: req?.user?.ClientCode,
-        },
-      });
-      if (credentailsdata) {
+      if (req.user?.guest === "guest") {
         return respHandler.success(res, {
           status: true,
           msg: "Credentials fetch successfully!!",
-          data: { User: req?.user, CredentailsData: credentailsdata },
+          data: { User: req?.user },
         });
+      } else {
+        let credentailsdata = await Credentials.findOne({
+          where: {
+            ClientCode: req?.user?.ClientCode,
+          },
+        });
+        if (credentailsdata) {
+          return respHandler.success(res, {
+            status: true,
+            msg: "Credentials fetch successfully!!",
+            data: { User: req?.user, CredentailsData: credentailsdata },
+          });
+        }
       }
     } else {
       return respHandler.error(res, {
@@ -3779,6 +3787,36 @@ const GetSentemailToStudent = async (req, res) => {
   }
 };
 
+const GetParentStudentListCoacging = async (req, res) => {
+  try {
+    let studentlist = await Student.findAll({
+      where: {
+        parentId: req.user?.id,
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (studentlist) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch All Student Successfully!!",
+        data: studentlist,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   Getprofile,
   updateprofile,
@@ -3854,4 +3892,5 @@ module.exports = {
   Changepassword,
   SendemailToStudent,
   GetSentemailToStudent,
+  GetParentStudentListCoacging
 };
