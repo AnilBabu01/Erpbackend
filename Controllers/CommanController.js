@@ -1942,7 +1942,6 @@ const DeleteDepartment = async (req, res) => {
         where: {
           id: id,
           ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
         },
       });
       return respHandler.success(res, {
@@ -1973,7 +1972,6 @@ const CreateCoursemonth = async (req, res) => {
     let coursemonths = await Coursemonth.findAll({
       where: {
         ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
       },
     });
     if (coursemonths.length > 0) {
@@ -1985,7 +1983,7 @@ const CreateCoursemonth = async (req, res) => {
     }
     let coursemonth = await Coursemonth.create({
       ClientCode: req.user?.ClientCode,
-      institutename: req.user?.institutename,
+
       noOfMonth: noOfMonth,
     });
     if (coursemonth) {
@@ -2021,7 +2019,6 @@ const UpdateCoursemonth = async (req, res) => {
         where: {
           id: id,
           ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
         },
       }
     );
@@ -2057,7 +2054,6 @@ const getCoursemonth = async (req, res) => {
     let coursemonth = await Coursemonth.findAll({
       where: {
         ClientCode: req.user?.ClientCode,
-        institutename: req.user?.institutename,
       },
     });
     if (coursemonth) {
@@ -3892,5 +3888,5 @@ module.exports = {
   Changepassword,
   SendemailToStudent,
   GetSentemailToStudent,
-  GetParentStudentListCoacging
+  GetParentStudentListCoacging,
 };

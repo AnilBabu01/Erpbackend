@@ -137,7 +137,7 @@ const Addstudent = async (req, res) => {
       FromRoute,
       ToRoute,
       BusNumber,
-      DateOfBirth
+      DateOfBirth,
     } = req.body;
 
     const genSalt = 10;
@@ -288,7 +288,7 @@ const Addstudent = async (req, res) => {
           hostelname: hostelname,
           Category: Category,
           Facility: Facility,
-          DateOfBirth:DateOfBirth,
+          DateOfBirth: DateOfBirth,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -600,7 +600,7 @@ const Addstudent = async (req, res) => {
           TransportTotalHostelFee: TransportTotalHostelFee,
           HostelPendingFee: TotalHostelFee,
           TransportPendingFee: TransportTotalHostelFee,
-          DateOfBirth:DateOfBirth,
+          DateOfBirth: DateOfBirth,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -1043,7 +1043,7 @@ const UpdateStudent = async (req, res) => {
       FromRoute,
       ToRoute,
       BusNumber,
-      DateOfBirth
+      DateOfBirth,
     } = req.body;
 
     let student = await Student.findOne({
@@ -1120,7 +1120,7 @@ const UpdateStudent = async (req, res) => {
           FromRoute: FromRoute,
           ToRoute: ToRoute,
           BusNumber: BusNumber,
-          DateOfBirth:DateOfBirth,
+          DateOfBirth: DateOfBirth,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req.body.profileurl,
@@ -2657,15 +2657,15 @@ const addOtherFee = async (req, res) => {
   }
 };
 
-
 ///amdin or employee can get all studbnt list
 const GetStudentCoachingfee = async (req, res) => {
   try {
+    const { studentid } = req.body;
     let whereClause = {};
 
     if (req.user) {
       whereClause.ClientCode = req.user?.ClientCode;
-      whereClause.id = req?.user?.id;
+      whereClause.id = studentid ? studentid : req?.user?.id;
     }
 
     let students = await Student.findAll({
@@ -2717,5 +2717,5 @@ module.exports = {
   UpdateOtherFee,
   DeleteOtherFee,
   addOtherFee,
-  GetStudentCoachingfee
+  GetStudentCoachingfee,
 };

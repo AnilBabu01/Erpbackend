@@ -342,7 +342,7 @@ const GetStudentTest = async (req, res) => {
 
     if (req.user) {
       whereClause.course = req.user?.courseorclass;
-      whereClause.batch = req.user.batch;
+      // whereClause.batch = req.user.batch;
       whereClause.ClientCode = req?.user?.ClientCode;
     }
 
