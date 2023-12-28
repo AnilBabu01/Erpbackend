@@ -22,6 +22,7 @@ const Slider = require("../Models/Slider.model");
 const Student = require("../Models/student.model");
 const Creadentials = require("../Models/Credentials.model");
 const MailSms = require("../Models/Emailsms.model");
+
 const nodemailer = require("nodemailer");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -3813,6 +3814,125 @@ const GetParentStudentListCoacging = async (req, res) => {
   }
 };
 
+const SendemailToEmployee = async (req, res) => {
+  try {
+    const { session, classname, section, subject, Message } = req.body;
+    const whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req?.user?.ClientCode;
+    }
+
+    let allstudent = await Employee.findAll({
+      attributes: ["email"],
+      where: whereClause,
+    });
+    if (allstudent) {
+      let creadentials = await Creadentials.findOne({
+        where: {
+          ClientCode: req?.user?.ClientCode,
+        },
+      });
+      if (creadentials) {
+        const arrayOfStrings = allstudent.map((obj) => `${obj.email}`);
+
+        const transporter = nodemailer.createTransport({
+          service: "gmail",
+          host: "smtp.gmail.com",
+          auth: {
+            user: creadentials?.Sendemail,
+            pass: creadentials?.SendemailPassword,
+          },
+        });
+
+        const message = {
+          from: creadentials?.Sendemail,
+          to: arrayOfStrings,
+          subject: subject,
+          html: Message,
+        };
+
+        let status = await transporter.sendMail(message);
+        if (status) {
+          let sms = await MailSms.create({
+            ClientCode: req.user.ClientCode,
+            Session: session,
+            Section: section,
+            courseorclass: "employee",
+            Subject: subject,
+            Sms: Message,
+            date: new Date(),
+          });
+          if (sms) {
+            return respHandler.success(res, {
+              status: true,
+              data: sms,
+              msg: "Mail Sent Successfully!!",
+            });
+          } else {
+            return respHandler.error(res, {
+              status: false,
+              msg: "Mail Sent Successfully But Data Is Not Saving!!",
+              error: [],
+            });
+          }
+        }
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Please Add Creadentials!!",
+          error: [""],
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetSentemailToEmployee = async (req, res) => {
+  try {
+    const { sentdate } = req.body;
+    const whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req?.user?.ClientCode;
+      whereClause.courseorclass = "employee";
+    }
+
+    if (sentdate) {
+      whereClause.date = new Date(sentdate);
+    }
+
+    let AllEmailSms = await MailSms.findAll({
+      where: whereClause,
+    });
+    if (AllEmailSms) {
+      return respHandler.success(res, {
+        status: true,
+        data: AllEmailSms,
+        msg: "Get All Mail Sent Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "No Data!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
 module.exports = {
   Getprofile,
   updateprofile,
@@ -3889,4 +4009,6 @@ module.exports = {
   SendemailToStudent,
   GetSentemailToStudent,
   GetParentStudentListCoacging,
+  SendemailToEmployee,
+  GetSentemailToEmployee,
 };

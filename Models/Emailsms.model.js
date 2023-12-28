@@ -13,11 +13,11 @@ const MailSms = sequelize.define("mailsms", {
   },
   Session: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   Section: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   courseorclass: {
     type: DataTypes.STRING,

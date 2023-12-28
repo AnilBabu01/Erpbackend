@@ -14,6 +14,7 @@ const Expensesassestype = require("../Models/expensesassettype.model");
 const Expensesasset = require("../Models/expensesasset.model");
 const Expenses = require("../Models/expenses.model");
 const ReceiptData = require("../Models/receiptdata.model");
+const TransferAmount = require("../Models/transfer.model");
 const removefile = require("../Middleware/removefile");
 config();
 
@@ -196,7 +197,7 @@ const CreateExpenses = async (req, res) => {
       ClientCode: req.user.ClientCode,
       PayOption: PayOption,
       Session: Session,
-      MonthNO: date.getMonth()+1,
+      MonthNO: date.getMonth() + 1,
     });
     if (Expensestypes) {
       return respHandler.success(res, {
@@ -701,12 +702,17 @@ const GetExpensesAnalysis = async (req, res) => {
     );
     const lastDayOfMonth = new Date(new Date().getFullYear(), Number(month), 0);
 
-
-    if (allexpenses && allreceiptdata&&allexpensesAsset) {
+    if (allexpenses && allreceiptdata && allexpensesAsset) {
       return respHandler.success(res, {
         status: true,
         msg: "Fetch All Expenses Successfully!!",
-        data: [{ allreceiptdata: allreceiptdata, allexpenses: allexpenses,allexpensesAsset:allexpensesAsset }],
+        data: [
+          {
+            allreceiptdata: allreceiptdata,
+            allexpenses: allexpenses,
+            allexpensesAsset: allexpensesAsset,
+          },
+        ],
       });
     } else {
       return respHandler.error(res, {
@@ -724,6 +730,167 @@ const GetExpensesAnalysis = async (req, res) => {
   }
 };
 
+const CreateTransferAmmount = async (req, res) => {
+  try {
+    const { Transfer_Amount, Comment, Transfer_Mode } = req.body;
+    let date = new Date();
+    let fullyear = date.getFullYear();
+    let lastyear = date.getFullYear() - 1;
+
+    let Session = `${lastyear}-${fullyear}`;
+    let Expensestypes = await TransferAmount.create({
+      Date: date,
+      Transfer_Amount: Transfer_Amount,
+      Comment: Comment,
+      ClientCode: req.user.ClientCode,
+      Transfer_Mode: Transfer_Mode,
+      Session: Session,
+      MonthNO: date.getMonth() + 1,
+    });
+    if (Expensestypes) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Amount Transfer Successfully!!",
+        data: [Expensestypes],
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateTransferAmmount = async (req, res) => {
+  try {
+    const { Transfer_Amount, Comment, Date, id, Transfer_Mode } = req.body;
+
+    let status = await TransferAmount.update(
+      {
+        Date: Date,
+        Transfer_Amount: Transfer_Amount,
+        Comment: Comment,
+        Transfer_Mode: Transfer_Mode,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      }
+    );
+
+    if (status) {
+      let expenses = await Expenses.findOne({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        msg: "Amount Transfer Updated Successfully!!",
+        data: [expenses],
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [err.message],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const GetTransferAmmount = async (req, res) => {
+  try {
+    const { fromdate, todate, Transfer_Mode, sessionname } = req.query;
+    let whereClause = {};
+    let from = new Date(fromdate);
+    let to = new Date(todate);
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+    }
+    if (Transfer_Mode) {
+      whereClause.Transfer_Mode = { [Op.regexp]: `^${Transfer_Mode}.*` };
+    }
+
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+    }
+    if (fromdate && todate) {
+      whereClause.Date = { [Op.between]: [from, to] };
+    }
+    let roomCategory = await TransferAmount.findAll({
+      where: whereClause,
+    });
+    if (roomCategory) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch All Amount Transfer Successfully!!",
+        data: roomCategory,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteTransferAmmount = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let Expensestype = await TransferAmount.findOne({ where: { id: id } });
+    if (Expensestype) {
+      await TransferAmount.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Amount Transfer Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   CreateExpensesType,
   GetExpensesType,
@@ -742,4 +909,8 @@ module.exports = {
   UpdateAsset,
   DeleteAsset,
   GetExpensesAnalysis,
+  CreateTransferAmmount,
+  GetTransferAmmount,
+  UpdateTransferAmmount,
+  DeleteTransferAmmount,
 };

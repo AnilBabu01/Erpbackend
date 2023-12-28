@@ -11,4 +11,10 @@ router.post(
   BckenupController.GetAllbackdataData
 );
 
+router.post(
+  "/GetAllbackdataDataCoaching",
+  verifyToken,
+  BckenupController.GetAllbackdataDataCoaching
+);
+
 module.exports = router;

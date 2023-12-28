@@ -296,6 +296,13 @@ router
   .post(verifyToken, CommanController.GetSentemailToStudent);
 
 router
+  .route("/SendemailToEmployee", verifyToken)
+  .post(verifyToken, CommanController.SendemailToEmployee);
+
+router
+  .route("/GetSentemailToEmployee", verifyToken)
+  .post(verifyToken, CommanController.GetSentemailToEmployee);
+router
   .route("/GetParentStudentListCoacging", verifyToken)
   .get(verifyToken, CommanController.GetParentStudentListCoacging);
 

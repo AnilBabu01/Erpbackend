@@ -31,10 +31,15 @@ router
   .put(verifyToken, ExpensesController.UpdateExpenses)
   .delete(verifyToken, ExpensesController.DeleteExpenses);
 
-  router
+router
   .route("/getexpensesanalysis", verifyToken)
-  .post(verifyToken, ExpensesController.GetExpensesAnalysis)
- 
-  
+  .post(verifyToken, ExpensesController.GetExpensesAnalysis);
+
+router
+  .route("/amounttransfer", verifyToken)
+  .post(verifyToken, ExpensesController.CreateTransferAmmount)
+  .get(verifyToken, ExpensesController.GetTransferAmmount)
+  .put(verifyToken, ExpensesController.UpdateTransferAmmount)
+  .delete(verifyToken, ExpensesController.DeleteTransferAmmount);
 
 module.exports = router;

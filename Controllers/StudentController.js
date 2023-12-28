@@ -1141,7 +1141,7 @@ const UpdateStudent = async (req, res) => {
           where: {
             id: id,
             ClientCode: req.user?.ClientCode,
-            institutename: req.user?.institutename,
+            // institutename: req.user?.institutename,
           },
         }
       );
