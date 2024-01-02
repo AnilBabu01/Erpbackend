@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { config } = require("dotenv");
 var bcrypt = require("bcrypt");
 const Client = require("../Models/client.model");
@@ -145,7 +146,7 @@ const Loging = async (req, res) => {
       try {
         let user = await Client.findOne({
           where: {
-            email: email,
+            [Op.or]: [{ email: email }, { phoneno1: email }],
             institutename: first,
             ClientCode: last,
           },

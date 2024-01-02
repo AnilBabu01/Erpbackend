@@ -22,7 +22,7 @@ const Slider = require("../Models/Slider.model");
 const Student = require("../Models/student.model");
 const Creadentials = require("../Models/Credentials.model");
 const MailSms = require("../Models/Emailsms.model");
-
+const Streams = require("../Models/stream.mode");
 const nodemailer = require("nodemailer");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
@@ -2777,10 +2777,11 @@ const DeleteSubject = async (req, res) => {
 
 const CreateClassSubject = async (req, res) => {
   try {
-    const { Subject } = req.body;
+    const { Subject, courses } = req.body;
     let sectionv = await ClassSubject.findOne({
       where: {
         Subject: Subject,
+        Class: courses,
         ClientCode: req.user.ClientCode,
       },
     });
@@ -2797,6 +2798,7 @@ const CreateClassSubject = async (req, res) => {
     let sections = await ClassSubject.create({
       ClientCode: req.user?.ClientCode,
       Subject: Subject,
+      Class: courses,
     });
     if (sections) {
       return respHandler.success(res, {
@@ -2821,11 +2823,12 @@ const CreateClassSubject = async (req, res) => {
 
 const UpdateClassSubject = async (req, res) => {
   try {
-    const { Subject, id } = req.body;
+    const { Subject, courses, id } = req.body;
 
     let status = await ClassSubject.update(
       {
         Subject: Subject,
+        Class: courses,
       },
       {
         where: {
@@ -3933,6 +3936,161 @@ const GetSentemailToEmployee = async (req, res) => {
   }
 };
 
+
+
+const CreateStream = async (req, res) => {
+  try {
+    const { Subject, courses,Stream } = req.body;
+    let sectionv = await Streams.findOne({
+      where: {
+        Subject: Subject,
+        Class: courses,
+        Stream:Stream,
+        ClientCode: req.user.ClientCode,
+      },
+    });
+    if (sectionv) {
+      if (sectionv?.Subject?.toLowerCase() === Subject.toLowerCase()) {
+        return respHandler.error(res, {
+          status: false,
+          msg: "AlReady Exists!!",
+          error: ["AlReady Exsist !!"],
+        });
+      }
+    }
+
+    let sections = await Streams.create({
+      ClientCode: req.user?.ClientCode,
+      Subject: Subject,
+      Class: courses,
+      Stream:Stream
+    });
+    if (sections) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Stream Created successfully!!",
+        data: [sections],
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const UpdateStream = async (req, res) => {
+  try {
+    const { Subject, courses,Stream, id } = req.body;
+
+    let status = await Streams.update(
+      {
+        Subject: Subject,
+        Class: courses,
+        Stream:Stream
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      }
+    );
+    let studentclass = await Streams.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    if (status) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Stream Updated successfully!!",
+        data: [studentclass],
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const getStream = async (req, res) => {
+  try {
+    let organizations = await Streams.findAll({
+      where: {
+        ClientCode: req.user?.ClientCode,
+      },
+    });
+    if (organizations) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "All Stream successfully!!",
+        data: organizations,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const DeleteStream = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let organization = await Streams.findOne({ where: { id: id } });
+    if (organization) {
+      await Streams.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      return respHandler.success(res, {
+        status: true,
+        data: [],
+        msg: "Stream Deleted Successfully!!",
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Something Went Wrong!!",
+        error: ["not found"],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+
 module.exports = {
   Getprofile,
   updateprofile,
@@ -4011,4 +4169,8 @@ module.exports = {
   GetParentStudentListCoacging,
   SendemailToEmployee,
   GetSentemailToEmployee,
+  CreateStream,
+  UpdateStream,
+  getStream,
+  DeleteStream
 };

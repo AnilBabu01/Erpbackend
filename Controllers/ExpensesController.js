@@ -732,20 +732,20 @@ const GetExpensesAnalysis = async (req, res) => {
 
 const CreateTransferAmmount = async (req, res) => {
   try {
-    const { Transfer_Amount, Comment, Transfer_Mode } = req.body;
-    let date = new Date();
-    let fullyear = date.getFullYear();
-    let lastyear = date.getFullYear() - 1;
+    const { Transfer_Amount, Comment, Transfer_Mode, addDate } = req.body;
+    let newdate = new Date(addDate);
+    let fullyear = newdate.getFullYear();
+    let lastyear = newdate.getFullYear() - 1;
 
     let Session = `${lastyear}-${fullyear}`;
     let Expensestypes = await TransferAmount.create({
-      Date: date,
+      Date: newdate,
       Transfer_Amount: Transfer_Amount,
       Comment: Comment,
       ClientCode: req.user.ClientCode,
       Transfer_Mode: Transfer_Mode,
       Session: Session,
-      MonthNO: date.getMonth() + 1,
+      MonthNO: newdate.getMonth() + 1,
     });
     if (Expensestypes) {
       return respHandler.success(res, {
@@ -771,11 +771,12 @@ const CreateTransferAmmount = async (req, res) => {
 
 const UpdateTransferAmmount = async (req, res) => {
   try {
-    const { Transfer_Amount, Comment, Date, id, Transfer_Mode } = req.body;
-
+    const { Transfer_Amount, Comment, id, Transfer_Mode, addDate } = req.body;
+    let newdate = new Date(addDate);
     let status = await TransferAmount.update(
       {
-        Date: Date,
+        Date: newdate,
+        MonthNO: newdate.getMonth() + 1,
         Transfer_Amount: Transfer_Amount,
         Comment: Comment,
         Transfer_Mode: Transfer_Mode,

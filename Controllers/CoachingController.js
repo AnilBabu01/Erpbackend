@@ -1,4 +1,4 @@
-const { sequelize, QueryTypes, Op, where, literal } = require("sequelize");
+const { Op } = require("sequelize");
 const { config } = require("dotenv");
 var bcrypt = require("bcrypt");
 const Client = require("../Models/client.model");
@@ -8,7 +8,6 @@ const Batch = require("../Models/batch.model");
 var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
-const axios = require("axios");
 const SECRET = process.env.SECRET;
 config();
 
@@ -130,7 +129,9 @@ const Register = async (req, res) => {
 
 const Loging = async (req, res) => {
   const { email, password, institutename } = req.body;
+
   console.log("from coaching login ", email, password, institutename);
+
   if (email || password != "") {
     let last = institutename.split(" ").pop();
     var lastIndex = institutename?.lastIndexOf(" ");
@@ -139,11 +140,12 @@ const Loging = async (req, res) => {
       try {
         let user = await Client.findOne({
           where: {
-            email: email,
+            [Op.or]: [{ email: email }, { phoneno1: email }],
             institutename: first,
             ClientCode: last,
           },
         });
+
         if (!user) {
           return respHandler.error(res, {
             status: false,

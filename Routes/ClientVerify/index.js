@@ -13,4 +13,15 @@ router
   .route("/phondverification")
   .post(ClientAuthController.getotponPhone)
   .put(ClientAuthController.VerifyPhone);
+
+router
+  .route("/GetforgetOtpEmail")
+  .post(ClientAuthController.GetforgetOtpEmail)
+  .put(ClientAuthController.Changepassword);
+
+router
+  .route("/GetforgetOtpPhone")
+  .post(ClientAuthController.GetforgetOtpPhone)
+  .put(ClientAuthController.Changepassword);
+
 module.exports = router;

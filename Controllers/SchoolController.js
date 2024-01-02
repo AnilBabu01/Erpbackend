@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { config } = require("dotenv");
 var bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
@@ -146,7 +147,7 @@ const Loging = async (req, res) => {
       try {
         let user = await Client.findOne({
           where: {
-            email: email,
+            [Op.or]: [{ email: email }, { phoneno1: email }],
             institutename: first,
             ClientCode: last,
           },
@@ -207,7 +208,7 @@ const updateprofile = async (req, res) => {
     city,
     state,
     pincode,
-    BusNumber
+    BusNumber,
   } = req.body;
 
   if (!req.files.profileurl || !req.files.logourl) {
@@ -253,7 +254,7 @@ const updateprofile = async (req, res) => {
           state: state,
           pincode: pincode,
           userType: userType,
-          BusNumber:BusNumber,
+          BusNumber: BusNumber,
           logourl: req.files.logourl[0]
             ? `images/${req.files.logourl[0].filename}`
             : "",

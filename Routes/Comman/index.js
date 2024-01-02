@@ -306,4 +306,11 @@ router
   .route("/GetParentStudentListCoacging", verifyToken)
   .get(verifyToken, CommanController.GetParentStudentListCoacging);
 
+router
+  .route("/stream", verifyToken)
+  .post(verifyToken, CommanController.CreateStream)
+  .get(verifyToken, CommanController.getStream)
+  .put(verifyToken, CommanController.UpdateStream)
+  .delete(verifyToken, CommanController.DeleteStream);
+
 module.exports = router;

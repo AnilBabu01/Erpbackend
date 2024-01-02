@@ -10,6 +10,10 @@ const ClassSubject = sequelize.define("classsubject", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  Class: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   Subject: {
     type: DataTypes.STRING,
     allowNull: false,

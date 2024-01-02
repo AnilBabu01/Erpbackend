@@ -35,7 +35,7 @@ const College = sequelize.define("client", {
   },
   institutename: {
     type: DataTypes.STRING,
-    allowNull:true,
+    allowNull: true,
   },
   ClientCode: {
     type: DataTypes.STRING,
@@ -59,7 +59,7 @@ const College = sequelize.define("client", {
   },
   city: {
     type: DataTypes.STRING,
-    allowNull:true,
+    allowNull: true,
   },
   state: {
     type: DataTypes.STRING,
@@ -75,7 +75,7 @@ const College = sequelize.define("client", {
   },
   certificatelogo: {
     type: DataTypes.STRING,
-    allowNull:true,
+    allowNull: true,
   },
   profileurl: {
     type: DataTypes.STRING,
@@ -99,17 +99,20 @@ const College = sequelize.define("client", {
   phoneOtp: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    defaultValue:true
+  },
+  ForgetOtp: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   },
   emailOtpStatus: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
-    defaultValue:false
+    defaultValue: false,
   },
   phoneOtpStatus: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
-    defaultValue:false
+    defaultValue: false,
   },
   Employeepassword: {
     type: DataTypes.TEXT,

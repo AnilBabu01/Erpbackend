@@ -54,8 +54,9 @@ const ClassSubject = require("../Models/classubject.model");
 const FooterDetails = require("../Models/footerdetails.model");
 const Banner = require("../Models/note.model");
 const Slider = require("../Models/Slider.model");
-const MailSms = require('../Models/Emailsms.model');
+const MailSms = require("../Models/Emailsms.model");
 const TransferAmount = require("../Models/transfer.model");
+const Stream = require("../Models/stream.mode");
 sequelize
   .sync({ alter: true })
   .then(() => {
