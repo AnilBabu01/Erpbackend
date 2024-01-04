@@ -19,6 +19,15 @@ var jwt = require("jsonwebtoken");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
 var moment = require("moment");
+const { firebaseApp } = require("../Helper/firebaseapp");
+const {
+  ref,
+  getStorage,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} = require("firebase/storage");
+const uuid = require("uuid");
 config();
 
 const SECRET = process.env.SECRET;
@@ -997,12 +1006,12 @@ const getAllStudent = async (req, res) => {
 
 const UpdateStudent = async (req, res) => {
   try {
-    let newdate = new Date();
-    var monthName = monthNames[newdate?.getMonth()];
-    let fullyear = newdate.getFullYear();
-    let lastyear = newdate.getFullYear() - 1;
-    let session = `${lastyear}-${fullyear}`;
-    let days = monthdays[newdate?.getMonth() + 1];
+    // let newdate = new Date();
+    // var monthName = monthNames[newdate?.getMonth()];
+    // let fullyear = newdate.getFullYear();
+    // let lastyear = newdate.getFullYear() + 1;
+    // let session = `${fullyear}-${lastyear}`;
+    // let days = monthdays[newdate?.getMonth() + 1];
     const {
       name,
       email,
@@ -1060,256 +1069,282 @@ const UpdateStudent = async (req, res) => {
       },
     });
     if (student) {
-      // if (req?.files?.profileurl) {
-      //   removefile(`public/upload/${student.profileurl?.substring(7)}`);
-      // }
+      if (req?.files?.profileurl) {
+        // removefile(`public/upload/${student.profileurl?.substring(7)}`);
 
-      // if (req?.files?.adharcard) {
-      //   removefile(`public/upload/${student?.adharcard?.substring(7)}`);
-      // }
+        const imageByte = req?.files?.profileurl;
 
-      // if (req?.files?.BirthDocument) {
-      //   removefile(`public/upload/${student?.BirthDocument?.substring(7)}`);
-      // }
+        const extention = req?.files?.profileurl[0]?.originalname
+          ?.split(".")
+          .pop();
 
-      // if (req?.files?.othersdoc) {
-      //   removefile(`public/upload/${student?.othersdoc?.substring(7)}`);
-      // }
+        console.log("filesssssssssss", req?.files?.profileurl);
 
-      // if (req?.files?.markSheet) {
-      //   removefile(`public/upload/${student?.markSheet?.substring(7)}`);
-      // }
+        const RandomFile = `[${
+          student.id
+        }]-[${new Date().toUTCString()}]-[${uuid.v4()}].${extention}`;
 
-      let status = await Student.update(
-        {
-          name: name,
-          email: email,
-          ClientCode: req.user?.ClientCode,
-          institutename: req.user?.institutename,
-          logourl: req?.user?.logourl,
-          phoneno1: phoneno1,
-          phoneno2: phoneno2,
-          address: address,
-          city: city,
-          state: state,
-          pincode: pincode,
-          fathersPhoneNo: fathersPhoneNo,
-          fathersName: fathersName,
-          MathersName: MathersName,
-          rollnumber: rollnumber,
-          StudentStatus: StudentStatus,
-          Status: Status,
-          StudentCategory: StudentCategory,
-          courseorclass: courseorclass,
-          courseduration: courseduration,
-          studentTotalFee: studentTotalFee,
-          permonthfee: permonthfee,
-          adharno: adharno,
-          pancardnno: pancardnno,
-          batch: batch,
-          Transport: Transport,
-          Library: Library,
-          hostal: hostal,
-          admissionDate: admissionDate,
-          markSheetname: markSheetname,
-          othersdocName: othersdocName,
-          HostelPerMonthFee: HostelPerMonthFee,
-          TotalHostelFee: TotalHostelFee,
-          TransportPerMonthFee: TransportPerMonthFee,
-          TransportTotalHostelFee: TransportTotalHostelFee,
-          AnnualFee: AnnualFee,
-          Session: Session,
-          SrNumber: SrNumber,
-          Section: Section,
-          hostelname: hostelname,
-          Category: Category,
-          Facility: Facility,
-          whatsappNo: whatsappNo,
-          FromRoute: FromRoute,
-          ToRoute: ToRoute,
-          BusNumber: BusNumber,
-          DateOfBirth: DateOfBirth,
-          Stream: stream,
-          profileurl: req?.files?.profileurl
-            ? `images/${req?.files?.profileurl[0]?.filename}`
-            : req.body.profileurl,
-          adharcard: req?.files?.adharcard
-            ? `images/${req?.files?.adharcard[0]?.filename}`
-            : req.body.profileurl,
-          markSheet: req?.files?.markSheet
-            ? `images/${req?.files?.markSheet[0]?.filename}`
-            : req.body.profileurl,
-          othersdoc: req?.files?.othersdoc
-            ? `images/${req?.files?.othersdoc[0]?.filename}`
-            : req.body.profileurl,
-          BirthDocument: req?.files?.BirthDocument
-            ? `images/${req?.files?.BirthDocument[0]?.filename}`
-            : req.body.profileurl,
-        },
-        {
-          where: {
-            id: id,
-            ClientCode: req.user?.ClientCode,
-            // institutename: req.user?.institutename,
-          },
-        }
-      );
+        const FirebaseStorage = getStorage(firebaseApp);
 
-      if (status) {
-        let UpdatedStudent = await Student.findOne({
-          where: {
-            id: id,
-          },
+        storageRef = ref(`${FirebaseStorage}, posts/${RandomFile}`);
+
+        await uploadBytes(FirebaseStorage, imageByte);
+
+        url = await getDownloadURL(storageRef);
+
+        return respHandler.success(res, {
+          status: true,
+          msg: "Image Uploaded Successfully!!",
+          data: url,
         });
-        if (UpdatedStudent) {
-          let allhostelfee = await SchoolHostelFeeStatus.findAll({
-            where: {
-              studentId: id,
-              SrNumber: UpdatedStudent?.SrNumber,
-              Session: UpdatedStudent?.Session,
-            },
-          });
-
-          let alltransportfee = await SchoolTransportFeeStatus.findAll({
-            where: {
-              studentId: id,
-              SrNumber: UpdatedStudent?.SrNumber,
-              Session: UpdatedStudent?.Session,
-            },
-          });
-
-          if (allhostelfee && alltransportfee) {
-            let promises1 = allhostelfee?.map(async (item) => {
-              await SchoolHostelFeeStatus.update(
-                {
-                  ClientCode: req.user?.ClientCode,
-                  studentId: UpdatedStudent?.id,
-                  PerMonthFee: hostal ? HostelPerMonthFee : 0,
-                  Session: UpdatedStudent?.Session,
-                  SrNumber: UpdatedStudent?.SrNumber,
-                  paidStatus: hostelstatus,
-                },
-                {
-                  where: {
-                    id: item?.id,
-                    MonthName: item?.MonthName,
-                    Session: item?.Session,
-                    SrNumber: UpdatedStudent?.SrNumber,
-                    ClientCode: req.user?.ClientCode,
-                  },
-                }
-              );
-            });
-
-            let promises2 = alltransportfee?.map(async (item) => {
-              await SchoolTransportFeeStatus.update(
-                {
-                  ClientCode: req.user?.ClientCode,
-                  studentId: UpdatedStudent?.id,
-                  PerMonthFee: Transport ? TransportPerMonthFee : 0,
-                  Session: UpdatedStudent?.Session,
-                  SrNumber: UpdatedStudent?.SrNumber,
-                  paidStatus: transportstatus,
-                },
-                {
-                  where: {
-                    id: item?.id,
-                    MonthName: item?.MonthName,
-                    Session: item?.Session,
-                    SrNumber: UpdatedStudent?.SrNumber,
-                    ClientCode: req.user?.ClientCode,
-                  },
-                }
-              );
-            });
-
-            if (
-              (await Promise.all(promises1)) &&
-              (await Promise.all(promises2))
-            ) {
-              if (Transport === false) {
-                let oldbus = await VehicleDetails.findOne({
-                  where: {
-                    BusNumber: BusNumber,
-                    ClientCode: req.user?.ClientCode,
-                  },
-                });
-
-                let status = await VehicleDetails.update(
-                  {
-                    NoOfSheets: Number(oldbus?.NoOfSheets) + 1,
-                  },
-                  {
-                    where: {
-                      id: oldbus?.id,
-                      ClientCode: req.user?.ClientCode,
-                    },
-                  }
-                );
-              } else {
-                let isattendance = await AttendanceStudent.findOne({
-                  where: {
-                    studentid: UpdatedStudent?.id,
-                    attendancedate: newdate,
-                  },
-                });
-                if (isattendance) {
-                  return respHandler.success(res, {
-                    status: true,
-                    msg: "Student Updated successfully!!",
-                    data: UpdatedStudent,
-                  });
-                } else {
-                  if (Status === "Active") {
-                    const promises = days?.map(async (date) => {
-                      let result = await AttendanceStudent.create({
-                        name: UpdatedStudent?.name,
-                        email: UpdatedStudent?.email,
-                        ClientCode: req.user?.ClientCode,
-                        address: UpdatedStudent?.address,
-                        parentId: UpdatedStudent?.parentId,
-                        studentid: UpdatedStudent?.id,
-                        Section: UpdatedStudent?.Section,
-                        courseorclass: UpdatedStudent?.courseorclass,
-                        batch: UpdatedStudent?.courseorclass,
-                        rollnumber: UpdatedStudent?.rollnumber,
-                        fathersPhoneNo: UpdatedStudent?.fathersPhoneNo,
-                        fathersName: UpdatedStudent?.fathersName,
-                        MathersName: UpdatedStudent?.MathersName,
-                        rollnumber: UpdatedStudent?.rollnumber,
-                        MonthName: monthName,
-                        yeay: newdate?.getFullYear(),
-                        MonthNo: newdate?.getMonth() + 1,
-                        attendancedate: `${newdate?.getFullYear()}-${
-                          newdate?.getMonth() + 1
-                        }-${date}`,
-                        attendaceStatusIntext: "Absent",
-
-                        monthNumber: newdate?.getMonth() + 1,
-                      });
-
-                      return result;
-                    });
-                    if (await Promise.all(promises)) {
-                      return respHandler.success(res, {
-                        status: true,
-                        msg: "Student Updated successfully add attendance!!",
-                        data: UpdatedStudent,
-                      });
-                    }
-                  } else {
-                    return respHandler.success(res, {
-                      status: true,
-                      msg: "Student Updated successfully!!",
-                      data: UpdatedStudent,
-                    });
-                  }
-                }
-              }
-            }
-          }
-        }
       }
+
+      // // if (req?.files?.adharcard) {
+      // //   removefile(`public/upload/${student?.adharcard?.substring(7)}`);
+      // // }
+
+      // // if (req?.files?.BirthDocument) {
+      // //   removefile(`public/upload/${student?.BirthDocument?.substring(7)}`);
+      // // }
+
+      // // if (req?.files?.othersdoc) {
+      // //   removefile(`public/upload/${student?.othersdoc?.substring(7)}`);
+      // // }
+
+      // // if (req?.files?.markSheet) {
+      // //   removefile(`public/upload/${student?.markSheet?.substring(7)}`);
+      // // }
+
+      // let status = await Student.update(
+      //   {
+      //     name: name,
+      //     email: email,
+      //     ClientCode: req.user?.ClientCode,
+      //     institutename: req.user?.institutename,
+      //     logourl: req?.user?.logourl,
+      //     phoneno1: phoneno1,
+      //     phoneno2: phoneno2,
+      //     address: address,
+      //     city: city,
+      //     state: state,
+      //     pincode: pincode,
+      //     fathersPhoneNo: fathersPhoneNo,
+      //     fathersName: fathersName,
+      //     MathersName: MathersName,
+      //     rollnumber: rollnumber,
+      //     StudentStatus: StudentStatus,
+      //     Status: Status,
+      //     StudentCategory: StudentCategory,
+      //     courseorclass: courseorclass,
+      //     courseduration: courseduration,
+      //     studentTotalFee: studentTotalFee,
+      //     permonthfee: permonthfee,
+      //     adharno: adharno,
+      //     pancardnno: pancardnno,
+      //     batch: batch,
+      //     Transport: Transport,
+      //     Library: Library,
+      //     hostal: hostal,
+      //     admissionDate: admissionDate,
+      //     markSheetname: markSheetname,
+      //     othersdocName: othersdocName,
+      //     HostelPerMonthFee: HostelPerMonthFee,
+      //     TotalHostelFee: TotalHostelFee,
+      //     TransportPerMonthFee: TransportPerMonthFee,
+      //     TransportTotalHostelFee: TransportTotalHostelFee,
+      //     AnnualFee: AnnualFee,
+      //     Session: Session,
+      //     SrNumber: SrNumber,
+      //     Section: Section,
+      //     hostelname: hostelname,
+      //     Category: Category,
+      //     Facility: Facility,
+      //     whatsappNo: whatsappNo,
+      //     FromRoute: FromRoute,
+      //     ToRoute: ToRoute,
+      //     BusNumber: BusNumber,
+      //     DateOfBirth: DateOfBirth,
+      //     Stream: stream,
+      //     profileurl: req?.files?.profileurl
+      //       ? `images/${req?.files?.profileurl[0]?.filename}`
+      //       : req.body.profileurl,
+      //     adharcard: req?.files?.adharcard
+      //       ? `images/${req?.files?.adharcard[0]?.filename}`
+      //       : req.body.profileurl,
+      //     markSheet: req?.files?.markSheet
+      //       ? `images/${req?.files?.markSheet[0]?.filename}`
+      //       : req.body.profileurl,
+      //     othersdoc: req?.files?.othersdoc
+      //       ? `images/${req?.files?.othersdoc[0]?.filename}`
+      //       : req.body.profileurl,
+      //     BirthDocument: req?.files?.BirthDocument
+      //       ? `images/${req?.files?.BirthDocument[0]?.filename}`
+      //       : req.body.profileurl,
+      //   },
+      //   {
+      //     where: {
+      //       id: id,
+      //       ClientCode: req.user?.ClientCode,
+      //       // institutename: req.user?.institutename,
+      //     },
+      //   }
+      // );
+
+      // if (status) {
+      //   let UpdatedStudent = await Student.findOne({
+      //     where: {
+      //       id: id,
+      //     },
+      //   });
+      //   if (UpdatedStudent) {
+      //     let allhostelfee = await SchoolHostelFeeStatus.findAll({
+      //       where: {
+      //         studentId: id,
+      //         SrNumber: UpdatedStudent?.SrNumber,
+      //         Session: UpdatedStudent?.Session,
+      //       },
+      //     });
+
+      //     let alltransportfee = await SchoolTransportFeeStatus.findAll({
+      //       where: {
+      //         studentId: id,
+      //         SrNumber: UpdatedStudent?.SrNumber,
+      //         Session: UpdatedStudent?.Session,
+      //       },
+      //     });
+
+      //     if (allhostelfee && alltransportfee) {
+      //       let promises1 = allhostelfee?.map(async (item) => {
+      //         await SchoolHostelFeeStatus.update(
+      //           {
+      //             ClientCode: req.user?.ClientCode,
+      //             studentId: UpdatedStudent?.id,
+      //             PerMonthFee: hostal ? HostelPerMonthFee : 0,
+      //             Session: UpdatedStudent?.Session,
+      //             SrNumber: UpdatedStudent?.SrNumber,
+      //             paidStatus: hostelstatus,
+      //           },
+      //           {
+      //             where: {
+      //               id: item?.id,
+      //               MonthName: item?.MonthName,
+      //               Session: item?.Session,
+      //               SrNumber: UpdatedStudent?.SrNumber,
+      //               ClientCode: req.user?.ClientCode,
+      //             },
+      //           }
+      //         );
+      //       });
+
+      //       let promises2 = alltransportfee?.map(async (item) => {
+      //         await SchoolTransportFeeStatus.update(
+      //           {
+      //             ClientCode: req.user?.ClientCode,
+      //             studentId: UpdatedStudent?.id,
+      //             PerMonthFee: Transport ? TransportPerMonthFee : 0,
+      //             Session: UpdatedStudent?.Session,
+      //             SrNumber: UpdatedStudent?.SrNumber,
+      //             paidStatus: transportstatus,
+      //           },
+      //           {
+      //             where: {
+      //               id: item?.id,
+      //               MonthName: item?.MonthName,
+      //               Session: item?.Session,
+      //               SrNumber: UpdatedStudent?.SrNumber,
+      //               ClientCode: req.user?.ClientCode,
+      //             },
+      //           }
+      //         );
+      //       });
+
+      //       if (
+      //         (await Promise.all(promises1)) &&
+      //         (await Promise.all(promises2))
+      //       ) {
+      //         if (Transport === false) {
+      //           let oldbus = await VehicleDetails.findOne({
+      //             where: {
+      //               BusNumber: BusNumber,
+      //               ClientCode: req.user?.ClientCode,
+      //             },
+      //           });
+
+      //           let status = await VehicleDetails.update(
+      //             {
+      //               NoOfSheets: Number(oldbus?.NoOfSheets) + 1,
+      //             },
+      //             {
+      //               where: {
+      //                 id: oldbus?.id,
+      //                 ClientCode: req.user?.ClientCode,
+      //               },
+      //             }
+      //           );
+      //         } else {
+      //           let isattendance = await AttendanceStudent.findOne({
+      //             where: {
+      //               studentid: UpdatedStudent?.id,
+      //               attendancedate: newdate,
+      //             },
+      //           });
+      //           if (isattendance) {
+      //             return respHandler.success(res, {
+      //               status: true,
+      //               msg: "Student Updated successfully!!",
+      //               data: UpdatedStudent,
+      //             });
+      //           } else {
+      //             if (Status === "Active") {
+      //               const promises = days?.map(async (date) => {
+      //                 let result = await AttendanceStudent.create({
+      //                   name: UpdatedStudent?.name,
+      //                   email: UpdatedStudent?.email,
+      //                   ClientCode: req.user?.ClientCode,
+      //                   address: UpdatedStudent?.address,
+      //                   parentId: UpdatedStudent?.parentId,
+      //                   studentid: UpdatedStudent?.id,
+      //                   Section: UpdatedStudent?.Section,
+      //                   courseorclass: UpdatedStudent?.courseorclass,
+      //                   batch: UpdatedStudent?.courseorclass,
+      //                   rollnumber: UpdatedStudent?.rollnumber,
+      //                   fathersPhoneNo: UpdatedStudent?.fathersPhoneNo,
+      //                   fathersName: UpdatedStudent?.fathersName,
+      //                   MathersName: UpdatedStudent?.MathersName,
+      //                   rollnumber: UpdatedStudent?.rollnumber,
+      //                   MonthName: monthName,
+      //                   yeay: newdate?.getFullYear(),
+      //                   MonthNo: newdate?.getMonth() + 1,
+      //                   attendancedate: `${newdate?.getFullYear()}-${
+      //                     newdate?.getMonth() + 1
+      //                   }-${date}`,
+      //                   attendaceStatusIntext: "Absent",
+
+      //                   monthNumber: newdate?.getMonth() + 1,
+      //                 });
+
+      //                 return result;
+      //               });
+      //               if (await Promise.all(promises)) {
+      //                 return respHandler.success(res, {
+      //                   status: true,
+      //                   msg: "Student Updated successfully add attendance!!",
+      //                   data: UpdatedStudent,
+      //                 });
+      //               }
+      //             } else {
+      //               return respHandler.success(res, {
+      //                 status: true,
+      //                 msg: "Student Updated successfully!!",
+      //                 data: UpdatedStudent,
+      //               });
+      //             }
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      //}
     }
   } catch (err) {
     return respHandler.error(res, {
