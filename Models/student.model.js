@@ -52,6 +52,10 @@ const Student = sequelize.define("student", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  Stream: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   batch: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -264,7 +268,7 @@ const Student = sequelize.define("student", {
   AnnualFeeStatus: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
-    defaultValue:0
+    defaultValue: 0,
   },
   hostelname: {
     type: DataTypes.STRING,

@@ -23,6 +23,10 @@ const Book = sequelize.define("book", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  stream:{
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   auther: {
     type: DataTypes.STRING,
     allowNull: true,

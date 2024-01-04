@@ -3936,16 +3936,14 @@ const GetSentemailToEmployee = async (req, res) => {
   }
 };
 
-
-
 const CreateStream = async (req, res) => {
   try {
-    const { Subject, courses,Stream } = req.body;
+    const { Subject, courses, Stream } = req.body;
     let sectionv = await Streams.findOne({
       where: {
         Subject: Subject,
         Class: courses,
-        Stream:Stream,
+        Stream: Stream,
         ClientCode: req.user.ClientCode,
       },
     });
@@ -3963,7 +3961,7 @@ const CreateStream = async (req, res) => {
       ClientCode: req.user?.ClientCode,
       Subject: Subject,
       Class: courses,
-      Stream:Stream
+      Stream: Stream,
     });
     if (sections) {
       return respHandler.success(res, {
@@ -3988,13 +3986,13 @@ const CreateStream = async (req, res) => {
 
 const UpdateStream = async (req, res) => {
   try {
-    const { Subject, courses,Stream, id } = req.body;
+    const { Subject, courses, Stream, id } = req.body;
 
     let status = await Streams.update(
       {
         Subject: Subject,
         Class: courses,
-        Stream:Stream
+        Stream: Stream,
       },
       {
         where: {
@@ -4032,11 +4030,23 @@ const UpdateStream = async (req, res) => {
 
 const getStream = async (req, res) => {
   try {
+    const { scoursename, stream } = req.query;
+    let whereClause = {};
+    if (req.user) {
+      whereClause.ClientCode = req.user.ClientCode;
+    }
+
+    if (scoursename) {
+      whereClause.Class = scoursename;
+    }
+    if (stream) {
+      whereClause.Stream = stream;
+    }
+
     let organizations = await Streams.findAll({
-      where: {
-        ClientCode: req.user?.ClientCode,
-      },
+      where: whereClause,
     });
+    
     if (organizations) {
       return respHandler.success(res, {
         status: true,
@@ -4089,7 +4099,6 @@ const DeleteStream = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   Getprofile,
@@ -4172,5 +4181,5 @@ module.exports = {
   CreateStream,
   UpdateStream,
   getStream,
-  DeleteStream
+  DeleteStream,
 };

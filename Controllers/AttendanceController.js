@@ -44,8 +44,8 @@ const MarkStudentAttendance = async (req, res) => {
     let newdate = new Date(Attendancedate);
     var monthName = monthNames[newdate?.getMonth()];
     let fullyear = newdate.getFullYear();
-    let lastyear = newdate.getFullYear() - 1;
-    let session = `${lastyear}-${fullyear}`;
+    let lastyear = newdate.getFullYear() + 1;
+    let session = `${fullyear}-${lastyear}`;
     let days = monthdays[newdate?.getMonth() + 1];
 
     let students;
@@ -306,8 +306,8 @@ const MarkCoachingStudentAttendance = async (req, res) => {
     let newdate = new Date(Attendancedate);
     var monthName = monthNames[newdate?.getMonth()];
     let fullyear = newdate.getFullYear();
-    let lastyear = newdate.getFullYear() - 1;
-    let session = `${lastyear}-${fullyear}`;
+    let lastyear = newdate.getFullYear() + 1;
+    let session = `${fullyear}-${lastyear}`;
     let days = monthdays[newdate?.getMonth() + 1];
 
     let students;
@@ -570,8 +570,8 @@ const AttendanceAnalasis = async (req, res) => {
     let days = monthdays[month];
     let newdate = new Date();
     let fullyear = newdate.getFullYear();
-    let lastyear = newdate.getFullYear() - 1;
-    let session = `${lastyear}-${fullyear}`;
+    let lastyear = newdate.getFullYear() + 1;
+    let session = `${fullyear}-${lastyear}`;
     if (rollname) {
       if (batch) {
         let student = await Student.findOne({

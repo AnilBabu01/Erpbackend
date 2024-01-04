@@ -7,7 +7,7 @@ config();
 
 const CreateBook = async (req, res) => {
   try {
-    const { courseorclass, BookId, BookTitle, auther, quantity, addDate } =
+    const { courseorclass, BookId, BookTitle, auther, quantity, addDate,stream } =
       req.body;
     let newdate = new Date(addDate);
     let book = await Book.findOne({
@@ -16,6 +16,7 @@ const CreateBook = async (req, res) => {
         BookId: BookId,
         BookTitle: BookTitle,
         auther: auther,
+        stream:stream,
         ClientCode: req.user.ClientCode,
       },
     });
@@ -54,6 +55,7 @@ const CreateBook = async (req, res) => {
       ClientCode: req.user.ClientCode,
       addDate: newdate,
       Realquantity: quantity,
+      stream:stream,
     });
     if (books) {
       return respHandler.success(res, {
@@ -130,7 +132,7 @@ const UpdateBook = async (req, res) => {
 
 const GetBook = async (req, res) => {
   try {
-    const { courseorclass, BookId, auther, studentid, rollnumber } = req.query;
+    const { courseorclass, BookId, auther, studentid, rollnumber ,stream} = req.query;
     let whereClause = {};
 
     if (req.user) {
@@ -145,6 +147,10 @@ const GetBook = async (req, res) => {
     }
     if (BookId) {
       whereClause.BookId = BookId;
+    }
+    if(stream)
+    {
+      whereClause.stream = stream;
     }
 
     let book = await Book.findAll({

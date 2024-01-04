@@ -138,6 +138,7 @@ const Addstudent = async (req, res) => {
       ToRoute,
       BusNumber,
       DateOfBirth,
+      stream,
     } = req.body;
 
     const genSalt = 10;
@@ -289,6 +290,7 @@ const Addstudent = async (req, res) => {
           Category: Category,
           Facility: Facility,
           DateOfBirth: DateOfBirth,
+          Stream: stream,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -601,6 +603,7 @@ const Addstudent = async (req, res) => {
           HostelPendingFee: TotalHostelFee,
           TransportPendingFee: TransportTotalHostelFee,
           DateOfBirth: DateOfBirth,
+          Stream: stream,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : "",
@@ -901,6 +904,7 @@ const getAllStudent = async (req, res) => {
       sectionname,
       sno,
       transport,
+      stream,
     } = req.query;
 
     let whereClause = {};
@@ -949,6 +953,9 @@ const getAllStudent = async (req, res) => {
       } else {
         whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
       }
+    }
+    if (stream) {
+      whereClause.Stream = { [Op.regexp]: `^${stream}.*` };
     }
     if (library) {
       whereClause.Library = library;
@@ -1044,6 +1051,7 @@ const UpdateStudent = async (req, res) => {
       ToRoute,
       BusNumber,
       DateOfBirth,
+      stream,
     } = req.body;
 
     let student = await Student.findOne({
@@ -1121,6 +1129,7 @@ const UpdateStudent = async (req, res) => {
           ToRoute: ToRoute,
           BusNumber: BusNumber,
           DateOfBirth: DateOfBirth,
+          Stream: stream,
           profileurl: req?.files?.profileurl
             ? `images/${req?.files?.profileurl[0]?.filename}`
             : req.body.profileurl,

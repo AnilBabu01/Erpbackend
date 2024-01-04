@@ -40,8 +40,8 @@ const GetAllTotalData = async (req, res) => {
     var monthName = monthNames[newdate?.getMonth()];
     let date = new Date();
     let fullyear = date.getFullYear();
-    let lastyear = date.getFullYear() - 1;
-    let sessionname = `${lastyear}-${fullyear}`;
+    let lastyear = date.getFullYear() + 1;
+    let sessionname = `${fullyear}-${lastyear}`;
 
     let whereClause = {};
     let from = new Date(newdate);
@@ -287,8 +287,8 @@ const GetCoachingAllTotalData = async (req, res) => {
     var monthName = monthNames[newdate?.getMonth()];
     let date = new Date();
     let fullyear = date.getFullYear();
-    let lastyear = date.getFullYear() - 1;
-    let sessionname = `${lastyear}-${fullyear}`;
+    let lastyear = date.getFullYear() + 1;
+    let sessionname = `${fullyear}-${lastyear}`;
 
     let whereClause = {};
     let from = new Date(newdate);
