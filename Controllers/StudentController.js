@@ -1086,9 +1086,9 @@ const UpdateStudent = async (req, res) => {
 
         const FirebaseStorage = getStorage(firebaseApp);
 
-        storageRef = ref(`${FirebaseStorage}, posts/${RandomFile}`);
+        storageRef = ref(FirebaseStorage, RandomFile);
 
-        await uploadBytes(FirebaseStorage, imageByte);
+        await uploadBytes(storageRef, imageByte);
 
         url = await getDownloadURL(storageRef);
 
