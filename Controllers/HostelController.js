@@ -17,6 +17,11 @@ const Employee = require("../Models/employee.model");
 const Student = require("../Models/student.model");
 const RoomCheckin = require("../Models/roomcheckin.model");
 const removefile = require("../Middleware/removefile");
+const {
+  uploadfileonfirebase,
+  deletefilefromfirebase,
+} = require("../Middleware/uploadanddeletefromfirebase");
+
 config();
 
 const CreateCategory = async (req, res) => {
@@ -346,8 +351,6 @@ const CreateHostel = async (req, res) => {
   try {
     const { HostelName, DescripTion } = req.body;
 
-    console.log("body params is ", req.body);
-
     let hostel = await RoomHostel.findOne({
       where: {
         HostelName: HostelName,
@@ -364,13 +367,19 @@ const CreateHostel = async (req, res) => {
         });
       }
     }
+    let Hostelimgurl;
+
+    if (req?.files?.Hostelurl) {
+      Hostelimgurl = await uploadfileonfirebase(
+        req?.files?.Hostelurl,
+        `client-Hostelimgurl-${HostelName}-${DescripTion}-${req.user?.ClientCode}`
+      );
+    }
 
     let roomhostel = await RoomHostel.create({
       HostelName: HostelName,
       DescripTion: DescripTion,
-      Hostelurl: req?.files?.Hostelurl
-        ? `images/${req?.files?.Hostelurl[0]?.filename}`
-        : "",
+      Hostelurl: req?.files?.Hostelurl ? Hostelimgurl : "",
       ClientCode: req.user.ClientCode,
     });
     if (roomhostel) {
@@ -405,8 +414,19 @@ const UpdateHostel = async (req, res) => {
       },
     });
     if (hostel) {
+      let Hostelimgurl;
+
       if (req?.files?.Hostelurl) {
-        removefile(`public/upload/${hostel?.Hostelurl?.substring(7)}`);
+        if (hostel?.Hostelurl != "") {
+          await deletefilefromfirebase(
+            `client-Hostelimgurl-${hostel?.HostelName}-${hostel?.DescripTion}-${req.user?.ClientCode}`
+          );
+        }
+
+        Hostelimgurl = await uploadfileonfirebase(
+          req?.files?.Hostelurl,
+          `client-Hostelimgurl-${HostelName}-${DescripTion}-${req.user?.ClientCode}`
+        );
       }
 
       let status = await RoomHostel.update(
@@ -414,7 +434,7 @@ const UpdateHostel = async (req, res) => {
           HostelName: HostelName,
           DescripTion: DescripTion,
           Hostelurl: req?.files?.Hostelurl
-            ? `images/${req?.files?.Hostelurl[0]?.filename}`
+            ? Hostelimgurl
             : req?.user?.Hostelurl,
         },
         {
@@ -465,7 +485,7 @@ const GetHostel = async (req, res) => {
     const { courseorclass } = req.query;
     let whereClause = {};
 
-    console.log("values is ", req.query);
+   
 
     if (req.user) {
       whereClause.ClientCode = req.user.ClientCode;
@@ -504,14 +524,16 @@ const DeleteHostel = async (req, res) => {
   try {
     const { id } = req.body;
 
-    console.log("delete id is ", id);
+ 
 
     let hostel = await RoomHostel.findOne({
       where: { id: id, ClientCode: req.user?.ClientCode },
     });
     if (hostel) {
-      if (req?.files?.Hostelurl) {
-        removefile(`public/upload/${hostel?.Hostelurl?.substring(7)}`);
+      if (hostel?.Hostelurl != "") {
+        await deletefilefromfirebase(
+          `client-Hostelimgurl-${hostel?.HostelName}-${hostel?.DescripTion}-${req.user?.ClientCode}`
+        );
       }
       let status = await RoomHostel.destroy({
         where: {

@@ -6,18 +6,12 @@ const Coursemonth = sequelize.define("coursemonth", {
     autoIncrement: true,
     primaryKey: true,
   },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
+
   ClientCode: {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  institutename: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+
   noOfMonth: {
     type: DataTypes.INTEGER,
     allowNull: true,

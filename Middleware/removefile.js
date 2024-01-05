@@ -7,4 +7,5 @@ const removefile = (file) => {
   }
   return true;
 };
+
 module.exports = removefile;

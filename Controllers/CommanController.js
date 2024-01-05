@@ -26,6 +26,10 @@ const Streams = require("../Models/stream.mode");
 const nodemailer = require("nodemailer");
 const respHandler = require("../Handlers");
 const removefile = require("../Middleware/removefile");
+const {
+  uploadfileonfirebase,
+  deletefilefromfirebase,
+} = require("../Middleware/uploadanddeletefromfirebase");
 config();
 const genSalt = 10;
 const SECRET = process.env.SECRET;
@@ -163,6 +167,86 @@ const RegisterEmployee = async (req, res) => {
           msg: "Empployee Id Allready exist",
         });
       }
+      let profileimg;
+      let Aadharurlimg;
+      let Drivingurlimg;
+      let tenthimg;
+      let twethimg;
+      let Graduationimg;
+      let PostGraduationimg;
+      let Certificate1img;
+      let Certificate2img;
+      let Certificate3img;
+
+      if (req?.files?.profileurl) {
+        profileimg = await uploadfileonfirebase(
+          req?.files?.profileurl,
+          `employee-profileimg-${empId}-${req.user?.ClientCode}`
+        );
+      }
+
+      if (req?.files?.Aadharurl) {
+        Aadharurlimg = await uploadfileonfirebase(
+          req?.files?.Aadharurl,
+          `employee-Aadharurlimg-${empId}-${req.user?.ClientCode}`
+        );
+      }
+
+      if (req?.files?.Drivingurl) {
+        Drivingurlimg = await uploadfileonfirebase(
+          req?.files?.Drivingurl,
+          `employee-Drivingurlimg-${empId}-${req.user?.ClientCode}`
+        );
+      }
+
+      if (req?.files?.tenurl) {
+        tenthimg = await uploadfileonfirebase(
+          req?.files?.tenurl,
+          `employee-tenthimg-${empId}-${req.user?.ClientCode}`
+        );
+      }
+
+      if (req?.files?.twelturl) {
+        twethimg = await uploadfileonfirebase(
+          req?.files?.twelturl,
+          `employee-twethimg-${empId}-${req.user?.ClientCode}`
+        );
+      }
+
+      if (req?.files?.Graduationurl) {
+        Graduationimg = await uploadfileonfirebase(
+          req?.files?.Graduationurl,
+          `employee-Graduationimg-${empId}-${req.user?.ClientCode}`
+        );
+      }
+
+      if (req?.files?.PostGraduationurl) {
+        PostGraduationimg = await uploadfileonfirebase(
+          req?.files?.PostGraduationurl,
+          `employee-PostGraduationimg-${empId}-${req.user?.ClientCode}`
+        );
+      }
+
+      if (req?.files?.Certificate1url) {
+        Certificate1img = await uploadfileonfirebase(
+          req?.files?.Certificate1url,
+          `employee-Certificate1img-${empId}-${req.user?.ClientCode}`
+        );
+      }
+      if (req?.files?.Certificate2url) {
+        Certificate2img = await uploadfileonfirebase(
+          req?.files?.Certificate2url,
+          `employee-Certificate2img-${empId}-${req.user?.ClientCode}`
+        );
+      }
+
+      if (req?.files?.Certificate3url) {
+        Certificate3img = await uploadfileonfirebase(
+          req?.files?.Certificate3url,
+          `employee-Certificate3img-${empId}-${req.user?.ClientCode}`
+        );
+      }
+
       let newUser = {
         name: name,
         email: email,
@@ -254,36 +338,18 @@ const RegisterEmployee = async (req, res) => {
         libraryWrite: libraryWrite,
         libraryEdit: libraryEdit,
         libraryDelete: libraryDelete,
-        profileurl: req?.files?.profileurl
-          ? `images/${req?.files?.profileurl[0]?.filename}`
-          : "",
-        Aadharurl: req?.files?.Aadharurl
-          ? `images/${req?.files?.Aadharurl[0]?.filename}`
-          : req?.user?.profileurl,
-        Drivingurl: req?.files?.Drivingurl
-          ? `images/${req?.files?.Drivingurl[0]?.filename}`
-          : "",
-        tenurl: req?.files?.tenurl
-          ? `images/${req?.files?.tenurl[0]?.filename}`
-          : "",
-        twelturl: req?.files?.twelturl
-          ? `images/${req?.files?.twelturl[0]?.filename}`
-          : req?.user?.profileurl,
-        Graduationurl: req?.files?.Graduationurl
-          ? `images/${req?.files?.Graduationurl[0]?.filename}`
-          : "",
+        profileurl: req?.files?.profileurl ? profileimg : "",
+        Aadharurl: req?.files?.Aadharurl ? Aadharurlimg : "",
+        Drivingurl: req?.files?.Drivingurl ? Drivingurlimg : "",
+        tenurl: req?.files?.tenurl ? tenthimg : "",
+        twelturl: req?.files?.twelturl ? twethimg : "",
+        Graduationurl: req?.files?.Graduationurl ? Graduationimg : "",
         PostGraduationurl: req?.files?.PostGraduationurl
-          ? `images/${req?.files?.PostGraduationurl[0]?.filename}`
+          ? PostGraduationimg
           : "",
-        Certificate1url: req?.files?.Certificate1url
-          ? `images/${req?.files?.Certificate1url[0]?.filename}`
-          : req?.user?.profileurl,
-        Certificate2url: req?.files?.Certificate2url
-          ? `images/${req?.files?.Certificate2url[0]?.filename}`
-          : "",
-        Certificate3url: req?.files?.Certificate3url
-          ? `images/${req?.files?.Certificate3url[0]?.filename}`
-          : "",
+        Certificate1url: req?.files?.Certificate1url ? Certificate1img : "",
+        Certificate2url: req?.files?.Certificate2url ? Certificate2img : "",
+        Certificate3url: req?.files?.Certificate3url ? Certificate3img : "",
       };
 
       let createdUser = await Employee.create(newUser);
@@ -369,13 +435,64 @@ const DeleteEmployee = async (req, res) => {
     const { id } = req.body;
     let organization = await Employee.findOne({ where: { id: id } });
     if (organization) {
-      removefile(`public/upload/${req?.user?.ResumeFile?.substring(7)}`);
+      if (organization?.profileurl != "") {
+        await deletefilefromfirebase(
+          `employee-profileimg-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
 
-      removefile(`public/upload/${req?.user?.profileurl?.substring(7)}`);
+      if (organization?.Aadharurl != "") {
+        await deletefilefromfirebase(
+          `employee-Aadharurlimg-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
 
-      removefile(`public/upload/${req?.user?.OfferLater?.substring(7)}`);
+      if (organization?.Drivingurl != "") {
+        await deletefilefromfirebase(
+          `employee-Drivingurlimg-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
 
-      removefile(`public/upload/${req?.user?.JoningLater?.substring(7)}`);
+      if (organization?.tenurl != "") {
+        await deletefilefromfirebase(
+          `employee-tenthimg-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
+
+      if (organization?.twelturl != "") {
+        await deletefilefromfirebase(
+          `employee-twethimg-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
+
+      if (organization?.Graduationurl != "") {
+        await deletefilefromfirebase(
+          `employee-Graduationimg-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
+
+      if (organization?.PostGraduationurl != "") {
+        await deletefilefromfirebase(
+          `employee-PostGraduationimg-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
+
+      if (organization?.Certificate1url != "") {
+        await deletefilefromfirebase(
+          `employee-Certificate1img-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
+      if (organization?.Certificate2url != "") {
+        await deletefilefromfirebase(
+          `employee-Certificate2img-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
+
+      if (organization?.Certificate3url != "") {
+        await deletefilefromfirebase(
+          `employee-Certificate3img-${organization?.empId}-${organization?.ClientCode}`
+        );
+      }
 
       await Employee.destroy({
         where: {
@@ -500,36 +617,136 @@ const UpdateEmployee = async (req, res) => {
         id: id,
       },
     });
+
     if (employees != null) {
+      let profileimg;
+      let Aadharurlimg;
+      let Drivingurlimg;
+      let tenthimg;
+      let twethimg;
+      let Graduationimg;
+      let PostGraduationimg;
+      let Certificate1img;
+      let Certificate2img;
+      let Certificate3img;
+
       if (req?.files?.profileurl) {
-        removefile(`public/upload/${employees?.profileurl?.substring(7)}`);
+        if (employees?.profileurl != "") {
+          await deletefilefromfirebase(
+            `employee-profileimg-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        profileimg = await uploadfileonfirebase(
+          req?.files?.profileurl,
+          `employee-profileimg-${empId}-${req.user?.ClientCode}`
+        );
       }
+
       if (req?.files?.Aadharurl) {
-        removefile(`public/upload/${employees?.OfferLater?.substring(7)}`);
+        if (employees?.Aadharurl != "") {
+          await deletefilefromfirebase(
+            `employee-Aadharurlimg-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        Aadharurlimg = await uploadfileonfirebase(
+          req?.files?.Aadharurl,
+          `employee-Aadharurlimg-${empId}-${req.user?.ClientCode}`
+        );
       }
+
       if (req?.files?.Drivingurl) {
-        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+        if (employees?.Drivingurl != "") {
+          await deletefilefromfirebase(
+            `employee-Drivingurlimg-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        Drivingurlimg = await uploadfileonfirebase(
+          req?.files?.Drivingurl,
+          `employee-Drivingurlimg-${empId}-${req.user?.ClientCode}`
+        );
       }
+
       if (req?.files?.tenurl) {
-        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+        if (employees?.tenurl != "") {
+          await deletefilefromfirebase(
+            `employee-tenthimg-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        tenthimg = await uploadfileonfirebase(
+          req?.files?.tenurl,
+          `employee-tenthimg-${empId}-${req.user?.ClientCode}`
+        );
       }
+
       if (req?.files?.twelturl) {
-        removefile(`public/upload/${employees.OfferLater?.substring(7)}`);
+        if (employees?.twelturl != "") {
+          await deletefilefromfirebase(
+            `employee-twethimg-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        twethimg = await uploadfileonfirebase(
+          req?.files?.twelturl,
+          `employee-twethimg-${empId}-${req.user?.ClientCode}`
+        );
       }
+
       if (req?.files?.Graduationurl) {
-        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+        if (employees?.Graduationurl != "") {
+          await deletefilefromfirebase(
+            `employee-Graduationimg-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        Graduationimg = await uploadfileonfirebase(
+          req?.files?.Graduationurl,
+          `employee-Graduationimg-${empId}-${req.user?.ClientCode}`
+        );
       }
+
       if (req?.files?.PostGraduationurl) {
-        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+        if (employees?.PostGraduationurl != "") {
+          await deletefilefromfirebase(
+            `employee-PostGraduationimg-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        PostGraduationimg = await uploadfileonfirebase(
+          req?.files?.PostGraduationurl,
+          `employee-PostGraduationimg-${empId}-${req.user?.ClientCode}`
+        );
       }
+
       if (req?.files?.Certificate1url) {
-        removefile(`public/upload/${employees?.OfferLater?.substring(7)}`);
+        if (employees?.Certificate1url != "") {
+          await deletefilefromfirebase(
+            `employee-Certificate1img-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        Certificate1img = await uploadfileonfirebase(
+          req?.files?.Certificate1url,
+          `employee-Certificate1img-${empId}-${req.user?.ClientCode}`
+        );
       }
       if (req?.files?.Certificate2url) {
-        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+        if (employees?.Certificate2url != "") {
+          await deletefilefromfirebase(
+            `employee-Certificate2img-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        Certificate2img = await uploadfileonfirebase(
+          req?.files?.Certificate2url,
+          `employee-Certificate2img-${empId}-${req.user?.ClientCode}`
+        );
       }
-      if (req?.files?.Certificate2url) {
-        removefile(`public/upload/${employees?.JoningLater?.substring(7)}`);
+
+      if (req?.files?.Certificate3url) {
+        if (employees?.Certificate2url != "") {
+          await deletefilefromfirebase(
+            `employee-Certificate3img-${employees?.empId}-${employees?.ClientCode}`
+          );
+        }
+        Certificate3img = await uploadfileonfirebase(
+          req?.files?.Certificate3url,
+          `employee-Certificate3img-${empId}-${req.user?.ClientCode}`
+        );
       }
 
       let statuss = await Employee.update(
@@ -624,43 +841,38 @@ const UpdateEmployee = async (req, res) => {
           libraryDelete: libraryDelete,
           userType: userType,
           profileurl: req?.files?.profileurl
-            ? `images/${req?.files?.profileurl[0]?.filename}`
+            ? profileimg
             : req?.user?.profileurl,
           Aadharurl: req?.files?.Aadharurl
-            ? `images/${req?.files?.Aadharurl[0]?.filename}`
+            ? Aadharurlimg
             : req?.user?.Aadharurl,
           Drivingurl: req?.files?.Drivingurl
-            ? `images/${req?.files?.Drivingurl[0]?.filename}`
+            ? Drivingurlimg
             : req?.user?.Drivingurl,
-          JonitenurlngLater: req?.files?.tenurl
-            ? `images/${req?.files?.tenurl[0]?.filename}`
-            : req?.user?.tenurl,
+          tenurl: req?.files?.tenurl ? tenthimg : req?.user?.tenurl,
 
-          twelturl: req?.files?.twelturl
-            ? `images/${req?.files?.twelturl[0]?.filename}`
-            : req?.user?.twelturl,
+          twelturl: req?.files?.twelturl ? twethimg : req?.user?.twelturl,
           Graduationurl: req?.files?.Graduationurl
-            ? `images/${req?.files?.Graduationurl[0]?.filename}`
+            ? Graduationimg
             : req?.user?.Graduationurl,
           PostGraduationurl: req?.files?.tenurl
-            ? `images/${req?.files?.PostGraduationurl[0]?.filename}`
+            ? PostGraduationimg
             : req?.user?.PostGraduationurl,
 
           Certificate1url: req?.files?.Certificate1url
-            ? `images/${req?.files?.Certificate1url[0]?.filename}`
+            ? Certificate1img
             : req?.user?.Certificate1url,
           Certificate2url: req?.files?.Certificate2url
-            ? `images/${req?.files?.Certificate2url[0]?.filename}`
+            ? Certificate2img
             : req?.user?.Certificate2url,
           Certificate3url: req?.files?.Certificate3url
-            ? `images/${req?.files?.Certificate3url[0]?.filename}`
+            ? Certificate3img
             : req?.user?.Certificate3url,
         },
         {
           where: {
             id: id,
             ClientCode: req.user?.ClientCode,
-            institutename: req.user?.institutename,
           },
         }
       );
@@ -1393,18 +1605,48 @@ const updateCredentials = async (req, res) => {
         where: { ClientCode: req?.user?.ClientCode },
       });
 
-      console.log("geting error", user?.logourl);
-
       if (user != null) {
-        // if (req?.files?.logourl) {
-        //   removefile(`public/upload/${user?.logourl?.substring(7)}`);
-        // }
-        // if (req?.files?.profileurl) {
-        //   removefile(`public/upload/${user?.profileurl?.substring(7)}`);
-        // }
-        // if (req?.files?.certificatelogo) {
-        //   removefile(`public/upload/${user?.certificatelogo?.substring(7)}`);
-        // }
+        let logoimg;
+        let profileimg;
+        let certificatelogo;
+        if (req?.files?.logourl) {
+          // if (user?.logourl != null) {
+          //   await deletefilefromfirebase(
+          //     `client-logo-${user?.id}-${user?.ClientCode}`
+          //   );
+
+          // }
+
+          logoimg = await uploadfileonfirebase(
+            req?.files?.logourl,
+            `client-logo-${user?.id}-${user?.ClientCode}`
+          );
+        }
+        if (req?.files?.profileurl) {
+          // if (user?.profileurl != null) {
+          //   await deletefilefromfirebase(
+          //     `client-profileimg-${user?.id}-${user?.ClientCode}`
+          //   );
+          // }
+
+          profileimg = await uploadfileonfirebase(
+            req?.files?.profileurl,
+            `client-profileimg-${user?.id}-${user?.ClientCode}`
+          );
+        }
+        if (req?.files?.certificatelogo) {
+          // if (user?.certificatelogo != null) {
+          //   await deletefilefromfirebase(
+          //     `client-certificatelogo-${user?.id}-${user?.ClientCode}`
+          //   );
+          // }
+
+          certificatelogo = await uploadfileonfirebase(
+            req?.files?.certificatelogo,
+            `client-certificatelogo-${user?.id}-${user?.ClientCode}`
+          );
+        }
+
         let updateUser = {
           name: name,
           email: email,
@@ -1427,14 +1669,12 @@ const updateCredentials = async (req, res) => {
           hostel: hostel,
           FrontOffice: FrontOffice,
           userType: userType ? userType : user?.userType,
-          logourl: req?.files?.logourl
-            ? `images/${req?.files?.logourl[0]?.filename}`
-            : req?.body?.logourl,
+          logourl: req?.files?.logourl ? logoimg : req?.body?.logourl,
           profileurl: req?.files?.profileurl
-            ? `images/${req?.files?.profileurl[0]?.filename}`
+            ? profileimg
             : req?.body?.profileurl,
           certificatelogo: req?.files?.certificatelogo
-            ? `images/${req?.files?.certificatelogo[0]?.filename}`
+            ? certificatelogo
             : req?.body?.certificatelogo,
         };
         let updateduser = await Credentials.update(updateUser, {
@@ -3309,12 +3549,19 @@ const DeleteFooterDtails = async (req, res) => {
 const CreateSlider = async (req, res) => {
   let { Dec } = req.body;
   try {
+    let Sliderimgurl;
+
+    if (req?.files?.ImgUrl) {
+      Sliderimgurl = await uploadfileonfirebase(
+        req?.files?.ImgUrl,
+        `client-slider-${Dec}-${req.user?.ClientCode}`
+      );
+    }
+
     let Sliderimg = await Slider.create({
       ClientCode: req.user?.ClientCode,
       Dec: Dec,
-      ImgUrl: req?.files?.ImgUrl
-        ? `images/${req?.files?.ImgUrl[0]?.filename}`
-        : "",
+      ImgUrl: req?.files?.ImgUrl ? Sliderimgurl : "",
     });
 
     if (Sliderimg) {
@@ -3324,7 +3571,6 @@ const CreateSlider = async (req, res) => {
         msg: "Slider Added Successfully!!",
       });
     } else {
-      // removefile(`public/upload/${req?.files?.ImgUrl[0]?.filename}`);
       return respHandler.error(res, {
         status: false,
         msg: "Something Went Wrong!!",
@@ -3370,7 +3616,7 @@ const GetSlider = async (req, res) => {
 };
 
 const updateSlider = async (req, res) => {
-  let { id, Dec, ImgUrl } = req.body;
+  let { id, Dec } = req.body;
 
   try {
     let isSlider = await Slider.findOne({
@@ -3378,35 +3624,46 @@ const updateSlider = async (req, res) => {
         id: id,
       },
     });
-    if (removefile(`public/upload/${isSlider?.ImgUrl?.substring(7)}`)) {
-      let status = await Slider.update(
-        {
-          Dec: Dec,
-          ImgUrl: req?.files?.ImgUrl
-            ? `images/${req?.files?.ImgUrl[0]?.filename}`
-            : req?.user?.ImgUrl,
-        },
-        {
-          where: {
-            id: id,
-            ClientCode: req.user?.ClientCode,
-          },
-        }
-      );
 
-      if (status) {
-        let sliders = await Slider.findOne({
-          where: {
-            id: id,
-          },
+    let Sliderimgurl;
+
+    if (req?.files?.ImgUrl) {
+      if (isSlider?.ImgUrl != null) {
+        await deletefilefromfirebase(
+          `client-slider-${isSlider?.Dec}-${req.user?.ClientCode}`
+        );
+      }
+      Sliderimgurl = await uploadfileonfirebase(
+        req?.files?.ImgUrl,
+        `client-slider-${isSlider?.Dec}-${req.user?.ClientCode}`
+      );
+    }
+
+    let status = await Slider.update(
+      {
+        Dec: Dec,
+        ImgUrl: req?.files?.ImgUrl ? Sliderimgurl : req?.user?.ImgUrl,
+      },
+      {
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      }
+    );
+
+    if (status) {
+      let sliders = await Slider.findOne({
+        where: {
+          id: id,
+        },
+      });
+      if (sliders) {
+        return respHandler.success(res, {
+          status: true,
+          data: sliders,
+          msg: "Slider Updated Successfully!!",
         });
-        if (sliders) {
-          return respHandler.success(res, {
-            status: true,
-            data: sliders,
-            msg: "Slider Updated Successfully!!",
-          });
-        }
       }
     }
   } catch (err) {
@@ -3424,7 +3681,11 @@ const DeleteSlider = async (req, res) => {
     let isdlider = await Slider.findOne({ id: id });
 
     if (isdlider) {
-      removefile(`public/upload/${isdlider?.ImgUrl.substring(7)}`);
+      if (isdlider?.ImgUrl != null) {
+        await deletefilefromfirebase(
+          `client-slider-${isdlider?.Dec}-${req.user?.ClientCode}`
+        );
+      }
       let status = await Slider.destroy({
         where: {
           id: isdlider.id,
@@ -3528,8 +3789,8 @@ const GetParentStudentList = async (req, res) => {
   try {
     let date = new Date();
     let fullyear = date.getFullYear();
-    let lastyear = date.getFullYear() - 1;
-    let sessionname = `${lastyear}-${fullyear}`;
+    let lastyear = date.getFullYear() + 1;
+    let sessionname = `${fullyear}-${lastyear}`;
     let studentlist = await Student.findAll({
       where: {
         parentId: req.user?.id,
@@ -4046,7 +4307,7 @@ const getStream = async (req, res) => {
     let organizations = await Streams.findAll({
       where: whereClause,
     });
-    
+
     if (organizations) {
       return respHandler.success(res, {
         status: true,
