@@ -103,4 +103,8 @@ router.post(
   StudentController.GetStudentCoachingfee
 );
 
+router.get("/getReceiptCoaching", verifyToken, StudentController.getReceiptCoaching);
+
+router.get("/getAllStudentCoaching", verifyToken, StudentController.getAllStudentCoaching);
+
 module.exports = router;

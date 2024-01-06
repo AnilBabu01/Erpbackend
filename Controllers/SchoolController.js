@@ -642,6 +642,43 @@ const DeleteEnquiry = async (req, res) => {
     });
   }
 };
+
+const GetSchoolSession = async (req, res) => {
+  try {
+    const currentDate = new Date();
+    const sessionStartMonth = 3;
+    let sessionStartYear = currentDate.getFullYear();
+    if (currentDate.getMonth() < sessionStartMonth) {
+      sessionStartYear -= 1;
+    }
+    const sessionEndMonth = 3;
+    const sessionEndYear = sessionStartYear + 1;
+    const sessionStartDate = new Date(
+      sessionStartYear,
+      sessionStartMonth,
+      1
+    ).getFullYear();
+    const sessionEndDate = new Date(
+      sessionEndYear,
+      sessionEndMonth,
+      0
+    ).getFullYear();
+
+    if (sessionStartDate && sessionEndDate) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "School Current Session successfully!!",
+        data: `${sessionStartDate}-${sessionEndDate}`,
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   Register,
   Loging,
@@ -654,4 +691,5 @@ module.exports = {
   Getallenquuiry,
   UpdateEnquiry,
   DeleteEnquiry,
+  GetSchoolSession,
 };

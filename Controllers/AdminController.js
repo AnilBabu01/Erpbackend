@@ -13,10 +13,8 @@ const Register = async (req, res) => {
   const {
     name,
     email,
-    institutename,
     phoneno1,
     phoneno2,
-    typeoforganization,
     address,
     city,
     state,
@@ -30,10 +28,8 @@ const Register = async (req, res) => {
     name != "" ||
     email != "" ||
     password != "" ||
-    institutename != "" ||
     phoneno1 != "" ||
     phoneno2 != "" ||
-    typeoforganization != "" ||
     address != "" ||
     city != "" ||
     state != "" ||
@@ -42,8 +38,11 @@ const Register = async (req, res) => {
     try {
       let user = await Admin.findOne({ where: { email: email } });
       if (user != null) {
-        removefile(`public/upload/${req.files.logourl[0].filename}`);
-        removefile(`public/upload/${req.files.profileurl[0].filename}`);
+
+        // removefile(`public/upload/${req.files.logourl[0].filename}`);
+        // removefile(`public/upload/${req.files.profileurl[0].filename}`);
+
+
         return respHandler.error(res, {
           status: false,
           msg: "Email or Mobile Number already exist",
@@ -53,10 +52,8 @@ const Register = async (req, res) => {
       let newUser = {
         name: name,
         email: email,
-        institutename: institutename,
         phoneno1: phoneno1,
         phoneno2: phoneno2,
-        typeoforganization: typeoforganization,
         address: address,
         city: city,
         state: state,

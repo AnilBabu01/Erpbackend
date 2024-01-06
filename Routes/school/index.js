@@ -52,4 +52,8 @@ router
   .put(verifyToken, SchoolController.UpdateEnquiry)
   .delete(verifyToken, SchoolController.DeleteEnquiry);
 
+router
+  .route("/getsession", verifyToken)
+  .get(verifyToken, SchoolController.GetSchoolSession);
+
 module.exports = router;

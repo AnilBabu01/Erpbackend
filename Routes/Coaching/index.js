@@ -35,4 +35,9 @@ router
   .get(verifyToken, CoachingController.Getbatch)
   .put(verifyToken, CoachingController.Updatebatch)
   .delete(verifyToken, CoachingController.Deletebatch);
+
+router
+  .route("/getcurrentyear", verifyToken)
+  .get(verifyToken, CoachingController.GetCurrentYear);
+
 module.exports = router;

@@ -574,6 +574,25 @@ const Deletebatch = async (req, res) => {
   }
 };
 
+const GetCurrentYear = async (req, res) => {
+  try {
+    const currentDate = new Date();
+
+    if (currentDate) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Coaching Current Year successfully!!",
+        data: currentDate,
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   Register,
   Loging,
@@ -585,4 +604,5 @@ module.exports = {
   Updatebatch,
   Deletebatch,
   Getbatch,
+  GetCurrentYear,
 };

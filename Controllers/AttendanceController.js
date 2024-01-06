@@ -9,6 +9,29 @@ const respHandler = require("../Handlers");
 const { monthdays } = require("../Helper/Constant");
 config();
 
+const GetSession = () => {
+  const currentDate = new Date();
+  const sessionStartMonth = 3;
+  let sessionStartYear = currentDate.getFullYear();
+  if (currentDate.getMonth() < sessionStartMonth) {
+    sessionStartYear -= 1;
+  }
+  const sessionEndMonth = 3;
+  const sessionEndYear = sessionStartYear + 1;
+  const sessionStartDate = new Date(
+    sessionStartYear,
+    sessionStartMonth,
+    1
+  ).getFullYear();
+  const sessionEndDate = new Date(
+    sessionEndYear,
+    sessionEndMonth,
+    0
+  ).getFullYear();
+
+  return `${sessionStartDate}-${sessionEndDate}`;
+};
+
 function getDayName(date) {
   const days = [
     "Sunday",
@@ -43,9 +66,8 @@ const MarkStudentAttendance = async (req, res) => {
     const { Attendancedate, batch, classname, sectionname } = req.body;
     let newdate = new Date(Attendancedate);
     var monthName = monthNames[newdate?.getMonth()];
-    let fullyear = newdate.getFullYear();
-    let lastyear = newdate.getFullYear() + 1;
-    let session = `${fullyear}-${lastyear}`;
+   
+    let session = GetSession()
     let days = monthdays[newdate?.getMonth() + 1];
 
     let students;
@@ -305,9 +327,8 @@ const MarkCoachingStudentAttendance = async (req, res) => {
     const { Attendancedate, batch, classname, sectionname } = req.body;
     let newdate = new Date(Attendancedate);
     var monthName = monthNames[newdate?.getMonth()];
-    let fullyear = newdate.getFullYear();
-    let lastyear = newdate.getFullYear() + 1;
-    let session = `${fullyear}-${lastyear}`;
+
+    let session = GetSession()
     let days = monthdays[newdate?.getMonth() + 1];
 
     let students;
@@ -570,8 +591,8 @@ const AttendanceAnalasis = async (req, res) => {
     let days = monthdays[month];
     let newdate = new Date();
     let fullyear = newdate.getFullYear();
-    let lastyear = newdate.getFullYear() + 1;
-    let session = `${fullyear}-${lastyear}`;
+
+    let session = GetSession();
     if (rollname) {
       if (batch) {
         let student = await Student.findOne({

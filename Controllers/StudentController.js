@@ -29,6 +29,29 @@ config();
 const SECRET = process.env.SECRET;
 //admin
 
+const GetSession = () => {
+  const currentDate = new Date();
+  const sessionStartMonth = 3;
+  let sessionStartYear = currentDate.getFullYear();
+  if (currentDate.getMonth() < sessionStartMonth) {
+    sessionStartYear -= 1;
+  }
+  const sessionEndMonth = 3;
+  const sessionEndYear = sessionStartYear + 1;
+  const sessionStartDate = new Date(
+    sessionStartYear,
+    sessionStartMonth,
+    1
+  ).getFullYear();
+  const sessionEndDate = new Date(
+    sessionEndYear,
+    sessionEndMonth,
+    0
+  ).getFullYear();
+
+  return `${sessionStartDate}-${sessionEndDate}`;
+};
+
 var monthNames = [
   "January",
   "February",
@@ -92,9 +115,7 @@ const Addstudent = async (req, res) => {
   try {
     let newdate = new Date();
     var monthName = monthNames[newdate?.getMonth()];
-    let fullyear = newdate.getFullYear();
-    let lastyear = newdate.getFullYear() - 1;
-    let session = `${lastyear}-${fullyear}`;
+    let session = GetSession();
     let days = monthdays[newdate?.getMonth() + 1];
     const {
       name,
@@ -941,7 +962,6 @@ const getAllStudent = async (req, res) => {
       sessionname,
       sectionname,
       sno,
-      transport,
       stream,
     } = req.query;
 
@@ -978,23 +998,110 @@ const getAllStudent = async (req, res) => {
     if (categoryname) {
       whereClause.StudentCategory = { [Op.regexp]: `^${categoryname}.*` };
     }
+
     if (sessionname) {
-      if (req.user?.userType === "institute") {
-        whereClause.Session = "";
-      } else {
-        whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
-      }
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+    } else {
+      let currentsession = GetSession();
+      whereClause.Session = { [Op.regexp]: `^${currentsession}.*` };
     }
+
     if (sectionname) {
-      if (req.user?.userType === "institute") {
-        whereClause.Section = "";
-      } else {
-        whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
-      }
+      whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
     }
+
     if (stream) {
       whereClause.Stream = { [Op.regexp]: `^${stream}.*` };
     }
+    if (library) {
+      whereClause.Library = library;
+    }
+
+    if (sno) {
+      whereClause.SrNumber = { [Op.regexp]: `^${sno}.*` };
+    }
+
+    let students = await Student.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: Coachingfeestatus,
+        },
+      ],
+      order: [["id", "DESC"]],
+    });
+    if (students) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch All Student successfully!!",
+        data: students,
+      });
+    }
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+///amdin or employee can get all studbnt list
+const getAllStudentCoaching = async (req, res) => {
+  try {
+    const {
+      name,
+      batch,
+      fromdate,
+      todate,
+      fathers,
+      studentname,
+      rollnumber,
+      status,
+      categoryname,
+      library,
+      sno,
+    } = req.query;
+
+    let whereClause = {};
+    let from = new Date(fromdate);
+    let to = new Date(todate);
+
+    if (req.user) {
+      whereClause.ClientCode = req.user?.ClientCode;
+    }
+
+    if (fromdate && todate) {
+      whereClause.admissionDate = { [Op.between]: [from, to] };
+    }
+
+    if (name) {
+      whereClause.courseorclass = name;
+    }
+    if (batch) {
+      whereClause.batch = { [Op.regexp]: `^${batch}.*` };
+    }
+    if (fathers) {
+      whereClause.fathersName = { [Op.regexp]: `^${fathers}.*` };
+    }
+    if (rollnumber) {
+      whereClause.rollnumber = { [Op.regexp]: `^${Number(rollnumber)}.*` };
+    }
+    if (studentname) {
+      whereClause.name = { [Op.regexp]: `^${studentname}.*` };
+    }
+    if (status) {
+      whereClause.Status = { [Op.regexp]: `^${status}.*` };
+    }
+    if (categoryname) {
+      whereClause.StudentCategory = { [Op.regexp]: `^${categoryname}.*` };
+    }
+
     if (library) {
       whereClause.Library = library;
     }
@@ -1039,7 +1146,7 @@ const UpdateStudent = async (req, res) => {
     var monthName = monthNames[newdate?.getMonth()];
     let fullyear = newdate.getFullYear();
     let lastyear = newdate.getFullYear() - 1;
-    let session = `${lastyear}-${fullyear}`;
+    let session = GetSession();
     let days = monthdays[newdate?.getMonth() + 1];
     const {
       name,
@@ -1677,12 +1784,82 @@ const getReceipt = async (req, res) => {
     if (sectionname) {
       whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
     }
+
     if (sessionname) {
-      if (req.user?.userType === "institute") {
-        whereClause.Session = "";
-      } else {
-        whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+    } else {
+      let newsession = GetSession();
+      whereClause.Session = { [Op.regexp]: `^${newsession}.*` };
+    }
+
+    let receipts = await ReceiptData.findAll({
+      where: whereClause,
+      order: [["PaidDate", "DESC"]],
+    });
+    if (receipts) {
+      return respHandler.success(res, {
+        status: true,
+        msg: "Fetch Receipt successfully!!",
+        data: receipts,
+      });
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found!!",
+        error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+///amdin or employee can get all studbnt list
+const getReceiptCoaching = async (req, res) => {
+  try {
+    const {
+      fromdate,
+      name,
+      studentname,
+      rollnumber,
+      sessionname,
+      sectionname,
+      sno,
+      todate,
+    } = req.query;
+
+    let whereClause = {};
+    let from = new Date(fromdate);
+    let to = new Date(todate);
+    if (req.user) {
+      whereClause.ClientCode = req.user?.ClientCode;
+    }
+    if (fromdate && todate) {
+      whereClause.PaidDate = { [Op.between]: [from, to] };
+    }
+
+    if (req.user?.userType === "institute") {
+      if (fromdate) {
+        whereClause.PaidDate = fromdate;
       }
+    }
+
+    if (name) {
+      whereClause.Course = { [Op.regexp]: `^${name}.*` };
+    }
+
+    if (rollnumber) {
+      whereClause.RollNo = { [Op.regexp]: `^${Number(rollnumber)}.*` };
+    }
+    if (studentname) {
+      whereClause.studentName = { [Op.regexp]: `^${studentname}.*` };
+    }
+    if (sno) {
+      whereClause.SNO = { [Op.regexp]: `^${sno}.*` };
     }
 
     let receipts = await ReceiptData.findAll({
@@ -2815,11 +2992,13 @@ module.exports = {
   Addstudent,
   getAllStudent,
   getAllStudent,
+  getAllStudentCoaching,
   UpdateStudent,
   deleteStudent,
   Loging,
   addfee,
   getReceipt,
+  getReceiptCoaching,
   getStudentFee,
   addSchoolFee,
   addHostelFee,
