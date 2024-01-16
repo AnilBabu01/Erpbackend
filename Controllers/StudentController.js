@@ -36,7 +36,7 @@ const GetSession = () => {
   if (currentDate.getMonth() < sessionStartMonth) {
     sessionStartYear -= 1;
   }
-  const sessionEndMonth = 3;
+  const sessionEndMonth = 2;
   const sessionEndYear = sessionStartYear + 1;
   const sessionStartDate = new Date(
     sessionStartYear,
@@ -1750,7 +1750,7 @@ const getReceipt = async (req, res) => {
       sectionname,
       sno,
       todate,
-    } = req.query;
+    } = req.body;
 
     let whereClause = {};
     let from = new Date(fromdate);
@@ -1807,6 +1807,104 @@ const getReceipt = async (req, res) => {
         status: false,
         msg: "Not Found!!",
         error: [""],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+///amdin or employee can get all studbnt list
+
+const UpdateReceipt = async (req, res) => {
+  try {
+    const { id, paidDate, paidAmount } = req.body;
+    let isreceipt = await ReceiptData.findOne({
+      where: {
+        id: id,
+      },
+    });
+    if (isreceipt) {
+      let isupdatd = await ReceiptData.update(
+        {
+          PaidDate: paidDate,
+          PaidAmount: paidAmount,
+        },
+        {
+          where: {
+            id: id,
+            ClientCode: req.user?.ClientCode,
+          },
+        }
+      );
+      if (isupdatd) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Updated Receipt successfully!!",
+          data: [],
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: [],
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found!!",
+        error: [],
+      });
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+///amdin or employee can get all studbnt list
+
+const DeleteReceipt = async (req, res) => {
+  try {
+    const { id } = req.body;
+    let isreceipt = await ReceiptData.findOne({
+      where: {
+        id: id,
+      },
+    });
+    if (isreceipt) {
+      let isdelete = await ReceiptData.destroy({
+        where: {
+          id: id,
+          ClientCode: req.user?.ClientCode,
+        },
+      });
+      if (isdelete) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Deleted Receipt successfully!!",
+          data: [],
+        });
+      } else {
+        return respHandler.error(res, {
+          status: false,
+          msg: "Something Went Wrong!!",
+          error: [],
+        });
+      }
+    } else {
+      return respHandler.error(res, {
+        status: false,
+        msg: "Not Found!!",
+        error: [],
       });
     }
   } catch (err) {
@@ -2999,6 +3097,8 @@ module.exports = {
   addfee,
   getReceipt,
   getReceiptCoaching,
+  UpdateReceipt,
+  DeleteReceipt,
   getStudentFee,
   addSchoolFee,
   addHostelFee,

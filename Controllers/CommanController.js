@@ -3554,7 +3554,7 @@ const CreateSlider = async (req, res) => {
     if (req?.files?.ImgUrl) {
       Sliderimgurl = await uploadfileonfirebase(
         req?.files?.ImgUrl,
-        `client-slider-${Dec}-${req.user?.ClientCode}`
+        `client-slider-${Dec.slice(0,8)}-${req.user?.ClientCode}`
       );
     }
 
@@ -3630,12 +3630,12 @@ const updateSlider = async (req, res) => {
     if (req?.files?.ImgUrl) {
       if (isSlider?.ImgUrl != null) {
         await deletefilefromfirebase(
-          `client-slider-${isSlider?.Dec}-${req.user?.ClientCode}`
+          `client-slider-${isSlider?.Dec?.slice(0,8)}-${req.user?.ClientCode}`
         );
       }
       Sliderimgurl = await uploadfileonfirebase(
         req?.files?.ImgUrl,
-        `client-slider-${isSlider?.Dec}-${req.user?.ClientCode}`
+        `client-slider-${isSlider?.Dec?.slice(0,8)}-${req.user?.ClientCode}`
       );
     }
 

@@ -9,8 +9,30 @@ const SchoolTransportFeeStatus = require("../Models/schooltransportfee.model");
 const OtherFee = require("../Models/otherfee.model");
 const Receiptdata = require("../Models/receiptdata.model");
 const Student = require("../Models/student.model");
+const Coachingfeestatus = require('../Models/coachingfeestatus.model');
 config();
+const GetSession = () => {
+  const currentDate = new Date();
+  const sessionStartMonth = 3;
+  let sessionStartYear = currentDate.getFullYear();
+  if (currentDate.getMonth() < sessionStartMonth) {
+    sessionStartYear -= 1;
+  }
+  const sessionEndMonth = 2;
+  const sessionEndYear = sessionStartYear + 1;
+  const sessionStartDate = new Date(
+    sessionStartYear,
+    sessionStartMonth,
+    1
+  ).getFullYear();
+  const sessionEndDate = new Date(
+    sessionEndYear,
+    sessionEndMonth,
+    0
+  ).getFullYear();
 
+  return `${sessionStartDate}-${sessionEndDate}`;
+};
 const getSchoolFee = async (req, res) => {
   try {
     const { id, SrNumber } = req.body;
@@ -236,8 +258,259 @@ const GetStudentFeeLedger = async (req, res) => {
   }
 };
 
+const Searchfee = async (req, res) => {
+  try {
+    const {
+      scoursename,
+      sbatch,
+      stream,
+      rollnumber,
+      status,
+      categoryname,
+      sessionname,
+      sectionname,
+      seno,
+    } = req.body;
+
+    let whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req.user?.ClientCode;
+    }
+
+    if (seno) {
+      whereClause.SrNumber = { [Op.regexp]: `^${seno}.*` };
+    }
+
+    if (scoursename) {
+      whereClause.courseorclass = scoursename;
+    }
+    if (sbatch) {
+      whereClause.batch = { [Op.regexp]: `^${sbatch}.*` };
+    }
+
+    if (rollnumber) {
+      whereClause.rollnumber = { [Op.regexp]: `^${Number(rollnumber)}.*` };
+    }
+
+    if (status) {
+      whereClause.Status = { [Op.regexp]: `^${status}.*` };
+    }
+    if (categoryname) {
+      whereClause.StudentCategory = { [Op.regexp]: `^${categoryname}.*` };
+    }
+
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+    } else {
+      let currentsession = GetSession();
+      whereClause.Session = { [Op.regexp]: `^${currentsession}.*` };
+    }
+
+    // if (sectionname) {
+    //   whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
+    // }
+
+    if (stream) {
+      whereClause.Stream = { [Op.regexp]: `^${stream}.*` };
+    }
+
+    let students = await Student.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: Coachingfeestatus,
+        },
+      ],
+      order: [["id", "DESC"]],
+    });
+
+    if (students) {
+      let result = [];
+      const promises = students?.map(async (item) => {
+        let schollfee = await SchoolFeeStatus.findAll({
+          where: {
+            studentId:item?.id,
+            ClientCode :req.user?.ClientCode
+          },
+        });
+        let hostelfee = await SchoolHostelFeeStatus.findAll({
+          where: {
+            studentId:item?.id,
+            ClientCode :req.user?.ClientCode
+          },
+        });
+        let transportfee = await SchoolTransportFeeStatus.findAll({
+          where: {
+            studentId:item?.id,
+            ClientCode :req.user?.ClientCode
+          },
+        });
+        let otherfee = await OtherFee.findAll({
+          where: {
+            studentId:item?.id,
+            ClientCode :req.user?.ClientCode
+          },
+        });
+
+        if (schollfee && hostelfee && transportfee && otherfee) {
+          result.push({
+            student: item,
+            schollfee: schollfee,
+            hostelfee: hostelfee,
+            transportfee: transportfee,
+            otherfee: otherfee,
+          });
+        }
+      });
+
+      if (await Promise.all(promises)) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fee Fetch Successfully!!",
+          data: result,
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
+
+const SearchfeeByMonth = async (req, res) => {
+  try {
+    const {
+      scoursename,
+      sbatch,
+      stream,
+      rollnumber,
+      status,
+      categoryname,
+      sessionname,
+      sectionname,
+      seno,
+      monthname
+    } = req.body;
+
+    let whereClause = {};
+
+    if (req.user) {
+      whereClause.ClientCode = req.user?.ClientCode;
+    }
+
+    if (seno) {
+      whereClause.SrNumber = { [Op.regexp]: `^${seno}.*` };
+    }
+
+    if (scoursename) {
+      whereClause.courseorclass = scoursename;
+    }
+    if (sbatch) {
+      whereClause.batch = { [Op.regexp]: `^${sbatch}.*` };
+    }
+
+    if (rollnumber) {
+      whereClause.rollnumber = { [Op.regexp]: `^${Number(rollnumber)}.*` };
+    }
+
+    if (status) {
+      whereClause.Status = { [Op.regexp]: `^${status}.*` };
+    }
+    if (categoryname) {
+      whereClause.StudentCategory = { [Op.regexp]: `^${categoryname}.*` };
+    }
+
+    if (sessionname) {
+      whereClause.Session = { [Op.regexp]: `^${sessionname}.*` };
+    } else {
+      let currentsession = GetSession();
+      whereClause.Session = { [Op.regexp]: `^${currentsession}.*` };
+    }
+
+    // if (sectionname) {
+    //   whereClause.Section = { [Op.regexp]: `^${sectionname}.*` };
+    // }
+
+    if (stream) {
+      whereClause.Stream = { [Op.regexp]: `^${stream}.*` };
+    }
+
+    let students = await Student.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: Coachingfeestatus,
+        },
+      ],
+      order: [["id", "DESC"]],
+    });
+
+    if (students) {
+      let result = [];
+      const promises = students?.map(async (item) => {
+        let schollfee = await SchoolFeeStatus.findAll({
+          where: {
+            studentId:item?.id,
+            ClientCode :req.user?.ClientCode,
+            MonthName:monthname
+          },
+        });
+        let hostelfee = await SchoolHostelFeeStatus.findAll({
+          where: {
+            studentId:item?.id,
+            ClientCode :req.user?.ClientCode,
+            MonthName:monthname
+          },
+        });
+        let transportfee = await SchoolTransportFeeStatus.findAll({
+          where: {
+            studentId:item?.id,
+            ClientCode :req.user?.ClientCode,
+            MonthName:monthname
+          },
+        });
+        let otherfee = await OtherFee.findAll({
+          where: {
+            studentId:item?.id,
+            ClientCode :req.user?.ClientCode
+          },
+        });
+
+        if (schollfee && hostelfee && transportfee && otherfee) {
+          result.push({
+            student: item,
+            schollfee: schollfee,
+            hostelfee: hostelfee,
+            transportfee: transportfee,
+            otherfee: otherfee,
+          });
+        }
+      });
+
+      if (await Promise.all(promises)) {
+        return respHandler.success(res, {
+          status: true,
+          msg: "Fee Fetch Successfully!!",
+          data: result,
+        });
+      }
+    }
+  } catch (err) {
+    return respHandler.error(res, {
+      status: false,
+      msg: "Something Went Wrong!!",
+      error: [err.message],
+    });
+  }
+};
 module.exports = {
   getSchoolFee,
   getStudentFee,
   GetStudentFeeLedger,
+  Searchfee,
+  SearchfeeByMonth
 };

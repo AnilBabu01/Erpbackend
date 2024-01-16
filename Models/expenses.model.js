@@ -25,7 +25,7 @@ const Expenses = sequelize.define("expenses", {
   },
   Comment: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   PayOption: {
     type: DataTypes.STRING,

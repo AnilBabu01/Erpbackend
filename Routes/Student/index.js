@@ -103,8 +103,25 @@ router.post(
   StudentController.GetStudentCoachingfee
 );
 
-router.get("/getReceiptCoaching", verifyToken, StudentController.getReceiptCoaching);
+router
+  .route("/getReceiptCoaching", verifyToken)
+  .get(verifyToken, StudentController.getReceipt)
+  .put(verifyToken, StudentController.UpdateReceipt)
+  .delete(verifyToken, StudentController.DeleteReceipt);
 
-router.get("/getAllStudentCoaching", verifyToken, StudentController.getAllStudentCoaching);
+router
+  .route("/getreceiptdata", verifyToken)
+  .get(verifyToken, StudentController.getReceipt)
+  .put(verifyToken, StudentController.UpdateReceipt)
+  .delete(verifyToken, StudentController.DeleteReceipt);
 
+router.get(
+  "/getAllStudentCoaching",
+  verifyToken,
+  StudentController.getAllStudentCoaching
+);
+
+router.post("/Searchfee", verifyToken, SchoolStudentController.Searchfee);
+
+router.post("/SearchfeeByMonth", verifyToken, SchoolStudentController.SearchfeeByMonth);
 module.exports = router;

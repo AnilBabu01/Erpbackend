@@ -16,7 +16,7 @@ const GetSession = () => {
   if (currentDate.getMonth() < sessionStartMonth) {
     sessionStartYear -= 1;
   }
-  const sessionEndMonth = 3;
+  const sessionEndMonth = 2;
   const sessionEndYear = sessionStartYear + 1;
   const sessionStartDate = new Date(
     sessionStartYear,

@@ -762,6 +762,7 @@ const DeleteRoom = async (req, res) => {
   }
 };
 
+
 const GetHostelFee = async (req, res) => {
   try {
     const { hostelname, Category, Facility } = req.query;

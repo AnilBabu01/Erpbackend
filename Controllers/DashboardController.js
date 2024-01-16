@@ -33,15 +33,33 @@ var monthNames = [
   "November",
   "December",
 ];
+const GetSession = () => {
+  const currentDate = new Date();
+  const sessionStartMonth = 3;
+  let sessionStartYear = currentDate.getFullYear();
+  if (currentDate.getMonth() < sessionStartMonth) {
+    sessionStartYear -= 1;
+  }
+  const sessionEndMonth = 2;
+  const sessionEndYear = sessionStartYear + 1;
+  const sessionStartDate = new Date(
+    sessionStartYear,
+    sessionStartMonth,
+    1
+  ).getFullYear();
+  const sessionEndDate = new Date(
+    sessionEndYear,
+    sessionEndMonth,
+    0
+  ).getFullYear();
 
+  return `${sessionStartDate}-${sessionEndDate}`;
+};
 const GetAllTotalData = async (req, res) => {
   try {
     let newdate = new Date();
     var monthName = monthNames[newdate?.getMonth()];
-    let date = new Date();
-    let fullyear = date.getFullYear();
-    let lastyear = date.getFullYear() + 1;
-    let sessionname = `${fullyear}-${lastyear}`;
+    let sessionname = GetSession()
 
     let whereClause = {};
     let from = new Date(newdate);
@@ -195,11 +213,7 @@ const GetAllTotalData = async (req, res) => {
 const GetFeePaidChart = async (req, res) => {
   try {
     const { sessionname } = req.body;
-    let newdate = new Date();
-    // let date = new Date();
-    // let fullyear = date.getFullYear();
-    // let lastyear = date.getFullYear() - 1;
-    // let sessionname = `${lastyear}-${fullyear}`;
+  
 
     let whereClause = {};
     let from = new Date(newdate);
@@ -240,10 +254,7 @@ const GetExpensesChart = async (req, res) => {
   try {
     const { sessionname } = req.body;
     let newdate = new Date();
-    // let date = new Date();
-    // let fullyear = date.getFullYear();
-    // let lastyear = date.getFullYear() - 1;
-    // let sessionname = `${lastyear}-${fullyear}`;
+  
 
     let whereClause = {};
     let from = new Date(newdate);
@@ -284,31 +295,21 @@ const GetExpensesChart = async (req, res) => {
 const GetCoachingAllTotalData = async (req, res) => {
   try {
     let newdate = new Date();
-    var monthName = monthNames[newdate?.getMonth()];
-    let date = new Date();
-    let fullyear = date.getFullYear();
-    let lastyear = date.getFullYear() + 1;
-    let sessionname = `${fullyear}-${lastyear}`;
+    var monthName = monthNames[newdate?.getMonth()];  
+    let sessionname = GetSession()
 
     let whereClause = {};
     let from = new Date(newdate);
     let to = new Date(newdate);
     whereClause.PaidDate = { [Op.between]: [from, to] };
-    // whereClause.Session = sessionname;
+    
 
     let allTodayreceiptdata = await ReceiptData.findAll({
       where: whereClause,
       order: [["PaidDate", "DESC"]],
     });
 
-    // let allTodayreceiptdata = await sequelizes.query(
-    //   `Select PaidDate, Course,PayOption, SUM(PaidAmount) AS total_paidamount FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}' AND PaidAmount='${from}'  GROUP BY PaidDate;`,
-    //   {
-    //     nest: true,
-    //     type: QueryTypes.SELECT,
-    //     raw: true,
-    //   }
-    // );
+ 
 
     let TotalStudent = await Student.findAll({
       attributes: ["name"],
