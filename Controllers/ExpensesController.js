@@ -678,8 +678,8 @@ const GetExpensesAnalysis = async (req, res) => {
       }
     );
 
-    let allexpensesAsset = await sequelizes.query(
-      `Select Expensestype,PayOption,SUM(ExpensesAmount) AS total_paidamount FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND MONTH(Date) ='${month}'  AND Session ='${sessionname}' AND PayOption IN ('Cash', 'Online')  GROUP BY Expensestype ,PayOption;`,
+    let allexpensesAsset =await sequelizes.query(
+      `Select Expensestype,PayOption,SUM(ExpensesAmount) AS total_paidamount FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND Expensestype IN ('Asset','Expenses', 'Liability') AND MONTH(Date) ='${month}'  AND Session ='${sessionname}' AND PayOption IN ('Cash', 'Online')  GROUP BY Expensestype ,PayOption;`,
       {
         nest: true,
         type: QueryTypes.SELECT,
