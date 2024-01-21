@@ -200,11 +200,13 @@ const Addenquiry = async (req, res) => {
     Comment,
   } = req.body;
 
+  console.log("body data is ",req.body);
+
   if (EnquiryDate != "" || EnquiryDate != "") {
     try {
       let enquiry = await Enquiry.findOne({
         where: {
-          EnquiryDate: EnquiryDate,
+          EnquiryDate: new Date(EnquiryDate),
           StudentName: StudentName,
           StudentNumber: StudentNumber,
           StudentEmail: StudentEmail,

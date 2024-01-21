@@ -167,6 +167,8 @@ const Addstudent = async (req, res) => {
       stream,
     } = req.body;
 
+    console.log("body data of add student", req.body);
+
     const genSalt = 10;
     const hash = await bcrypt.hash(req?.user?.Studentpassword, genSalt);
     let profileimg;

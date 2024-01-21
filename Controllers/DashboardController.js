@@ -215,10 +215,10 @@ const GetFeePaidChart = async (req, res) => {
     const { sessionname } = req.body;
   
 
-    let whereClause = {};
-    let from = new Date(newdate);
-    let to = new Date(newdate);
-    whereClause.PaidDate = { [Op.between]: [from, to] };
+    // let whereClause = {};
+    // let from = new Date(newdate);
+    // let to = new Date(newdate);
+    // whereClause.PaidDate = { [Op.between]: [from, to] };
 
     let ReceiptChartdata = await sequelizes.query(
       `Select monthno,SUM(PaidAmount) AS total  FROM receiptdata WHERE ClientCode= '${req.user?.ClientCode}' AND Session ='${sessionname}' GROUP BY monthno;`,
@@ -250,16 +250,17 @@ const GetFeePaidChart = async (req, res) => {
     });
   }
 };
+
 const GetExpensesChart = async (req, res) => {
   try {
     const { sessionname } = req.body;
     let newdate = new Date();
   
 
-    let whereClause = {};
-    let from = new Date(newdate);
-    let to = new Date(newdate);
-    whereClause.PaidDate = { [Op.between]: [from, to] };
+    // let whereClause = {};
+    // let from = new Date(newdate);
+    // let to = new Date(newdate);
+    // whereClause.PaidDate = { [Op.between]: [from, to] };
 
     let ReceiptChartdata = await sequelizes.query(
       `Select MonthNO,SUM(ExpensesAmount) AS total  FROM expenses WHERE ClientCode= '${req.user?.ClientCode}' AND Session ='${sessionname}' GROUP BY MonthNO;`,
