@@ -167,10 +167,10 @@ const Addstudent = async (req, res) => {
       stream,
     } = req.body;
 
-    console.log("body data of add student", req.body);
+    console.log("body data of add student",req.files);
 
     const genSalt = 10;
-    const hash = await bcrypt.hash(req?.user?.Studentpassword, genSalt);
+    const hash = await bcrypt.hash(req?.user.Studentpassword, genSalt);
     let profileimg;
     let adharimg;
     let birthdocimg;
@@ -1146,9 +1146,6 @@ const UpdateStudent = async (req, res) => {
   try {
     let newdate = new Date();
     var monthName = monthNames[newdate?.getMonth()];
-    let fullyear = newdate.getFullYear();
-    let lastyear = newdate.getFullYear() - 1;
-    let session = GetSession();
     let days = monthdays[newdate?.getMonth() + 1];
     const {
       name,
@@ -1200,6 +1197,8 @@ const UpdateStudent = async (req, res) => {
       DateOfBirth,
       stream,
     } = req.body;
+
+    console.log("Updated data is",req.body);
 
     let student = await Student.findOne({
       where: {
