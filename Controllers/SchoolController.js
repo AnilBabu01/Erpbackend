@@ -138,7 +138,7 @@ const Register = async (req, res) => {
 
 const Loging = async (req, res) => {
   const { email, password, institutename } = req.body;
-
+  console.log("login data is",req.body);
   if (email || password != "") {
     let last = institutename.split(" ").pop();
     var lastIndex = institutename?.lastIndexOf(" ");

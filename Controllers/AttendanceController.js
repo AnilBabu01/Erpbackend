@@ -4,7 +4,6 @@ const sequelizes = require("../Helper/Connect");
 const { config } = require("dotenv");
 const Student = require("../Models/student.model");
 const AttendanceStudent = require("../Models/attendance.model");
-const Batch = require("../Models/batch.model");
 const respHandler = require("../Handlers");
 const { monthdays } = require("../Helper/Constant");
 config();
@@ -16,7 +15,7 @@ const GetSession = () => {
   if (currentDate.getMonth() < sessionStartMonth) {
     sessionStartYear -= 1;
   }
-  const sessionEndMonth = 2;
+  const sessionEndMonth = 3;
   const sessionEndYear = sessionStartYear + 1;
   const sessionStartDate = new Date(
     sessionStartYear,
@@ -587,7 +586,7 @@ const DoneStudentAttendance = async (req, res) => {
 const AttendanceAnalasis = async (req, res) => {
   try {
     const { batch, month, rollname, status, classname, sectionname } = req.body;
-    console.log("body data is", Number(rollname));
+    console.log("body data is now", req.body);
     let days = monthdays[month];
     let newdate = new Date();
     let fullyear = newdate.getFullYear();
